@@ -1,9 +1,6 @@
-# Fabric Example Mod
+# SkinRestorer
+This is a server-side only mod for fabric.
 
-## Setup
+It allows you to use and change skins on servers that are in offline/insecure mode.
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
-
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+After installation on server use /skin command to change skin. 
