@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.lionarius.skinrestorer.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "CommandManagerMixin",
+    "PlayerManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

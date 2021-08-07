@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "skinrestorer",
+  "version": "${version}",
+
+  "name": "Skin Restorer",
+  "description": "",
+  "authors": [
+    "Lionarius"
+  ],
+  "contact": {},
+
+  "license": "MIT",
+
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "net.lionarius.skinrestorer.SkinRestorer"
+    ]
+  },
+  "mixins": [
+    "skinrestorer.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "minecraft": "*",
+    "java": ">=8"
+  }
+}
