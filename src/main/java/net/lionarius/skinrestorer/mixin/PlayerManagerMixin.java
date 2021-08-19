@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.mixin;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.MojangSkinProvider;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.SkinStorage;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,11 +29,10 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At(value = "HEAD"))
     private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        Property skin = SkinRestorer.getSkinStorage().getSkin(player.getUuid());
-        if (Objects.equals(skin.getValue(), "")) {
-            skin = MojangSkinProvider.getSkin(player.getGameProfile().getName());
-        }
-        applySkin(player, skin);
+        if (SkinRestorer.getSkinStorage().getSkin(player.getUuid()) == SkinStorage.DEFAULT_SKIN)
+            SkinRestorer.getSkinStorage().setSkin(player.getUuid(), MojangSkinProvider.getSkin(player.getGameProfile().getName()));
+
+        applySkin(player, SkinRestorer.getSkinStorage().getSkin(player.getUuid()));
     }
 
     @Inject(method = "remove", at = @At("TAIL"))
