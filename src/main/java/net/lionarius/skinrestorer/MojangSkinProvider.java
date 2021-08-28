@@ -21,7 +21,7 @@ public class MojangSkinProvider {
                     .getAsJsonArray("properties").get(0).getAsJsonObject();
 
             return new Property("textures", texture.get("value").getAsString(), texture.get("signature").getAsString());
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }
