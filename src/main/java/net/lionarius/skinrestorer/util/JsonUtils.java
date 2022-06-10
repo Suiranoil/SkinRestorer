@@ -18,6 +18,6 @@ public class JsonUtils {
     }
 
     public static JsonObject parseJson(String json) {
-        return new JsonParser().parse(json).getAsJsonObject();
+        return JsonParser.parseString(json).getAsJsonObject();
     }
 }

@@ -10,7 +10,7 @@ import net.lionarius.skinrestorer.enums.SkinVariant;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,7 +65,7 @@ public class SkinCommand {
     private static int skinAction(Collection<ServerPlayerEntity> targets, boolean setByOperator, Supplier<Property> skinSupplier) {
         new Thread(() -> {
             if (!setByOperator)
-                targets.stream().findFirst().get().sendMessage(new LiteralText("§6[SkinRestorer]§f Downloading skin."), true);
+                targets.stream().findFirst().get().sendMessage(Text.of("§6[SkinRestorer]§f Downloading skin."), true);
 
             Property skin = skinSupplier.get();
 
@@ -73,9 +73,9 @@ public class SkinCommand {
                 SkinRestorer.getSkinStorage().setSkin(player.getUuid(), skin);
 
                 if (setByOperator)
-                    player.sendMessage(new LiteralText("§a[SkinRestorer]§f Operator changed your skin. You need to reconnect to apply it."), true);
+                    player.sendMessage(Text.of("§a[SkinRestorer]§f Operator changed your skin. You need to reconnect to apply it."), true);
                 else
-                    player.sendMessage(new LiteralText("§a[SkinRestorer]§f You need to reconnect to apply skin."), true);
+                    player.sendMessage(Text.of("§a[SkinRestorer]§f You need to reconnect to apply skin."), true);
             }
         }).start();
 
