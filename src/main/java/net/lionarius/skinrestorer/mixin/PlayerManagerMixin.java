@@ -1,10 +1,6 @@
 package net.lionarius.skinrestorer.mixin;
 
-import com.mojang.authlib.properties.Property;
-import net.lionarius.skinrestorer.MojangSkinProvider;
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.SkinStorage;
-import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,26 +10,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
-import java.util.Objects;
 
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
 
-    private static void applySkin(ServerPlayerEntity playerEntity, Property skin) {
-        playerEntity.getGameProfile().getProperties().removeAll("textures");
-        playerEntity.getGameProfile().getProperties().put("textures", skin);
-    }
+
 
     @Shadow
     public abstract List<ServerPlayerEntity> getPlayerList();
-
-    @Inject(method = "onPlayerConnect", at = @At(value = "HEAD"))
-    private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        if (SkinRestorer.getSkinStorage().getSkin(player.getUuid()) == SkinStorage.DEFAULT_SKIN)
-            SkinRestorer.getSkinStorage().setSkin(player.getUuid(), MojangSkinProvider.getSkin(player.getGameProfile().getName()));
-
-        applySkin(player, SkinRestorer.getSkinStorage().getSkin(player.getUuid()));
-    }
 
     @Inject(method = "remove", at = @At("TAIL"))
     private void remove(ServerPlayerEntity player, CallbackInfo ci) {
