@@ -54,7 +54,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 		}
 	}
 
-	private static void applyRestoreSkin(ServerPlayerEntity playerEntity, Property skin) {
+	private static void applyRestoredSkin(ServerPlayerEntity playerEntity, Property skin) {
 		playerEntity.getGameProfile().getProperties().removeAll("textures");
 		playerEntity.getGameProfile().getProperties().put("textures", skin);
 	}
@@ -62,7 +62,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 	@Inject(method = "addToServer", at = @At("HEAD"))
 	public void applyRestoredSkinHook(ServerPlayerEntity player, CallbackInfo ci) {
 		if (skinrestorer_pendingSkin != null) {
-			applyRestoreSkin(player, skinrestorer_pendingSkin.getNow(SkinStorage.DEFAULT_SKIN));
+			applyRestoredSkin(player, skinrestorer_pendingSkin.getNow(SkinStorage.DEFAULT_SKIN));
 		}
 	}
 }

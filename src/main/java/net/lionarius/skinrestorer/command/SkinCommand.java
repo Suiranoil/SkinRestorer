@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.command;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -7,7 +8,8 @@ import net.lionarius.skinrestorer.MineskinSkinProvider;
 import net.lionarius.skinrestorer.MojangSkinProvider;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.enums.SkinVariant;
-import net.minecraft.command.argument.EntityArgumentType;
+import net.lionarius.skinrestorer.util.TranslationUtils;
+import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -16,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Supplier;
 
+import static net.lionarius.skinrestorer.SkinStorage.DEFAULT_SKIN;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -27,58 +30,71 @@ public class SkinCommand {
                         .then(literal("mojang")
                                 .then(argument("skin_name", StringArgumentType.word())
                                         .executes(context ->
-                                                skinAction(Collections.singleton(context.getSource().getPlayer()), false,
+                                                skinAction(context.getSource(), false,
                                                         () -> MojangSkinProvider.getSkin(StringArgumentType.getString(context, "skin_name"))))
-                                        .then(argument("targets", EntityArgumentType.players()).requires(source -> source.hasPermissionLevel(3))
+                                        .then(argument("targets", GameProfileArgumentType.gameProfile()).requires(source -> source.hasPermissionLevel(3))
                                                 .executes(context ->
-                                                        skinAction(EntityArgumentType.getPlayers(context, "targets"), true,
+                                                        skinAction(context.getSource(), GameProfileArgumentType.getProfileArgument(context, "targets"), true,
                                                                 () -> MojangSkinProvider.getSkin(StringArgumentType.getString(context, "skin_name")))))))
                         .then(literal("web")
                                 .then(literal("classic")
                                         .then(argument("url", StringArgumentType.string())
                                                 .executes(context ->
-                                                        skinAction(Collections.singleton(context.getSource().getPlayer()), false,
+                                                        skinAction(context.getSource(), false,
                                                                 () -> MineskinSkinProvider.getSkin(StringArgumentType.getString(context, "url"), SkinVariant.CLASSIC)))
-                                                .then(argument("targets", EntityArgumentType.players()).requires(source -> source.hasPermissionLevel(3))
+                                                .then(argument("targets", GameProfileArgumentType.gameProfile()).requires(source -> source.hasPermissionLevel(3))
                                                         .executes(context ->
-                                                                skinAction(EntityArgumentType.getPlayers(context, "targets"), true,
+                                                                skinAction(context.getSource(), GameProfileArgumentType.getProfileArgument(context, "targets"), true,
                                                                         () -> MineskinSkinProvider.getSkin(StringArgumentType.getString(context, "url"), SkinVariant.CLASSIC))))))
                                 .then(literal("slim")
                                         .then(argument("url", StringArgumentType.string())
                                                 .executes(context ->
-                                                        skinAction(Collections.singleton(context.getSource().getPlayer()), false,
+                                                        skinAction(context.getSource(), false,
                                                                 () -> MineskinSkinProvider.getSkin(StringArgumentType.getString(context, "url"), SkinVariant.SLIM)))
-                                                .then(argument("targets", EntityArgumentType.players()).requires(source -> source.hasPermissionLevel(3))
+                                                .then(argument("targets", GameProfileArgumentType.gameProfile()).requires(source -> source.hasPermissionLevel(3))
                                                         .executes(context ->
-                                                                skinAction(EntityArgumentType.getPlayers(context, "targets"), true,
+                                                                skinAction(context.getSource(), GameProfileArgumentType.getProfileArgument(context, "targets"), true,
                                                                         () -> MineskinSkinProvider.getSkin(StringArgumentType.getString(context, "url"), SkinVariant.SLIM))))))))
                 .then(literal("clear")
                         .executes(context ->
-                                skinAction(Collections.singleton(context.getSource().getPlayer()), false,
-                                        () -> null))
-                        .then(argument("targets", EntityArgumentType.players()).executes(context ->
-                                skinAction(EntityArgumentType.getPlayers(context, "targets"), true,
-                                        () -> null))))
+                                skinAction(context.getSource(), false,
+                                        () -> DEFAULT_SKIN))
+                        .then(argument("targets", GameProfileArgumentType.gameProfile()).executes(context ->
+                                skinAction(context.getSource(), GameProfileArgumentType.getProfileArgument(context, "targets"), true,
+                                        () -> DEFAULT_SKIN))))
         );
     }
 
-    private static int skinAction(Collection<ServerPlayerEntity> targets, boolean setByOperator, Supplier<Property> skinSupplier) {
-        new Thread(() -> {
-            if (!setByOperator)
-                targets.stream().findFirst().get().sendMessage(Text.of("§6[SkinRestorer]§f Downloading skin."), true);
-
-            Property skin = skinSupplier.get();
-
-            for (ServerPlayerEntity player : targets) {
-                SkinRestorer.getSkinStorage().setSkin(player.getUuid(), skin);
-
-                if (setByOperator)
-                    player.sendMessage(Text.of("§a[SkinRestorer]§f Operator changed your skin. You need to reconnect to apply it."), true);
-                else
-                    player.sendMessage(Text.of("§a[SkinRestorer]§f You need to reconnect to apply skin."), true);
+    private static int skinAction(ServerCommandSource src, Collection<GameProfile> targets, boolean setByOperator, Supplier<Property> skinSupplier) {
+        SkinRestorer.setSkinAsync(src.getServer(), targets, skinSupplier).thenAccept(pair -> {
+            Collection<GameProfile> profiles = pair.right();
+            Collection<ServerPlayerEntity> players = pair.left();
+            if (profiles.size() == 0) {
+                src.sendError(Text.of(TranslationUtils.translation.skinActionFailed));
+                return;
             }
-        }).start();
-
+            if (setByOperator) {
+                src.sendFeedback(Text.of(
+                        String.format(TranslationUtils.translation.skinActionAffectedProfile,
+                                String.join(", ", profiles.stream().map(GameProfile::getName).toList()))), true);
+                if (players.size() != 0) {
+                    src.sendFeedback(Text.of(
+                            String.format(TranslationUtils.translation.skinActionAffectedPlayer,
+                                    String.join(", ", players.stream().map(p -> p.getGameProfile().getName()).toList()))), true);
+                }
+            } else {
+                src.sendFeedback(Text.of(TranslationUtils.translation.skinActionOk), true);
+            }
+        });
         return targets.size();
+    }
+
+    private static int skinAction(ServerCommandSource src,  boolean setByOperator, Supplier<Property> skinSupplier) {
+        if (src.getPlayer() != null) {
+            skinAction(src, Collections.singleton(src.getPlayer().getGameProfile()), setByOperator, skinSupplier);
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }
