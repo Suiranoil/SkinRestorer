@@ -24,7 +24,7 @@ public class WebUtils {
             os.write(input.getBytes(StandardCharsets.UTF_8), 0, input.length());
         }
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
             return StringUtils.readString(br);
         }
     }
@@ -35,7 +35,7 @@ public class WebUtils {
         connection.setRequestMethod("GET");
         connection.setDoOutput(true);
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
             return StringUtils.readString(br);
         }
     }
