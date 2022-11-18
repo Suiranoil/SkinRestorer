@@ -5,7 +5,6 @@ import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.MojangSkinProvider;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.SkinStorage;
-import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
@@ -23,33 +22,23 @@ import java.util.concurrent.CompletableFuture;
 public abstract class ServerLoginNetworkHandlerMixin {
 	@Shadow @Nullable GameProfile profile;
 
-	@Shadow protected abstract GameProfile toOfflineProfile(GameProfile profile);
-
 	@Shadow @Final
 	static Logger LOGGER;
 	private CompletableFuture<Property> skinrestorer_pendingSkin;
-	@Inject(method = "onHello", at = @At("RETURN"))
-	public void onHelloReturn(LoginHelloC2SPacket packet, CallbackInfo ci) {
-		assert profile != null;
-		GameProfile profile1;
-		if (!profile.isComplete()) {
-			profile1 = profile = toOfflineProfile(this.profile);
-		} else {
-			profile1 = profile;
+
+	@Inject(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;checkCanJoin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/text/Text;"), cancellable = true)
+	public void waitForSkin(CallbackInfo ci) {
+		if (skinrestorer_pendingSkin == null) {
+			skinrestorer_pendingSkin = CompletableFuture.supplyAsync(() -> {
+				LOGGER.debug("Fetching {}'s skin", profile.getName());
+				if (SkinRestorer.getSkinStorage().getSkin(profile.getId()) == SkinStorage.DEFAULT_SKIN)
+					SkinRestorer.getSkinStorage().setSkin(profile.getId(), MojangSkinProvider.getSkin(profile.getName()));
+
+				return SkinRestorer.getSkinStorage().getSkin(profile.getId());
+			});
 		}
 
-		skinrestorer_pendingSkin = CompletableFuture.supplyAsync(() -> {
-			LOGGER.debug("Fetching {}'s skin", profile1.getName());
-			if (SkinRestorer.getSkinStorage().getSkin(profile1.getId()) == SkinStorage.DEFAULT_SKIN)
-				SkinRestorer.getSkinStorage().setSkin(profile1.getId(), MojangSkinProvider.getSkin(profile1.getName()));
-
-			return SkinRestorer.getSkinStorage().getSkin(profile1.getId());
-		});
-	}
-
-	@Inject(method = "acceptPlayer", at = @At("HEAD"), cancellable = true)
-	public void waitForSkin(CallbackInfo ci) {
-		if (skinrestorer_pendingSkin != null && !skinrestorer_pendingSkin.isDone()) {
+		if (!skinrestorer_pendingSkin.isDone()) {
 			ci.cancel();
 		}
 	}
