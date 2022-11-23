@@ -16,7 +16,7 @@ public class TranslationUtils {
 	}
 	public static Translation translation = new Translation();
 	static {
-		Path path = FabricLoader.getInstance().getConfigDir().resolve("skinrestorer\\translation.json");
+		Path path = FabricLoader.getInstance().getConfigDir().resolve("skinrestorer").resolve("translation.json");
 		if (Files.exists(path)) {
 			try {
 				translation = JsonUtils.fromJson(Objects.requireNonNull(FileUtils.readFile(path.toFile())), Translation.class);
