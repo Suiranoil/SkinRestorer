@@ -75,13 +75,13 @@ public class SkinRestorer implements DedicatedServerModInitializer {
                 applyRestoredSkin(player, skin);
                 for (PlayerEntity observer : player.world.getPlayers()) {
                     ServerPlayerEntity observer1 = (ServerPlayerEntity) observer;
-                    observer1.networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
+                    observer1.networkHandler.sendPacket(new PlayerRemoveS2CPacket(Collections.singletonList(player.getUuid())));
                     observer1.networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player)); // refresh the player information
                     if (player != observer1 && observer1.canSee(player)) {
                         observer1.networkHandler.sendPacket(new EntitiesDestroyS2CPacket(player.getId()));
                         observer1.networkHandler.sendPacket(new PlayerSpawnS2CPacket(player));
-                        observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker(), true));
                         observer1.networkHandler.sendPacket(new EntityPositionS2CPacket(player));
+                        observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
                     } else if (player == observer1) {
                         observer1.networkHandler.sendPacket(new PlayerRespawnS2CPacket(
                                 observer1.world.getDimensionKey(),
@@ -91,17 +91,17 @@ public class SkinRestorer implements DedicatedServerModInitializer {
                                 observer1.interactionManager.getPreviousGameMode(),
                                 observer1.getWorld().isDebugWorld(),
                                 observer1.getWorld().isFlat(),
-                                true,
-                                Optional.of(GlobalPos.create(observer1.getWorld().getRegistryKey(), observer1.getBlockPos()))
+                                (byte)2,
+                                Optional.empty()
                         ));
-                        observer1.requestTeleport(observer1.getX(), observer1.getY(), observer1.getZ());
                         observer1.networkHandler.sendPacket(new UpdateSelectedSlotS2CPacket(observer1.getInventory().selectedSlot));
                         observer1.sendAbilitiesUpdate();
                         observer1.playerScreenHandler.updateToClient();
                         for (StatusEffectInstance instance : observer1.getStatusEffects()) {
                             observer1.networkHandler.sendPacket(new EntityStatusEffectS2CPacket(observer1.getId(), instance));
                         }
-                        observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker(), true));
+                        observer1.networkHandler.requestTeleport(observer1.getX(), observer1.getY(), observer1.getZ(), observer1.getYaw(), observer1.getPitch());
+                        observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
                         observer1.networkHandler.sendPacket(new ExperienceBarUpdateS2CPacket(player.experienceProgress, player.totalExperience, player.experienceLevel));
                     }
                 }
