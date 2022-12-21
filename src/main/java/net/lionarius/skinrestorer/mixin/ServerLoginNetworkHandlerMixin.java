@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin {
+
 	@Shadow @Nullable GameProfile profile;
 
 	@Shadow @Final
@@ -50,8 +51,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
 	@Inject(method = "addToServer", at = @At("HEAD"))
 	public void applyRestoredSkinHook(ServerPlayerEntity player, CallbackInfo ci) {
-		if (skinrestorer_pendingSkin != null) {
+		if (skinrestorer_pendingSkin != null)
 			applyRestoredSkin(player, skinrestorer_pendingSkin.getNow(SkinStorage.DEFAULT_SKIN));
-		}
 	}
 }

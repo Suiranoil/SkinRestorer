@@ -30,7 +30,7 @@ public class SkinCommand {
                         .then(literal("mojang")
                                 .then(argument("skin_name", StringArgumentType.word())
                                         .executes(context ->
-                                                skinAction(context.getSource(), false,
+                                                skinAction(context.getSource(),
                                                         () -> MojangSkinProvider.getSkin(StringArgumentType.getString(context, "skin_name"))))
                                         .then(argument("targets", GameProfileArgumentType.gameProfile()).requires(source -> source.hasPermissionLevel(3))
                                                 .executes(context ->
@@ -40,7 +40,7 @@ public class SkinCommand {
                                 .then(literal("classic")
                                         .then(argument("url", StringArgumentType.string())
                                                 .executes(context ->
-                                                        skinAction(context.getSource(), false,
+                                                        skinAction(context.getSource(),
                                                                 () -> MineskinSkinProvider.getSkin(StringArgumentType.getString(context, "url"), SkinVariant.CLASSIC)))
                                                 .then(argument("targets", GameProfileArgumentType.gameProfile()).requires(source -> source.hasPermissionLevel(3))
                                                         .executes(context ->
@@ -49,7 +49,7 @@ public class SkinCommand {
                                 .then(literal("slim")
                                         .then(argument("url", StringArgumentType.string())
                                                 .executes(context ->
-                                                        skinAction(context.getSource(), false,
+                                                        skinAction(context.getSource(),
                                                                 () -> MineskinSkinProvider.getSkin(StringArgumentType.getString(context, "url"), SkinVariant.SLIM)))
                                                 .then(argument("targets", GameProfileArgumentType.gameProfile()).requires(source -> source.hasPermissionLevel(3))
                                                         .executes(context ->
@@ -57,7 +57,7 @@ public class SkinCommand {
                                                                         () -> MineskinSkinProvider.getSkin(StringArgumentType.getString(context, "url"), SkinVariant.SLIM))))))))
                 .then(literal("clear")
                         .executes(context ->
-                                skinAction(context.getSource(), false,
+                                skinAction(context.getSource(),
                                         () -> DEFAULT_SKIN))
                         .then(argument("targets", GameProfileArgumentType.gameProfile()).executes(context ->
                                 skinAction(context.getSource(), GameProfileArgumentType.getProfileArgument(context, "targets"), true,
@@ -89,12 +89,10 @@ public class SkinCommand {
         return targets.size();
     }
 
-    private static int skinAction(ServerCommandSource src,  boolean setByOperator, Supplier<Property> skinSupplier) {
-        if (src.getPlayer() != null) {
-            skinAction(src, Collections.singleton(src.getPlayer().getGameProfile()), setByOperator, skinSupplier);
-            return 1;
-        } else {
+    private static int skinAction(ServerCommandSource src, Supplier<Property> skinSupplier) {
+        if (src.getPlayer() == null)
             return 0;
-        }
+
+        return skinAction(src, Collections.singleton(src.getPlayer().getGameProfile()), false, skinSupplier);
     }
 }

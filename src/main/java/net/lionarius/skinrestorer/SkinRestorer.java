@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.biome.source.BiomeAccess;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -56,21 +55,18 @@ public class SkinRestorer implements DedicatedServerModInitializer {
             return Pair.of(skin, acceptedProfiles);
         }).<Pair<Collection<ServerPlayerEntity>, Collection<GameProfile>>>thenApplyAsync(pair -> {
             Property skin = pair.left();
-            if (skin == null) {
+            if (skin == null)
                 return Pair.of(Collections.emptySet(), Collections.emptySet());
-            }
+
             Collection<GameProfile> acceptedProfiles = pair.right();
             HashSet<ServerPlayerEntity> acceptedPlayers = new HashSet<>();
             JsonObject newSkinJson = gson.fromJson(new String(Base64.getDecoder().decode(skin.getValue()), StandardCharsets.UTF_8), JsonObject.class);
             newSkinJson.remove("timestamp");
             for (GameProfile profile : acceptedProfiles) {
                 ServerPlayerEntity player = server.getPlayerManager().getPlayer(profile.getId());
-                if (player == null) {
+
+                if (player == null || arePropertiesEquals(newSkinJson, player.getGameProfile()))
                     continue;
-                }
-                if (arePropertiesEquals(newSkinJson, player.getGameProfile())) {
-                    continue;
-                }
 
                 applyRestoredSkin(player, skin);
                 for (PlayerEntity observer : player.world.getPlayers()) {
@@ -120,17 +116,16 @@ public class SkinRestorer implements DedicatedServerModInitializer {
 
     private static boolean arePropertiesEquals(@NotNull JsonObject x, @NotNull GameProfile y) {
         Property py = y.getProperties().get("textures").stream().findFirst().orElse(null);
-        if (py == null) {
+        if (py == null)
             return false;
-        } else {
-            try {
-                JsonObject jy = gson.fromJson(new String(Base64.getDecoder().decode(py.getValue()), StandardCharsets.UTF_8), JsonObject.class);
-                jy.remove("timestamp");
-                return x.equals(jy);
-            } catch (Exception ex) {
-                SkinRestorer.LOGGER.info("Can not compare skin", ex);
-                return false;
-            }
+
+        try {
+            JsonObject jy = gson.fromJson(new String(Base64.getDecoder().decode(py.getValue()), StandardCharsets.UTF_8), JsonObject.class);
+            jy.remove("timestamp");
+            return x.equals(jy);
+        } catch (Exception ex) {
+            SkinRestorer.LOGGER.info("Can not compare skin", ex);
+            return false;
         }
     }
 }

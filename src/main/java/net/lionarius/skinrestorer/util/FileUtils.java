@@ -19,9 +19,9 @@ public class FileUtils {
                 path.mkdirs();
 
             File file = new File(path, fileName);
-            if (!file.exists()) {
+            if (!file.exists())
                 file.createNewFile();
-            }
+
             try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
                 writer.write(content);
             }

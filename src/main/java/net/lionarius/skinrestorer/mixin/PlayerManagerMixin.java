@@ -18,8 +18,6 @@ import java.util.List;
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
 
-
-
     @Shadow
     public abstract List<ServerPlayerEntity> getPlayerList();
 
@@ -39,8 +37,7 @@ public abstract class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect", at = @At("HEAD"))
     private void onPlayerConnected(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        if (player.getClass() != ServerPlayerEntity.class) { // if the player isn't a server player entity, it must be someone's fake player
+        if (player.getClass() != ServerPlayerEntity.class) // if the player isn't a server player entity, it must be someone's fake player
             SkinRestorer.setSkinAsync(server, Collections.singleton(player.getGameProfile()), () -> SkinRestorer.getSkinStorage().getSkin(player.getUuid()));
-        }
     }
 }
