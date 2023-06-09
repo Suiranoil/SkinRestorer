@@ -69,7 +69,7 @@ public class SkinRestorer implements DedicatedServerModInitializer {
                     continue;
 
                 applyRestoredSkin(player, skin);
-                for (PlayerEntity observer : player.world.getPlayers()) {
+                for (PlayerEntity observer : player.getWorld().getPlayers()) {
                     ServerPlayerEntity observer1 = (ServerPlayerEntity) observer;
                     observer1.networkHandler.sendPacket(new PlayerRemoveS2CPacket(Collections.singletonList(player.getUuid())));
                     observer1.networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player)); // refresh the player information
@@ -80,15 +80,16 @@ public class SkinRestorer implements DedicatedServerModInitializer {
                         observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
                     } else if (player == observer1) {
                         observer1.networkHandler.sendPacket(new PlayerRespawnS2CPacket(
-                                observer1.world.getDimensionKey(),
-                                observer1.world.getRegistryKey(),
-                                BiomeAccess.hashSeed(observer1.getWorld().getSeed()),
+                                observer1.getWorld().getDimensionKey(),
+                                observer1.getWorld().getRegistryKey(),
+                                BiomeAccess.hashSeed(observer1.getServerWorld().getSeed()),
                                 observer1.interactionManager.getGameMode(),
                                 observer1.interactionManager.getPreviousGameMode(),
                                 observer1.getWorld().isDebugWorld(),
-                                observer1.getWorld().isFlat(),
+                                observer1.getServerWorld().isFlat(),
                                 (byte)2,
-                                Optional.empty()
+                                Optional.empty(),
+                                observer1.getPortalCooldown()
                         ));
                         observer1.networkHandler.sendPacket(new UpdateSelectedSlotS2CPacket(observer1.getInventory().selectedSlot));
                         observer1.sendAbilitiesUpdate();

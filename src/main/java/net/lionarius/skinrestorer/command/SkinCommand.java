@@ -74,16 +74,16 @@ public class SkinCommand {
                 return;
             }
             if (setByOperator) {
-                src.sendFeedback(Text.of(
+                src.sendFeedback(() -> Text.of(
                         String.format(TranslationUtils.translation.skinActionAffectedProfile,
                                 String.join(", ", profiles.stream().map(GameProfile::getName).toList()))), true);
                 if (players.size() != 0) {
-                    src.sendFeedback(Text.of(
+                    src.sendFeedback(() -> Text.of(
                             String.format(TranslationUtils.translation.skinActionAffectedPlayer,
                                     String.join(", ", players.stream().map(p -> p.getGameProfile().getName()).toList()))), true);
                 }
             } else {
-                src.sendFeedback(Text.of(TranslationUtils.translation.skinActionOk), true);
+                src.sendFeedback(() -> Text.of(TranslationUtils.translation.skinActionOk), true);
             }
         });
         return targets.size();
