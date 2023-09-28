@@ -60,7 +60,7 @@ public class SkinRestorer implements DedicatedServerModInitializer {
 
             Collection<GameProfile> acceptedProfiles = pair.right();
             HashSet<ServerPlayerEntity> acceptedPlayers = new HashSet<>();
-            JsonObject newSkinJson = gson.fromJson(new String(Base64.getDecoder().decode(skin.getValue()), StandardCharsets.UTF_8), JsonObject.class);
+            JsonObject newSkinJson = gson.fromJson(new String(Base64.getDecoder().decode(skin.value()), StandardCharsets.UTF_8), JsonObject.class);
             newSkinJson.remove("timestamp");
             for (GameProfile profile : acceptedProfiles) {
                 ServerPlayerEntity player = server.getPlayerManager().getPlayer(profile.getId());
@@ -75,11 +75,11 @@ public class SkinRestorer implements DedicatedServerModInitializer {
                     observer1.networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player)); // refresh the player information
                     if (player != observer1 && observer1.canSee(player)) {
                         observer1.networkHandler.sendPacket(new EntitiesDestroyS2CPacket(player.getId()));
-                        observer1.networkHandler.sendPacket(new PlayerSpawnS2CPacket(player));
+                        //observer1.networkHandler.sendPacket(new PlayerSpawnS2CPacket(player));
                         observer1.networkHandler.sendPacket(new EntityPositionS2CPacket(player));
                         observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
                     } else if (player == observer1) {
-                        observer1.networkHandler.sendPacket(new PlayerRespawnS2CPacket(
+                        CommonPlayerSpawnInfo cpsi = new CommonPlayerSpawnInfo(
                                 observer1.getWorld().getDimensionKey(),
                                 observer1.getWorld().getRegistryKey(),
                                 BiomeAccess.hashSeed(observer1.getServerWorld().getSeed()),
@@ -87,9 +87,12 @@ public class SkinRestorer implements DedicatedServerModInitializer {
                                 observer1.interactionManager.getPreviousGameMode(),
                                 observer1.getWorld().isDebugWorld(),
                                 observer1.getServerWorld().isFlat(),
-                                (byte)2,
                                 Optional.empty(),
                                 observer1.getPortalCooldown()
+                        );
+                        observer1.networkHandler.sendPacket(new PlayerRespawnS2CPacket(
+                                cpsi,
+                                (byte) 2
                         ));
                         observer1.networkHandler.sendPacket(new UpdateSelectedSlotS2CPacket(observer1.getInventory().selectedSlot));
                         observer1.sendAbilitiesUpdate();
@@ -121,7 +124,7 @@ public class SkinRestorer implements DedicatedServerModInitializer {
             return false;
 
         try {
-            JsonObject jy = gson.fromJson(new String(Base64.getDecoder().decode(py.getValue()), StandardCharsets.UTF_8), JsonObject.class);
+            JsonObject jy = gson.fromJson(new String(Base64.getDecoder().decode(py.value()), StandardCharsets.UTF_8), JsonObject.class);
             jy.remove("timestamp");
             return x.equals(jy);
         } catch (Exception ex) {

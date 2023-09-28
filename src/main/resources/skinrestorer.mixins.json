@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "CommandManagerMixin",
-    "PlayerManagerMixin",
-    "ServerLoginNetworkHandlerMixin"
+    "PlayerManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
