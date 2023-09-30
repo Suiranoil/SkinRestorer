@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
@@ -7,8 +8,11 @@ import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -38,11 +42,57 @@ public class SkinRestorer implements DedicatedServerModInitializer {
         skinStorage = new SkinStorage(new SkinIO(FabricLoader.getInstance().getConfigDir().resolve("skinrestorer")));
     }
 
+    public static void refreshPlayer(ServerPlayerEntity player) {
+        List<com.mojang.datafixers.util.Pair<EquipmentSlot, ItemStack>> equipment = Lists.newArrayList();
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack itemStack = player.getEquippedStack(slot);
+            if (!itemStack.isEmpty()) {
+                equipment.add(com.mojang.datafixers.util.Pair.of(slot, itemStack.copy()));
+            }
+        }
+
+        for (ServerPlayerEntity observer : player.server.getPlayerManager().getPlayerList()) {
+            observer.networkHandler.sendPacket(new PlayerRemoveS2CPacket(List.of(player.getUuid())));
+            observer.networkHandler.sendPacket(PlayerListS2CPacket.entryFromPlayer(Collections.singleton(player)));
+
+            if (observer == player)
+                continue;
+
+            observer.networkHandler.sendPacket(new EntitiesDestroyS2CPacket(player.getId()));
+            observer.networkHandler.sendPacket(new EntitySpawnS2CPacket(player));
+            observer.networkHandler.sendPacket(new EntityPositionS2CPacket(player));
+            observer.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
+
+            if (!equipment.isEmpty())
+                observer.networkHandler.sendPacket(new EntityEquipmentUpdateS2CPacket(player.getId(), equipment));
+
+            if (player.hasVehicle())
+                observer.networkHandler.sendPacket(new EntityPassengersSetS2CPacket(player.getVehicle()));
+        }
+
+        player.networkHandler.sendPacket(new PlayerRespawnS2CPacket(player.createCommonPlayerSpawnInfo(player.getServerWorld()), (byte) 2));
+        player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
+        player.networkHandler.sendPacket(new UpdateSelectedSlotS2CPacket(player.getInventory().selectedSlot));
+        player.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
+
+        player.sendAbilitiesUpdate();
+        player.playerScreenHandler.updateToClient();
+
+        player.networkHandler.sendPacket(new ExperienceBarUpdateS2CPacket(player.experienceProgress, player.totalExperience, player.experienceLevel));
+        player.networkHandler.sendPacket(new HealthUpdateS2CPacket(player.getHealth(), player.getHungerManager().getFoodLevel(), player.getHungerManager().getSaturationLevel()));
+
+        for (StatusEffectInstance instance : player.getStatusEffects())
+            player.networkHandler.sendPacket(new EntityStatusEffectS2CPacket(player.getId(), instance));
+
+        if (player.hasVehicle())
+            player.networkHandler.sendPacket(new EntityPassengersSetS2CPacket(player.getVehicle()));
+    }
+
     public static CompletableFuture<Pair<Collection<ServerPlayerEntity>, Collection<GameProfile>>> setSkinAsync(MinecraftServer server, Collection<GameProfile> targets, Supplier<Property> skinSupplier) {
         return CompletableFuture.<Pair<Property, Collection<GameProfile>>>supplyAsync(() -> {
             HashSet<GameProfile> acceptedProfiles = new HashSet<>();
             Property skin = skinSupplier.get();
-            if (skin == null) {
+            if (Objects.isNull(skin)) {
                 SkinRestorer.LOGGER.error("Cannot get the skin for {}", targets.stream().findFirst().orElseThrow());
                 return Pair.of(null, Collections.emptySet());
             }
@@ -55,12 +105,12 @@ public class SkinRestorer implements DedicatedServerModInitializer {
             return Pair.of(skin, acceptedProfiles);
         }).<Pair<Collection<ServerPlayerEntity>, Collection<GameProfile>>>thenApplyAsync(pair -> {
             Property skin = pair.left();
-            if (skin == null)
+            if (Objects.isNull(skin))
                 return Pair.of(Collections.emptySet(), Collections.emptySet());
 
             Collection<GameProfile> acceptedProfiles = pair.right();
             HashSet<ServerPlayerEntity> acceptedPlayers = new HashSet<>();
-            JsonObject newSkinJson = gson.fromJson(new String(Base64.getDecoder().decode(skin.getValue()), StandardCharsets.UTF_8), JsonObject.class);
+            JsonObject newSkinJson = gson.fromJson(new String(Base64.getDecoder().decode(skin.value()), StandardCharsets.UTF_8), JsonObject.class);
             newSkinJson.remove("timestamp");
             for (GameProfile profile : acceptedProfiles) {
                 ServerPlayerEntity player = server.getPlayerManager().getPlayer(profile.getId());
@@ -68,49 +118,17 @@ public class SkinRestorer implements DedicatedServerModInitializer {
                 if (player == null || arePropertiesEquals(newSkinJson, player.getGameProfile()))
                     continue;
 
-                applyRestoredSkin(player, skin);
-                for (PlayerEntity observer : player.getWorld().getPlayers()) {
-                    ServerPlayerEntity observer1 = (ServerPlayerEntity) observer;
-                    observer1.networkHandler.sendPacket(new PlayerRemoveS2CPacket(Collections.singletonList(player.getUuid())));
-                    observer1.networkHandler.sendPacket(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player)); // refresh the player information
-                    if (player != observer1 && observer1.canSee(player)) {
-                        observer1.networkHandler.sendPacket(new EntitiesDestroyS2CPacket(player.getId()));
-                        observer1.networkHandler.sendPacket(new PlayerSpawnS2CPacket(player));
-                        observer1.networkHandler.sendPacket(new EntityPositionS2CPacket(player));
-                        observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
-                    } else if (player == observer1) {
-                        observer1.networkHandler.sendPacket(new PlayerRespawnS2CPacket(
-                                observer1.getWorld().getDimensionKey(),
-                                observer1.getWorld().getRegistryKey(),
-                                BiomeAccess.hashSeed(observer1.getServerWorld().getSeed()),
-                                observer1.interactionManager.getGameMode(),
-                                observer1.interactionManager.getPreviousGameMode(),
-                                observer1.getWorld().isDebugWorld(),
-                                observer1.getServerWorld().isFlat(),
-                                (byte)2,
-                                Optional.empty(),
-                                observer1.getPortalCooldown()
-                        ));
-                        observer1.networkHandler.sendPacket(new UpdateSelectedSlotS2CPacket(observer1.getInventory().selectedSlot));
-                        observer1.sendAbilitiesUpdate();
-                        observer1.playerScreenHandler.updateToClient();
-                        for (StatusEffectInstance instance : observer1.getStatusEffects()) {
-                            observer1.networkHandler.sendPacket(new EntityStatusEffectS2CPacket(observer1.getId(), instance));
-                        }
-                        observer1.networkHandler.requestTeleport(observer1.getX(), observer1.getY(), observer1.getZ(), observer1.getYaw(), observer1.getPitch());
-                        observer1.networkHandler.sendPacket(new EntityTrackerUpdateS2CPacket(player.getId(), player.getDataTracker().getChangedEntries()));
-                        observer1.networkHandler.sendPacket(new ExperienceBarUpdateS2CPacket(player.experienceProgress, player.totalExperience, player.experienceLevel));
-                    }
-                }
+                applyRestoredSkin(player.getGameProfile(), skin);
+                refreshPlayer(player);
                 acceptedPlayers.add(player);
             }
             return Pair.of(acceptedPlayers, acceptedProfiles);
         }, server).orTimeout(10, TimeUnit.SECONDS).exceptionally(e -> Pair.of(Collections.emptySet(), Collections.emptySet()));
     }
 
-    private static void applyRestoredSkin(ServerPlayerEntity playerEntity, Property skin) {
-        playerEntity.getGameProfile().getProperties().removeAll("textures");
-        playerEntity.getGameProfile().getProperties().put("textures", skin);
+    public static void applyRestoredSkin(GameProfile profile, Property skin) {
+        profile.getProperties().removeAll("textures");
+        profile.getProperties().put("textures", skin);
     }
 
     private static final Gson gson = new Gson();
@@ -121,7 +139,7 @@ public class SkinRestorer implements DedicatedServerModInitializer {
             return false;
 
         try {
-            JsonObject jy = gson.fromJson(new String(Base64.getDecoder().decode(py.getValue()), StandardCharsets.UTF_8), JsonObject.class);
+            JsonObject jy = gson.fromJson(new String(Base64.getDecoder().decode(py.value()), StandardCharsets.UTF_8), JsonObject.class);
             jy.remove("timestamp");
             return x.equals(jy);
         } catch (Exception ex) {

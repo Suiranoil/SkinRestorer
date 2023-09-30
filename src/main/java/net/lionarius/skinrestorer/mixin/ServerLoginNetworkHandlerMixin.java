@@ -27,7 +27,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 	static Logger LOGGER;
 	private CompletableFuture<Property> skinrestorer_pendingSkin;
 
-	@Inject(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;checkCanJoin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/text/Text;"), cancellable = true)
+	@Inject(method = "tickVerify", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;checkCanJoin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/text/Text;"), cancellable = true)
 	public void waitForSkin(CallbackInfo ci) {
 		if (skinrestorer_pendingSkin == null) {
 			skinrestorer_pendingSkin = CompletableFuture.supplyAsync(() -> {
@@ -44,14 +44,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
 		}
 	}
 
-	private static void applyRestoredSkin(ServerPlayerEntity playerEntity, Property skin) {
-		playerEntity.getGameProfile().getProperties().removeAll("textures");
-		playerEntity.getGameProfile().getProperties().put("textures", skin);
-	}
-
-	@Inject(method = "addToServer", at = @At("HEAD"))
-	public void applyRestoredSkinHook(ServerPlayerEntity player, CallbackInfo ci) {
+	@Inject(method = "sendSuccessPacket", at = @At("HEAD"))
+	public void applyRestoredSkinHook(GameProfile profile, CallbackInfo ci) {
 		if (skinrestorer_pendingSkin != null)
-			applyRestoredSkin(player, skinrestorer_pendingSkin.getNow(SkinStorage.DEFAULT_SKIN));
+			SkinRestorer.applyRestoredSkin(profile, skinrestorer_pendingSkin.getNow(SkinStorage.DEFAULT_SKIN));
 	}
 }

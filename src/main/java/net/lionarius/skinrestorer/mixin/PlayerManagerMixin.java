@@ -4,6 +4,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,7 +37,7 @@ public abstract class PlayerManagerMixin {
     }
 
     @Inject(method = "onPlayerConnect", at = @At("HEAD"))
-    private void onPlayerConnected(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
+    private void onPlayerConnected(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
         if (player.getClass() != ServerPlayerEntity.class) // if the player isn't a server player entity, it must be someone's fake player
             SkinRestorer.setSkinAsync(server, Collections.singleton(player.getGameProfile()), () -> SkinRestorer.getSkinStorage().getSkin(player.getUuid()));
     }
