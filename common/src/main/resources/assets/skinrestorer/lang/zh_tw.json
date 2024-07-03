@@ -1,7 +1,7 @@
 {
-    "skinrestorer.command.skin.affected_players": "已更改外觀變更於玩家 %s",
-    "skinrestorer.command.skin.no_changes": "沒有外觀更改",
-    "skinrestorer.command.skin.failed": "更改外觀失敗：%s",
-    "skinrestorer.command.skin.ok": "外觀已更改",
+    "skinrestorer.command.skin.affected_players": "已變更 %s 的外觀",
+    "skinrestorer.command.skin.no_changes": "沒有外觀變更",
+    "skinrestorer.command.skin.failed": "變更外觀失敗：%s",
+    "skinrestorer.command.skin.ok": "已變更外觀",
     "skinrestorer.command.skin.loading": "正在載入外觀..."
 }
