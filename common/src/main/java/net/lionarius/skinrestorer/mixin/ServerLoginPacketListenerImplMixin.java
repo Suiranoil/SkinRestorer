@@ -61,7 +61,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                         var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
                         SkinRestorer.getSkinStorage().setSkin(authenticatedProfile.getId(), value);
                     } else {
-                        SkinRestorer.LOGGER.error("failed to fetch skin on first join", result.getErrorValue());
+                        SkinRestorer.LOGGER.warn("failed to fetch skin on first join", result.getErrorValue());
                     }
                 }
                 
