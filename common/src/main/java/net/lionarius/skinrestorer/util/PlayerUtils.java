@@ -13,10 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public final class PlayerUtils {
     
@@ -54,7 +51,8 @@ public final class PlayerUtils {
         
         var trackedEntity = (TrackedEntityMixin) ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
         if (trackedEntity != null) {
-            for (var observerConnection : trackedEntity.getSeenBy()) {
+            var seenBy = Set.copyOf(trackedEntity.getSeenBy());
+            for (var observerConnection : seenBy) {
                 var observer = observerConnection.getPlayer();
                 trackedEntity.invokeRemovePlayer(observer);
                 
