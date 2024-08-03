@@ -22,40 +22,40 @@ import java.util.concurrent.CompletableFuture;
 public abstract class ServerLoginPacketListenerImplMixin {
     
     @Shadow @Nullable
-    private GameProfile authenticatedProfile;
+    private GameProfile gameProfile;
     
     @Unique
     private CompletableFuture<Void> skinrestorer_pendingSkin;
     
-    @Inject(method = "verifyLoginAndFinishConnectionSetup", at = @At(value = "INVOKE",
+    @Inject(method = "handleAcceptedLogin", at = @At(value = "INVOKE",
                                                                      target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"),
             cancellable = true)
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer_pendingSkin == null) {
             skinrestorer_pendingSkin = CompletableFuture.supplyAsync(() -> {
-                assert authenticatedProfile != null;
-                var originalSkin = PlayerUtils.getPlayerSkin(authenticatedProfile);
+                assert gameProfile != null;
+                var originalSkin = PlayerUtils.getPlayerSkin(gameProfile);
                 
-                if (SkinRestorer.getSkinStorage().hasSavedSkin(authenticatedProfile.getId())) {
+                if (SkinRestorer.getSkinStorage().hasSavedSkin(gameProfile.getId())) {
                     if (originalSkin != null) { // update to the latest official skin
-                        var value = SkinRestorer.getSkinStorage().getSkin(authenticatedProfile.getId());
-                        SkinRestorer.getSkinStorage().setSkin(authenticatedProfile.getId(), value.setOriginalValue(originalSkin));
+                        var value = SkinRestorer.getSkinStorage().getSkin(gameProfile.getId());
+                        SkinRestorer.getSkinStorage().setSkin(gameProfile.getId(), value.setOriginalValue(originalSkin));
                     }
                     
                     return null;
                 }
                 
                 if (originalSkin == null && SkinRestorer.getConfig().fetchSkinOnFirstJoin()) {
-                    SkinRestorer.LOGGER.debug("Fetching {}'s skin", authenticatedProfile.getName());
+                    SkinRestorer.LOGGER.debug("Fetching {}'s skin", gameProfile.getName());
                     
-                    var context = new SkinProviderContext(MojangSkinProvider.PROVIDER_NAME, authenticatedProfile.getName(), null);
+                    var context = new SkinProviderContext(MojangSkinProvider.PROVIDER_NAME, gameProfile.getName(), null);
                     var result = SkinRestorer.getProvider(context.name()).map(
                             provider -> provider.getSkin(context.argument(), context.variant())
                     ).orElse(Result.ofNullable(null));
                     
                     if (!result.isError()) {
                         var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
-                        SkinRestorer.getSkinStorage().setSkin(authenticatedProfile.getId(), value);
+                        SkinRestorer.getSkinStorage().setSkin(gameProfile.getId(), value);
                     } else {
                         SkinRestorer.LOGGER.warn("failed to fetch skin on first join", result.getErrorValue());
                     }

@@ -12,6 +12,7 @@ import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.biome.BiomeManager;
 
 import java.util.*;
 
@@ -66,7 +67,20 @@ public final class PlayerUtils {
         }
         
         if (!player.isDeadOrDying()) {
-            player.connection.send(new ClientboundRespawnPacket(player.createCommonSpawnInfo(serverLevel), ClientboundRespawnPacket.KEEP_ALL_DATA));
+            player.connection.send(
+                    new ClientboundRespawnPacket(
+                            player.level().dimensionTypeId(),
+                            player.level().dimension(),
+                            BiomeManager.obfuscateSeed(player.serverLevel().getSeed()),
+                            player.gameMode.getGameModeForPlayer(),
+                            player.gameMode.getPreviousGameModeForPlayer(),
+                            player.level().isDebug(),
+                            player.serverLevel().isFlat(),
+                            (byte) 3,
+                            player.getLastDeathLocation(),
+                            player.getPortalCooldown()
+                    )
+            );
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
             var vehicle = player.getVehicle();

@@ -71,4 +71,5 @@ rootProject.name = 'skin-restorer'
 include('common')
 include('fabric')
 include('forge')
-include('neoforge')
+// There is no NeoForge for versions <1.20.2
+// include('neoforge')

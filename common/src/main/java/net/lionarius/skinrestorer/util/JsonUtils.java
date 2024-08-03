@@ -36,7 +36,7 @@ public final class JsonUtils {
     
     public static JsonObject skinPropertyToJson(Property property) {
         try {
-            JsonObject json = GSON.fromJson(new String(Base64.getDecoder().decode(property.value()), StandardCharsets.UTF_8), JsonObject.class);
+            JsonObject json = GSON.fromJson(new String(Base64.getDecoder().decode(property.getValue()), StandardCharsets.UTF_8), JsonObject.class);
             if (json != null)
                 json.remove("timestamp");
             

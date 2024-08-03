@@ -4,7 +4,6 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +37,7 @@ public abstract class PlayerListMixin {
     }
     
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
-    private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
+    private void placeNewPlayer(Connection connection, ServerPlayer player, CallbackInfo ci) {
         if (SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID()))
             SkinRestorer.applySkin(server, Collections.singleton(player.getGameProfile()), SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
     }
