@@ -66,12 +66,7 @@ public final class PlayerUtils {
         }
         
         if (!player.isDeadOrDying()) {
-            player.connection.send(new ClientboundBundlePacket(
-                    List.of(
-                            new ClientboundRespawnPacket(player.createCommonSpawnInfo(serverLevel), ClientboundRespawnPacket.KEEP_ALL_DATA),
-                            new ClientboundGameEventPacket(ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START, 0)
-                    )
-            ));
+            player.connection.send(new ClientboundRespawnPacket(player.createCommonSpawnInfo(serverLevel), ClientboundRespawnPacket.KEEP_ALL_DATA));
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
             var vehicle = player.getVehicle();
