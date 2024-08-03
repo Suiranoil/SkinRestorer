@@ -91,7 +91,7 @@ public final class PlayerUtils {
     
     public static void sendActivePlayerEffects(ServerPlayer player) {
         for (var effect : player.getActiveEffects()) {
-            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effect, false));
+            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effect));
         }
     }
     
