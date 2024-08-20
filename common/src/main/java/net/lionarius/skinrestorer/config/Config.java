@@ -15,6 +15,8 @@ public final class Config {
     
     private boolean fetchSkinOnFirstJoin = true;
     
+    private FirstJoinSkinProvider firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
+    
     private String proxy = "";
     
     private long requestTimeout = 10;
@@ -25,6 +27,10 @@ public final class Config {
     
     public boolean fetchSkinOnFirstJoin() {
         return this.fetchSkinOnFirstJoin;
+    }
+    
+    public FirstJoinSkinProvider getFirstJoinSkinProvider() {
+        return this.firstJoinSkinProvider;
     }
     
     public String getProxy() {
