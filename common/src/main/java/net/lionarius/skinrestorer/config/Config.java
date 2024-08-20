@@ -54,8 +54,24 @@ public final class Config {
         if (config == null)
             config = new Config();
         
+        config.verifyAndFix();
+        
         FileUtils.writeFile(path.resolve(Config.CONFIG_FILENAME), JsonUtils.toJson(config));
         
         return config;
+    }
+    
+    private void verifyAndFix() {
+        if (this.language == null || this.language.isEmpty())
+            this.language = "en_us";
+        
+        if (this.firstJoinSkinProvider == null)
+            this.firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
+        
+        if (this.proxy == null)
+            this.proxy = "";
+        
+        if (this.requestTimeout <= 0)
+            this.requestTimeout = 10;
     }
 }
