@@ -5,8 +5,9 @@ import net.lionarius.skinrestorer.skin.provider.ElyBySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
 
 public enum FirstJoinSkinProvider {
+    @SerializedName(value = "MOJANG", alternate = {"mojang"})
     MOJANG(MojangSkinProvider.PROVIDER_NAME),
-    @SerializedName("ELY.BY")
+    @SerializedName(value = "ELY.BY", alternate = {"ely.by", "ELY_BY", "ely_by"})
     ELY_BY(ElyBySkinProvider.PROVIDER_NAME);
     
     private final String name;
