@@ -126,25 +126,4 @@ public final class PlayerUtils {
         
         return xJson.equals(yJson);
     }
-    
-    public static Property findTexturesProperty(JsonArray properties) {
-        Property textures = null;
-        for (var property : properties) {
-            var propertyObject = property.getAsJsonObject();
-            if (propertyObject == null)
-                continue;
-            
-            try {
-                textures = JsonUtils.fromJson(propertyObject, Property.class);
-                break;
-            } catch (Exception e) {
-                // ignored
-            }
-        }
-        
-        if (textures == null)
-            throw new IllegalStateException("no textures in profile");
-        
-        return textures;
-    }
 }
