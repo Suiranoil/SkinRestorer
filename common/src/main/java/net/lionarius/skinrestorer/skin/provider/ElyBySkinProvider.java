@@ -1,7 +1,8 @@
 package net.lionarius.skinrestorer.skin.provider;
 
-import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -16,13 +17,14 @@ import java.net.http.HttpRequest;
 import java.util.Optional;
 
 public final class ElyBySkinProvider implements SkinProvider {
+    
     public static final String PROVIDER_NAME = "ely.by";
     
     private static final URI API_URI;
     
     static {
         try {
-            API_URI = new URI("http://skinsystem.ely.by/");
+            API_URI = new URI("http://skinsystem.ely.by");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
@@ -45,9 +47,7 @@ public final class ElyBySkinProvider implements SkinProvider {
         
         try {
             var profile = ElyBySkinProvider.getElyByProfile(username);
-            
-            var properties = profile.getAsJsonArray("properties");
-            var textures = PlayerUtils.findTexturesProperty(properties);
+            var textures = PlayerUtils.getPlayerSkin(profile);
             
             return Result.ofNullable(textures);
         } catch (Exception e) {
@@ -55,10 +55,10 @@ public final class ElyBySkinProvider implements SkinProvider {
         }
     }
     
-    private static JsonObject getElyByProfile(String username) throws IOException {
+    private static GameProfile getElyByProfile(String username) throws IOException {
         var request = HttpRequest.newBuilder()
                 .uri(ElyBySkinProvider.API_URI
-                        .resolve("textures/signed/")
+                        .resolve("/textures/signed/")
                         .resolve(username + "?unsigned=false")
                 )
                 .GET()
@@ -70,6 +70,6 @@ public final class ElyBySkinProvider implements SkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with name " + username);
         
-        return JsonUtils.parseJson(response.body());
+        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
     }
 }
