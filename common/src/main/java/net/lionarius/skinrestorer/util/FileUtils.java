@@ -17,12 +17,11 @@ public final class FileUtils {
     
     private FileUtils() {}
     
-    public static void tryMigrateOldSkinDirectory(Path newDirectory) {
+    public static void tryMigrateOldSkinDirectory(Path oldDirectory, Path newDirectory) {
         try {
-            var configDirectory = SkinRestorer.getConfigDir();
-            try (var stream = Files.list(configDirectory)) {
+            try (var stream = Files.list(oldDirectory)) {
                 var files = stream.filter(file -> {
-                    var name = file.getFileName();
+                    var name = file.getFileName().toString();
                     return Files.isRegularFile(file)
                            && !name.startsWith(Translation.LEGACY_TRANSLATION_FILENAME)
                            && !name.startsWith(Config.CONFIG_FILENAME)
@@ -31,7 +30,6 @@ public final class FileUtils {
                 
                 if (!files.isEmpty() && !Files.exists(newDirectory))
                     Files.createDirectories(newDirectory);
-                
                 
                 for (var file : files)
                     Files.move(file, newDirectory.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
