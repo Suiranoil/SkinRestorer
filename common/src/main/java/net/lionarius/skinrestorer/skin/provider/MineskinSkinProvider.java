@@ -22,7 +22,7 @@ public final class MineskinSkinProvider implements SkinProvider {
     
     static {
         try {
-            API_URI = new URI("https://api.mineskin.org/");
+            API_URI = new URI("https://api.mineskin.org");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
@@ -45,8 +45,9 @@ public final class MineskinSkinProvider implements SkinProvider {
             
             var result = MineskinSkinProvider.uploadToMineskin(uri, variant);
             var texture = result.getAsJsonObject("data").getAsJsonObject("texture");
+            var textures = new Property(PlayerUtils.TEXTURES_KEY, texture.get("value").getAsString(), texture.get("signature").getAsString());
             
-            return Result.ofNullable(new Property(PlayerUtils.TEXTURES_KEY, texture.get("value").getAsString(), texture.get("signature").getAsString()));
+            return Result.ofNullable(textures);
         } catch (Exception e) {
             return Result.error(e);
         }
@@ -57,7 +58,7 @@ public final class MineskinSkinProvider implements SkinProvider {
                 .formatted(variant.toString(), "none", 0, url);
         
         var request = HttpRequest.newBuilder()
-                .uri(MineskinSkinProvider.API_URI.resolve("generate/url"))
+                .uri(MineskinSkinProvider.API_URI.resolve("/generate/url"))
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .header("Content-Type", "application/json")
                 .build();
