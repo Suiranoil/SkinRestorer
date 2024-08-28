@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.util;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.skin.SkinIO;
+import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
 import net.lionarius.skinrestorer.translation.Translation;
 
 import java.io.BufferedReader;
@@ -25,6 +26,7 @@ public final class FileUtils {
                     return Files.isRegularFile(file)
                            && !name.startsWith(Translation.LEGACY_TRANSLATION_FILENAME)
                            && !name.startsWith(Config.CONFIG_FILENAME)
+                           && !name.startsWith(MojangSkinProvider.CACHE_FILENAME)
                            && name.endsWith(SkinIO.FILE_EXTENSION);
                 }).toList();
                 
