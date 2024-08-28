@@ -8,6 +8,7 @@ import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
+import net.minecraft.util.StringUtil;
 
 import java.io.IOException;
 import java.net.URI;
@@ -47,6 +48,9 @@ public final class MojangSkinProvider implements SkinProvider {
     
     @Override
     public Result<Optional<Property>, Exception> getSkin(String username, SkinVariant variant) {
+        if (!StringUtil.isValidPlayerName(username))
+            return Result.error(new IllegalArgumentException("invalid username"));
+        
         try {
             var uuid = MojangSkinProvider.getUuid(username);
             var profile = MojangSkinProvider.getMojangProfile(uuid);
