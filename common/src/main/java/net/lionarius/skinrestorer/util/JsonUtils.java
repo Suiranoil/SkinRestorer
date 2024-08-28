@@ -31,7 +31,7 @@ public final class JsonUtils {
     }
     
     public static JsonObject parseJson(String json) {
-        return JsonParser.parseString(json).getAsJsonObject();
+        return GSON.fromJson(json, JsonObject.class);
     }
     
     public static JsonObject skinPropertyToJson(Property property) {
