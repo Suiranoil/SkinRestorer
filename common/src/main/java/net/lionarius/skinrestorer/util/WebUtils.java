@@ -10,7 +10,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 public final class WebUtils {
     
@@ -18,24 +17,16 @@ public final class WebUtils {
     
     public static final String USER_AGENT;
     
+    private static final HttpClient HTTP_CLIENT;
+    
     static {
         USER_AGENT = String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
         
         var builder = HttpClient.newBuilder();
+        
         var proxy = SkinRestorer.getConfig().getProxy();
-        try {
-            if (proxy != null) {
-                var colonIndex = proxy.lastIndexOf(':');
-                if (colonIndex != -1) {
-                    var host = proxy.substring(0, colonIndex);
-                    var port = Integer.parseInt(proxy.substring(colonIndex + 1));
-                    
-                    builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(host, port)));
-                }
-            }
-        } catch (Exception e) {
-            SkinRestorer.LOGGER.error("failed to parse proxy", e);
-        }
+        proxy.ifPresent(value -> builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(value.host(), value.port()))));
+        
         try {
             builder.connectTimeout(Duration.of(SkinRestorer.getConfig().getRequestTimeout(), ChronoUnit.SECONDS));
         } catch (IllegalArgumentException e) {
@@ -45,8 +36,6 @@ public final class WebUtils {
         
         HTTP_CLIENT = builder.build();
     }
-    
-    private static final HttpClient HTTP_CLIENT;
     
     public static HttpResponse<String> executeRequest(HttpRequest request) throws IOException {
         try {

@@ -5,6 +5,7 @@ import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 public final class Config {
     
@@ -18,6 +19,7 @@ public final class Config {
     private FirstJoinSkinProvider firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
     
     private String proxy = "";
+    private transient Proxy parsedProxy = null;
     
     private long requestTimeout = 10;
     
@@ -33,8 +35,8 @@ public final class Config {
         return this.firstJoinSkinProvider;
     }
     
-    public String getProxy() {
-        return this.proxy;
+    public Optional<Proxy> getProxy() {
+        return Optional.ofNullable(this.parsedProxy);
     }
     
     public long getRequestTimeout() {
@@ -70,6 +72,15 @@ public final class Config {
         
         if (this.proxy == null)
             this.proxy = "";
+        
+        if (!this.proxy.isEmpty()) {
+            try {
+                this.parsedProxy = Proxy.parse(this.proxy);
+            } catch (Exception e) {
+                SkinRestorer.LOGGER.warn("Could not parse proxy config", e);
+                this.parsedProxy = null;
+            }
+        }
         
         if (this.requestTimeout <= 0)
             this.requestTimeout = 10;
