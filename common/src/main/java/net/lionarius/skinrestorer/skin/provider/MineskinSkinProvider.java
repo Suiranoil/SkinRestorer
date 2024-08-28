@@ -41,7 +41,9 @@ public final class MineskinSkinProvider implements SkinProvider {
     @Override
     public Result<Optional<Property>, Exception> getSkin(String url, SkinVariant variant) {
         try {
-            var result = MineskinSkinProvider.uploadToMineskin(url, variant);
+            var uri = new URI(url);
+            
+            var result = MineskinSkinProvider.uploadToMineskin(uri, variant);
             var texture = result.getAsJsonObject("data").getAsJsonObject("texture");
             
             return Result.ofNullable(new Property(PlayerUtils.TEXTURES_KEY, texture.get("value").getAsString(), texture.get("signature").getAsString()));
@@ -50,7 +52,7 @@ public final class MineskinSkinProvider implements SkinProvider {
         }
     }
     
-    private static JsonObject uploadToMineskin(String url, SkinVariant variant) throws IOException {
+    private static JsonObject uploadToMineskin(URI url, SkinVariant variant) throws IOException {
         var body = ("{\"variant\":\"%s\",\"name\":\"%s\",\"visibility\":%d,\"url\":\"%s\"}")
                 .formatted(variant.toString(), "none", 0, url);
         
