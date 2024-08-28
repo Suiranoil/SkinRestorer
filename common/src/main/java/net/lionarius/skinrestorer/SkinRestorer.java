@@ -75,7 +75,7 @@ public final class SkinRestorer {
         Translation.reloadTranslations();
     }
     
-    public static String resource(String name) {
+    public static String assetPath(String name) {
         return String.format("/assets/%s/%s", SkinRestorer.MOD_ID, name);
     }
     

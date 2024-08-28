@@ -50,7 +50,7 @@ public final class Translation {
     }
     
     private static ImmutableMap<String, String> loadTranslationMap(String lang) {
-        var json = FileUtils.readResource(SkinRestorer.resource(String.format("lang/%s.json", lang)));
+        var json = FileUtils.readResource(SkinRestorer.assetPath(String.format("lang/%s.json", lang)));
         
         var type = new TypeToken<Map<String, String>>() {}.getType();
         Map<String, String> map = null;
