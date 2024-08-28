@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.util;
 
+import com.google.common.collect.Iterables;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
@@ -96,7 +97,7 @@ public final class PlayerUtils {
     }
     
     public static Property getPlayerSkin(GameProfile profile) {
-        return profile.getProperties().get(TEXTURES_KEY).stream().findFirst().orElse(null);
+        return Iterables.getFirst(profile.getProperties().get(TEXTURES_KEY), null);
     }
     
     public static void applyRestoredSkin(GameProfile profile, Property skin) {
