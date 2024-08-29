@@ -10,6 +10,7 @@ import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
+import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -73,6 +74,7 @@ public final class SkinRestorer {
     public static void reloadConfig() {
         SkinRestorer.config = Config.load(SkinRestorer.getConfigDir());
         Translation.reloadTranslations();
+        WebUtils.recreateHttpClient();
     }
     
     public static String assetPath(String name) {

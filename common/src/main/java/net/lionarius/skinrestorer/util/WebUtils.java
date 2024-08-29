@@ -17,11 +17,17 @@ public final class WebUtils {
     
     public static final String USER_AGENT;
     
-    private static final HttpClient HTTP_CLIENT;
+    private static HttpClient HTTP_CLIENT = null;
     
     static {
         USER_AGENT = String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
-        
+    }
+    
+    public static void recreateHttpClient() {
+        HTTP_CLIENT = WebUtils.buildClient();
+    }
+    
+    private static HttpClient buildClient() {
         var builder = HttpClient.newBuilder();
         
         var proxy = SkinRestorer.getConfig().getProxy();
@@ -34,7 +40,7 @@ public final class WebUtils {
             builder.connectTimeout(Duration.of(10, ChronoUnit.SECONDS));
         }
         
-        HTTP_CLIENT = builder.build();
+        return builder.build();
     }
     
     public static HttpResponse<String> executeRequest(HttpRequest request) throws IOException {
