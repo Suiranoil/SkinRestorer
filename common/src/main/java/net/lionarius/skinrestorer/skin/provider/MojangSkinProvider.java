@@ -1,5 +1,8 @@
 package net.lionarius.skinrestorer.skin.provider;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
@@ -12,6 +15,7 @@ import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,6 +23,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public final class MojangSkinProvider implements SkinProvider {
     
@@ -27,8 +32,10 @@ public final class MojangSkinProvider implements SkinProvider {
     private static final URI API_URI;
     private static final URI SESSION_SERVER_URI;
     
-    public static final String CACHE_FILENAME = "mojang_profile_cache.json";
+    public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
     private static final GameProfileCache PROFILE_CACHE;
+    
+    private static final LoadingCache<UUID, Optional<Property>> SKIN_CACHE;
     
     static {
         try {
@@ -47,7 +54,16 @@ public final class MojangSkinProvider implements SkinProvider {
                     callback.onProfileLookupFailed(name, e);
                 }
             }
-        }, SkinRestorer.getConfigDir().resolve(CACHE_FILENAME).toFile());
+        }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
+        
+        SKIN_CACHE = CacheBuilder.newBuilder()
+                .expireAfterWrite(60, TimeUnit.SECONDS)
+                .build(new CacheLoader<>() {
+                    @Override
+                    public @NotNull Optional<Property> load(@NotNull UUID key) throws Exception {
+                        return MojangSkinProvider.loadSkin(key);
+                    }
+                });
     }
     
     public static SkinProviderContext skinProviderContextFromProfile(GameProfile gameProfile) {
@@ -65,22 +81,26 @@ public final class MojangSkinProvider implements SkinProvider {
     }
     
     @Override
-    public Result<Optional<Property>, Exception> getSkin(String username, SkinVariant variant) {
-        if (!StringUtil.isValidPlayerName(username))
-            return Result.error(new IllegalArgumentException("invalid username"));
-        
+    public Result<Optional<Property>, Exception> fetchSkin(String username, SkinVariant variant) {
         try {
+            if (!StringUtil.isValidPlayerName(username))
+                throw new IllegalArgumentException("invalid username");
+            
             var cachedProfile = MojangSkinProvider.PROFILE_CACHE.get(username);
             if (cachedProfile.isEmpty())
                 throw new IllegalArgumentException("no profile found for " + username);
             
-            var profile = MojangSkinProvider.getProfileWithProperties(cachedProfile.get().getId());
-            var textures = PlayerUtils.getPlayerSkin(profile);
-            
-            return Result.ofNullable(textures);
+            return Result.success(SKIN_CACHE.get(cachedProfile.get().getId()));
         } catch (Exception e) {
             return Result.error(e);
         }
+    }
+    
+    private static Optional<Property> loadSkin(UUID uuid) throws Exception {
+        var profile = MojangSkinProvider.getProfileWithProperties(uuid);
+        var textures = PlayerUtils.getPlayerSkin(profile);
+        
+        return Optional.ofNullable(textures);
     }
     
     private static GameProfile getProfile(final String name) throws IOException {

@@ -1,5 +1,8 @@
 package net.lionarius.skinrestorer.skin.provider;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
@@ -9,12 +12,15 @@ import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public final class ElyBySkinProvider implements SkinProvider {
     
@@ -22,12 +28,23 @@ public final class ElyBySkinProvider implements SkinProvider {
     
     private static final URI API_URI;
     
+    private static final LoadingCache<String, Optional<Property>> SKIN_CACHE;
+    
     static {
         try {
             API_URI = new URI("http://skinsystem.ely.by");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
+        
+        SKIN_CACHE = CacheBuilder.newBuilder()
+                .expireAfterWrite(60, TimeUnit.SECONDS)
+                .build(new CacheLoader<>() {
+                    @Override
+                    public @NotNull Optional<Property> load(@NotNull String key) throws Exception {
+                        return ElyBySkinProvider.loadSkin(key);
+                    }
+                });
     }
     
     @Override
@@ -41,18 +58,23 @@ public final class ElyBySkinProvider implements SkinProvider {
     }
     
     @Override
-    public Result<Optional<Property>, Exception> getSkin(String username, SkinVariant variant) {
-        if (!StringUtil.isValidPlayerName(username))
-            return Result.error(new IllegalArgumentException("invalid username"));
-        
+    public Result<Optional<Property>, Exception> fetchSkin(String username, SkinVariant variant) {
         try {
-            var profile = ElyBySkinProvider.getElyByProfile(username);
-            var textures = PlayerUtils.getPlayerSkin(profile);
+            if (!StringUtil.isValidPlayerName(username))
+                throw new IllegalArgumentException("invalid username");
             
-            return Result.ofNullable(textures);
+            var usernameLowerCase = username.toLowerCase(Locale.ROOT);
+            return Result.success(SKIN_CACHE.get(usernameLowerCase));
         } catch (Exception e) {
             return Result.error(e);
         }
+    }
+    
+    private static Optional<Property> loadSkin(String username) throws Exception {
+        var profile = ElyBySkinProvider.getElyByProfile(username);
+        var textures = PlayerUtils.getPlayerSkin(profile);
+        
+        return Optional.ofNullable(textures);
     }
     
     private static GameProfile getElyByProfile(String username) throws IOException {

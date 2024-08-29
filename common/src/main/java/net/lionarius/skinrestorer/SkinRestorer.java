@@ -118,7 +118,7 @@ public final class SkinRestorer {
             boolean save
     ) {
         return CompletableFuture.supplyAsync(
-                        () -> SkinRestorer.getProvider(context.name()).map(provider -> provider.getSkin(context.argument(), context.variant()))
+                        () -> SkinRestorer.getProvider(context.name()).map(provider -> provider.fetchSkin(context.argument(), context.variant()))
                 )
                 .thenApplyAsync(result -> {
                     if (result.isEmpty())

@@ -21,11 +21,11 @@ public final class EmptySkinProvider implements SkinProvider {
     }
     
     @Override
-    public Result<Optional<Property>, Exception> getSkin(String argument, SkinVariant variant) {
-        return this.getSkin();
+    public Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant) {
+        return this.fetchSkin();
     }
     
-    public Result<Optional<Property>, Exception> getSkin() {
+    public Result<Optional<Property>, Exception> fetchSkin() {
         return Result.ofNullable(null);
     }
 }

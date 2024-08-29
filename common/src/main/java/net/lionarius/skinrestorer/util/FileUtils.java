@@ -26,7 +26,7 @@ public final class FileUtils {
                     return Files.isRegularFile(file)
                            && !name.startsWith(Translation.LEGACY_TRANSLATION_FILENAME)
                            && !name.startsWith(Config.CONFIG_FILENAME)
-                           && !name.startsWith(MojangSkinProvider.CACHE_FILENAME)
+                           && !name.startsWith(MojangSkinProvider.PROFILE_CACHE_FILENAME)
                            && name.endsWith(SkinIO.FILE_EXTENSION);
                 }).toList();
                 

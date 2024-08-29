@@ -16,5 +16,5 @@ public interface SkinProvider {
     
     boolean hasVariantSupport();
     
-    Result<Optional<Property>, Exception> getSkin(String argument, SkinVariant variant);
+    Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant);
 }
