@@ -49,8 +49,13 @@ public final class SkinCommand {
         var providers = SkinRestorer.getProvidersRegistry().getPublicProviders();
         for (var entry : providers)
             set.then(buildSetSubcommand(entry.first(), entry.second()));
-        
         base.then(set);
+        
+        base.then(
+                literal("config")
+                        .requires(commandSourceStack -> commandSourceStack.hasPermission(3))
+                        .then(literal("reload").executes(SkinCommand::configReloadSubcommand))
+        );
         
         dispatcher.register(base);
     }
@@ -158,6 +163,12 @@ public final class SkinCommand {
             return 0;
         
         return setSubcommand(src, Collections.singleton(src.getPlayer().getGameProfile()), context, false);
+    }
+    
+    private static int configReloadSubcommand(CommandContext<CommandSourceStack> context) {
+        SkinRestorer.reloadConfig();
+        
+        return 0;
     }
     
     private static void sendResponse(CommandSourceStack src, Collection<ServerPlayer> updatedPlayers, boolean setByOperator) {
