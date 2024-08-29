@@ -14,6 +14,8 @@ public final class Config {
     
     private String language = "en_us";
     
+    private boolean refreshSkinOnJoin = false;
+    
     private boolean fetchSkinOnFirstJoin = true;
     
     private FirstJoinSkinProvider firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
@@ -25,6 +27,10 @@ public final class Config {
     
     public String getLanguage() {
         return this.language;
+    }
+    
+    public boolean refreshSkinOnJoin() {
+        return this.refreshSkinOnJoin;
     }
     
     public boolean fetchSkinOnFirstJoin() {

@@ -24,14 +24,14 @@ public abstract class ServerLoginPacketListenerImplMixin {
     private GameProfile authenticatedProfile;
     
     @Unique
-    private CompletableFuture<Void> skinrestorer_pendingSkin;
+    private CompletableFuture<Void> skinrestorer$pendingSkin;
     
     @Inject(method = "verifyLoginAndFinishConnectionSetup", at = @At(value = "INVOKE",
                                                                      target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"),
             cancellable = true)
     public void waitForSkin(CallbackInfo ci) {
-        if (skinrestorer_pendingSkin == null) {
-            skinrestorer_pendingSkin = CompletableFuture.supplyAsync(() -> {
+        if (skinrestorer$pendingSkin == null) {
+            skinrestorer$pendingSkin = CompletableFuture.supplyAsync(() -> {
                 assert authenticatedProfile != null;
                 var originalSkin = PlayerUtils.getPlayerSkin(authenticatedProfile);
                 
@@ -41,34 +41,46 @@ public abstract class ServerLoginPacketListenerImplMixin {
                         SkinRestorer.getSkinStorage().setSkin(authenticatedProfile.getId(), value.setOriginalValue(originalSkin));
                     }
                     
+                    if (SkinRestorer.getConfig().refreshSkinOnJoin()) {
+                        var currentSkin = SkinRestorer.getSkinStorage().getSkin(authenticatedProfile.getId());
+                        var context = currentSkin.toProviderContext();
+                        
+                        skinrestorer$fetchSkin(authenticatedProfile, context);
+                    }
+                    
                     return null;
                 }
                 
                 if (originalSkin == null && SkinRestorer.getConfig().fetchSkinOnFirstJoin()) {
-                    SkinRestorer.LOGGER.debug("Fetching {}'s skin", authenticatedProfile.getName());
-                    
                     var context = new SkinProviderContext(
                             SkinRestorer.getConfig().getFirstJoinSkinProvider().getName(),
                             authenticatedProfile.getName(),
                             null
                     );
-                    var result = SkinRestorer.getProvider(context.name()).map(
-                            provider -> provider.getSkin(context.argument(), context.variant())
-                    ).orElse(Result.ofNullable(null));
-                    
-                    if (!result.isError()) {
-                        var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
-                        SkinRestorer.getSkinStorage().setSkin(authenticatedProfile.getId(), value);
-                    } else {
-                        SkinRestorer.LOGGER.warn("failed to fetch skin on first join", result.getErrorValue());
-                    }
+                    skinrestorer$fetchSkin(authenticatedProfile, context);
                 }
                 
                 return null;
             });
         }
         
-        if (!skinrestorer_pendingSkin.isDone())
+        if (!skinrestorer$pendingSkin.isDone())
             ci.cancel();
+    }
+    
+    @Unique
+    private static void skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
+        SkinRestorer.LOGGER.debug("fetching {}'s skin", profile.getName());
+        
+        var result = SkinRestorer.getProvider(context.name()).map(
+                provider -> provider.getSkin(context.argument(), context.variant())
+        ).orElseGet(() -> Result.error(new IllegalArgumentException("skin provider is not registered: " + context.name())));
+        
+        if (!result.isError()) {
+            var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
+            SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
+        } else {
+            SkinRestorer.LOGGER.warn("failed to fetch skin", result.getErrorValue());
+        }
     }
 }
