@@ -19,6 +19,7 @@ public final class Translation {
     public static final String COMMAND_SKIN_FAILED_KEY = "skinrestorer.command.skin.failed";
     public static final String COMMAND_SKIN_OK_KEY = "skinrestorer.command.skin.ok";
     public static final String COMMAND_SKIN_LOADING_KEY = "skinrestorer.command.skin.loading";
+    public static final String COMMAND_SKIN_CONFIG_RELOADED_KEY = "skinrestorer.command.skin.config_reloaded";
     
     private static Map<String, String> translations;
     private static final Map<String, String> fallback;
