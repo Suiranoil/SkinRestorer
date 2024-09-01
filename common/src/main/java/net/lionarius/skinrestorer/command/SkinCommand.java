@@ -53,7 +53,7 @@ public final class SkinCommand {
         
         base.then(
                 literal("config")
-                        .requires(commandSourceStack -> commandSourceStack.hasPermission(3))
+                        .requires(commandSourceStack -> commandSourceStack.hasPermission(4))
                         .then(literal("reload").executes(SkinCommand::configReloadSubcommand))
         );
         
