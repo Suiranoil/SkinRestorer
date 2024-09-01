@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "没有皮肤更改",
     "skinrestorer.command.skin.failed": "更改皮肤失败：%s",
     "skinrestorer.command.skin.ok": "皮肤已更改",
-    "skinrestorer.command.skin.loading": "正在加载皮肤..."
+    "skinrestorer.command.skin.loading": "正在加载皮肤...",
+    "skinrestorer.command.skin.config_reloaded": "配置已重新加载"
 }

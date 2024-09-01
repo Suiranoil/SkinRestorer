@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "Không có thay đổi skin",
     "skinrestorer.command.skin.failed": "Thay đổi skin thất bại: %s",
     "skinrestorer.command.skin.ok": "Đã thay đổi skin",
-    "skinrestorer.command.skin.loading": "Đang tải skin..."
+    "skinrestorer.command.skin.loading": "Đang tải skin...",
+    "skinrestorer.command.skin.config_reloaded": "Cấu hình đã được tải lại"
 }
