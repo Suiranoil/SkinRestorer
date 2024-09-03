@@ -17,7 +17,7 @@ public final class SkinRestorerNeoForge {
     public SkinRestorerNeoForge() {
         NeoForge.EVENT_BUS.register(SkinRestorerNeoForge.class);
         
-        SkinRestorer.onInitialize(FMLPaths.CONFIGDIR.get());
+        SkinRestorer.onInitialize();
     }
     
     @SubscribeEvent
