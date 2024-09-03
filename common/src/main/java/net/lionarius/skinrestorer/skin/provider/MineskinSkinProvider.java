@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.Pair;
+import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -26,7 +27,7 @@ public final class MineskinSkinProvider implements SkinProvider {
     
     private static final URI API_URI;
     
-    private static final LoadingCache<Pair<URI, SkinVariant>, Optional<Property>> SKIN_CACHE;
+    private static LoadingCache<Pair<URI, SkinVariant>, Optional<Property>> SKIN_CACHE;
     
     static {
         try {
@@ -34,9 +35,11 @@ public final class MineskinSkinProvider implements SkinProvider {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
-        
+    }
+    
+    public static void createCache() {
         SKIN_CACHE = CacheBuilder.newBuilder()
-                .expireAfterWrite(300, TimeUnit.SECONDS)
+                .expireAfterWrite(SkinRestorer.getConfig().getMineskinCacheDuration(), TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull Pair<URI, SkinVariant> key) throws Exception {

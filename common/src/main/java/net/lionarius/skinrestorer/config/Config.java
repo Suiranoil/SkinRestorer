@@ -25,6 +25,10 @@ public final class Config {
     
     private long requestTimeout = 10;
     
+    private long mojangCacheDuration = 60;
+    private long elybyCacheDuration = 60;
+    private long mineskinCacheDuration = 300;
+    
     public String getLanguage() {
         return this.language;
     }
@@ -47,6 +51,18 @@ public final class Config {
     
     public long getRequestTimeout() {
         return this.requestTimeout;
+    }
+    
+    public long getMojangCacheDuration() {
+        return this.mojangCacheDuration;
+    }
+    
+    public long getElybyCacheDuration() {
+        return this.elybyCacheDuration;
+    }
+    
+    public long getMineskinCacheDuration() {
+        return this.mineskinCacheDuration;
     }
     
     public static Config load(Path path) {
@@ -90,5 +106,14 @@ public final class Config {
         
         if (this.requestTimeout <= 0)
             this.requestTimeout = 10;
+        
+        if (this.mojangCacheDuration < 0)
+            this.mojangCacheDuration = 60;
+        
+        if (this.elybyCacheDuration < 0)
+            this.elybyCacheDuration = 60;
+        
+        if (this.mineskinCacheDuration < 0)
+            this.mineskinCacheDuration = 300;
     }
 }

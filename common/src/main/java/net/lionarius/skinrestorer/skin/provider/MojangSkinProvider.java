@@ -35,7 +35,7 @@ public final class MojangSkinProvider implements SkinProvider {
     public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
     private static final GameProfileCache PROFILE_CACHE;
     
-    private static final LoadingCache<UUID, Optional<Property>> SKIN_CACHE;
+    private static LoadingCache<UUID, Optional<Property>> SKIN_CACHE;
     
     static {
         try {
@@ -56,8 +56,12 @@ public final class MojangSkinProvider implements SkinProvider {
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
         
+        
+    }
+    
+    public static void createCache() {
         SKIN_CACHE = CacheBuilder.newBuilder()
-                .expireAfterWrite(60, TimeUnit.SECONDS)
+                .expireAfterWrite(SkinRestorer.getConfig().getMojangCacheDuration(), TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull UUID key) throws Exception {

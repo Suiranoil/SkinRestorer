@@ -76,6 +76,10 @@ public final class SkinRestorer {
         SkinRestorer.config = Config.load(SkinRestorer.getConfigDir());
         Translation.reloadTranslations();
         WebUtils.recreateHttpClient();
+        
+        MojangSkinProvider.createCache();
+        ElyBySkinProvider.createCache();
+        MineskinSkinProvider.createCache();
     }
     
     public static String assetPath(String name) {

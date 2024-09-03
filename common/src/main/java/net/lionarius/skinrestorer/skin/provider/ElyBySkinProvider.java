@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
+import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -28,7 +29,7 @@ public final class ElyBySkinProvider implements SkinProvider {
     
     private static final URI API_URI;
     
-    private static final LoadingCache<String, Optional<Property>> SKIN_CACHE;
+    private static LoadingCache<String, Optional<Property>> SKIN_CACHE;
     
     static {
         try {
@@ -37,8 +38,12 @@ public final class ElyBySkinProvider implements SkinProvider {
             throw new IllegalArgumentException(e);
         }
         
+        
+    }
+    
+    public static void createCache() {
         SKIN_CACHE = CacheBuilder.newBuilder()
-                .expireAfterWrite(60, TimeUnit.SECONDS)
+                .expireAfterWrite(SkinRestorer.getConfig().getElybyCacheDuration(), TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull String key) throws Exception {
@@ -64,6 +69,7 @@ public final class ElyBySkinProvider implements SkinProvider {
                 throw new IllegalArgumentException("invalid username");
             
             var usernameLowerCase = username.toLowerCase(Locale.ROOT);
+            
             return Result.success(SKIN_CACHE.get(usernameLowerCase));
         } catch (Exception e) {
             return Result.error(e);
