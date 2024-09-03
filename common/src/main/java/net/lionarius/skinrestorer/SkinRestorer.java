@@ -2,6 +2,7 @@ package net.lionarius.skinrestorer;
 
 import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.config.Config;
+import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
 import net.lionarius.skinrestorer.skin.SkinValue;
@@ -54,8 +55,8 @@ public final class SkinRestorer {
         return Optional.ofNullable(SkinRestorer.providersRegistry.get(name));
     }
     
-    public static void onInitialize(Path rootConfigDir) {
-        SkinRestorer.configDir = rootConfigDir.resolve(SkinRestorer.MOD_ID);
+    public static void onInitialize() {
+        SkinRestorer.configDir = Services.PLATFORM.getConfigDirectory().resolve(SkinRestorer.MOD_ID);
         SkinRestorer.reloadConfig();
         
         SkinRestorer.providersRegistry.register(EmptySkinProvider.PROVIDER_NAME, SkinProvider.EMPTY, false);

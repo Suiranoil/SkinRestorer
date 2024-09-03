@@ -16,7 +16,7 @@ public final class SkinRestorerForge {
     public SkinRestorerForge() {
         MinecraftForge.EVENT_BUS.register(SkinRestorerForge.class);
         
-        SkinRestorer.onInitialize(FMLPaths.CONFIGDIR.get());
+        SkinRestorer.onInitialize();
     }
     
     @SubscribeEvent
