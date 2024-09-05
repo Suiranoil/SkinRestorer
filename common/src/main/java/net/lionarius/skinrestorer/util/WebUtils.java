@@ -62,30 +62,16 @@ public final class WebUtils {
     }
     
     public static void throwOnClientErrors(HttpResponse<?> response) {
-        String message = null;
-        switch (response.statusCode()) {
-            case 400:
-                message = "bad request";
-                break;
-            case 401:
-                message = "unauthorized";
-                break;
-            case 403:
-                message = "forbidden";
-                break;
-            case 404:
-                message = "not found";
-                break;
-            case 405:
-                message = "method not allowed";
-                break;
-            case 408:
-                message = "request timeout";
-                break;
-            case 429:
-                message = "too many requests";
-                break;
-        }
+        String message = switch (response.statusCode()) {
+            case 400 -> "bad request";
+            case 401 -> "unauthorized";
+            case 403 -> "forbidden";
+            case 404 -> "not found";
+            case 405 -> "method not allowed";
+            case 408 -> "request timeout";
+            case 429 -> "too many requests";
+            default -> null;
+        };
         
         if (message != null)
             throw new IllegalStateException(message);
