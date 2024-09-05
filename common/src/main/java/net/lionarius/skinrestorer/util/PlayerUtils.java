@@ -1,7 +1,6 @@
 package net.lionarius.skinrestorer.util;
 
 import com.google.common.collect.Iterables;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
