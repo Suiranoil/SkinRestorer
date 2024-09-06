@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.skin.provider;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
@@ -71,6 +72,8 @@ public final class ElyBySkinProvider implements SkinProvider {
             var usernameLowerCase = username.toLowerCase(Locale.ROOT);
             
             return Result.success(SKIN_CACHE.get(usernameLowerCase));
+        } catch (UncheckedExecutionException e) {
+            return Result.error((Exception) e.getCause());
         } catch (Exception e) {
             return Result.error(e);
         }

@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.skin.provider;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.Pair;
@@ -64,6 +65,8 @@ public final class MineskinSkinProvider implements SkinProvider {
             var uri = new URI(url);
             
             return Result.success(SKIN_CACHE.get(Pair.of(uri, variant)));
+        } catch (UncheckedExecutionException e) {
+            return Result.error((Exception) e.getCause());
         } catch (Exception e) {
             return Result.error(e);
         }
