@@ -33,8 +33,13 @@ public final class FileUtils {
                 if (!files.isEmpty() && !Files.exists(newDirectory))
                     Files.createDirectories(newDirectory);
                 
-                for (var file : files)
-                    Files.move(file, newDirectory.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                for (var file : files) {
+                    var newFile = newDirectory.resolve(file.getFileName());
+                    if (!Files.exists(newFile))
+                        Files.move(file, newFile, StandardCopyOption.ATOMIC_MOVE);
+                    else
+                        Files.delete(file);
+                }
             }
         } catch (Exception e) {
             SkinRestorer.LOGGER.error("could not migrate skin directory", e);
