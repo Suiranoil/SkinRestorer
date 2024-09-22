@@ -38,13 +38,14 @@ public final class ElyBySkinProvider implements SkinProvider {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
-        
-        
     }
     
     public static void createCache() {
+        var config = SkinRestorer.getConfig().providersConfig().ely_by();
+        var time = config.cache().enabled() ? config.cache().duration() : 0;
+        
         SKIN_CACHE = CacheBuilder.newBuilder()
-                .expireAfterWrite(SkinRestorer.getConfig().getElybyCacheDuration(), TimeUnit.SECONDS)
+                .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull String key) throws Exception {

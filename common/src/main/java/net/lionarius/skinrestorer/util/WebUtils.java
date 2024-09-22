@@ -30,11 +30,11 @@ public final class WebUtils {
     private static HttpClient buildClient() {
         var builder = HttpClient.newBuilder();
         
-        var proxy = SkinRestorer.getConfig().getProxy();
+        var proxy = SkinRestorer.getConfig().proxy();
         proxy.ifPresent(value -> builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(value.host(), value.port()))));
         
         try {
-            builder.connectTimeout(Duration.of(SkinRestorer.getConfig().getRequestTimeout(), ChronoUnit.SECONDS));
+            builder.connectTimeout(Duration.of(SkinRestorer.getConfig().requestTimeout(), ChronoUnit.SECONDS));
         } catch (IllegalArgumentException e) {
             SkinRestorer.LOGGER.error("failed to set request timeout", e);
             builder.connectTimeout(Duration.of(10, ChronoUnit.SECONDS));

@@ -61,8 +61,11 @@ public final class MojangSkinProvider implements SkinProvider {
     }
     
     public static void createCache() {
+        var config = SkinRestorer.getConfig().providersConfig().mojang();
+        var time = config.cache().enabled() ? config.cache().duration() : 0;
+        
         SKIN_CACHE = CacheBuilder.newBuilder()
-                .expireAfterWrite(SkinRestorer.getConfig().getMojangCacheDuration(), TimeUnit.SECONDS)
+                .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull UUID key) throws Exception {

@@ -1,6 +1,7 @@
 package net.lionarius.skinrestorer;
 
 import com.mojang.authlib.GameProfile;
+import net.lionarius.skinrestorer.config.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
@@ -60,9 +61,18 @@ public final class SkinRestorer {
         SkinRestorer.reloadConfig();
         
         SkinRestorer.providersRegistry.register(EmptySkinProvider.PROVIDER_NAME, SkinProvider.EMPTY, false);
-        SkinRestorer.providersRegistry.register(MojangSkinProvider.PROVIDER_NAME, SkinProvider.MOJANG);
-        SkinRestorer.providersRegistry.register(ElyBySkinProvider.PROVIDER_NAME, SkinProvider.ELY_BY);
-        SkinRestorer.providersRegistry.register(MineskinSkinProvider.PROVIDER_NAME, SkinProvider.MINESKIN);
+        
+        SkinRestorer.registerDefaultSkinProvider(MojangSkinProvider.PROVIDER_NAME, SkinProvider.MOJANG, SkinRestorer.getConfig().providersConfig().mojang());
+        SkinRestorer.registerDefaultSkinProvider(ElyBySkinProvider.PROVIDER_NAME, SkinProvider.ELY_BY, SkinRestorer.getConfig().providersConfig().ely_by());
+        SkinRestorer.registerDefaultSkinProvider(MineskinSkinProvider.PROVIDER_NAME, SkinProvider.MINESKIN, SkinRestorer.getConfig().providersConfig().mineskin());
+    }
+    
+    private static void registerDefaultSkinProvider(String defaultName, SkinProvider provider, BuiltInProviderConfig config) {
+        var isDefaultName = config.name().equals(defaultName);
+        SkinRestorer.providersRegistry.register(defaultName, provider, config.enabled() && isDefaultName);
+        
+        if (!isDefaultName)
+            SkinRestorer.providersRegistry.register(config.name(), provider, config.enabled());
     }
     
     public static void onServerStarted(MinecraftServer server) {

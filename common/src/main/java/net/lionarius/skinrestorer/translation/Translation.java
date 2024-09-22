@@ -47,7 +47,7 @@ public final class Translation {
     }
     
     public static void reloadTranslations() {
-        translations = Translation.loadTranslationMap(SkinRestorer.getConfig().getLanguage());
+        translations = Translation.loadTranslationMap(SkinRestorer.getConfig().language());
     }
     
     private static ImmutableMap<String, String> loadTranslationMap(String lang) {

@@ -53,7 +53,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 
                 if (originalSkin == null && SkinRestorer.getConfig().fetchSkinOnFirstJoin()) {
                     var context = new SkinProviderContext(
-                            SkinRestorer.getConfig().getFirstJoinSkinProvider().getName(),
+                            SkinRestorer.getConfig().firstJoinSkinProvider().getName(),
                             authenticatedProfile.getName(),
                             null
                     );

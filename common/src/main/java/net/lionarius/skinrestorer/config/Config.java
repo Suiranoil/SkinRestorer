@@ -25,11 +25,9 @@ public final class Config {
     
     private long requestTimeout = 10;
     
-    private long mojangCacheDuration = 60;
-    private long elybyCacheDuration = 60;
-    private long mineskinCacheDuration = 300;
+    private ProvidersConfig providers = ProvidersConfig.DEFAULT;
     
-    public String getLanguage() {
+    public String language() {
         return this.language;
     }
     
@@ -41,28 +39,20 @@ public final class Config {
         return this.fetchSkinOnFirstJoin;
     }
     
-    public FirstJoinSkinProvider getFirstJoinSkinProvider() {
+    public FirstJoinSkinProvider firstJoinSkinProvider() {
         return this.firstJoinSkinProvider;
     }
     
-    public Optional<Proxy> getProxy() {
+    public Optional<Proxy> proxy() {
         return Optional.ofNullable(this.parsedProxy);
     }
     
-    public long getRequestTimeout() {
+    public long requestTimeout() {
         return this.requestTimeout;
     }
     
-    public long getMojangCacheDuration() {
-        return this.mojangCacheDuration;
-    }
-    
-    public long getElybyCacheDuration() {
-        return this.elybyCacheDuration;
-    }
-    
-    public long getMineskinCacheDuration() {
-        return this.mineskinCacheDuration;
+    public ProvidersConfig providersConfig() {
+        return this.providers;
     }
     
     public static Config load(Path path) {
@@ -86,14 +76,20 @@ public final class Config {
     }
     
     private void verifyAndFix() {
-        if (this.language == null || this.language.isEmpty())
+        if (this.language == null || this.language.isEmpty()) {
+            SkinRestorer.LOGGER.warn("Language config is null or empty, defaulting to 'en_us'");
             this.language = "en_us";
+        }
         
-        if (this.firstJoinSkinProvider == null)
+        if (this.firstJoinSkinProvider == null) {
+            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider config is null, defaulting to MOJANG");
             this.firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
+        }
         
-        if (this.proxy == null)
+        if (this.proxy == null) {
+            SkinRestorer.LOGGER.warn("Proxy config is null, defaulting to an empty string");
             this.proxy = "";
+        }
         
         if (!this.proxy.isEmpty()) {
             try {
@@ -104,16 +100,17 @@ public final class Config {
             }
         }
         
-        if (this.requestTimeout <= 0)
+        if (this.requestTimeout <= 0) {
+            SkinRestorer.LOGGER.warn("Request timeout config is less than or equal to 0, defaulting to 10");
             this.requestTimeout = 10;
+        }
         
-        if (this.mojangCacheDuration < 0)
-            this.mojangCacheDuration = 60;
+        if (this.providers == null) {
+            SkinRestorer.LOGGER.warn("Providers config is null, using default");
+            this.providers = ProvidersConfig.DEFAULT;
+        }
         
-        if (this.elybyCacheDuration < 0)
-            this.elybyCacheDuration = 60;
-        
-        if (this.mineskinCacheDuration < 0)
-            this.mineskinCacheDuration = 300;
+        if (!this.providers.isValid())
+            this.providers.fix();
     }
 }

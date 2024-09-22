@@ -39,8 +39,11 @@ public final class MineskinSkinProvider implements SkinProvider {
     }
     
     public static void createCache() {
+        var config = SkinRestorer.getConfig().providersConfig().mineskin();
+        var time = config.cache().enabled() ? config.cache().duration() : 0;
+        
         SKIN_CACHE = CacheBuilder.newBuilder()
-                .expireAfterWrite(SkinRestorer.getConfig().getMineskinCacheDuration(), TimeUnit.SECONDS)
+                .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull Pair<URI, SkinVariant> key) throws Exception {
