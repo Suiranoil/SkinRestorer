@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.Set;
 
 @Mixin(targets = "net.minecraft.server.level.ChunkMap$TrackedEntity")
-public interface TrackedEntityMixin {
+public interface TrackedEntityAccessorInvoker {
     
     @Accessor
     Set<ServerPlayerConnection> getSeenBy();

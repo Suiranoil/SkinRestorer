@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
-import net.lionarius.skinrestorer.mixin.TrackedEntityMixin;
+import net.lionarius.skinrestorer.mixin.TrackedEntityAccessorInvoker;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ChunkMap;
@@ -49,14 +49,14 @@ public final class PlayerUtils {
                 )
         ));
         
-        var trackedEntity = (TrackedEntityMixin) ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
+        var trackedEntity = (TrackedEntityAccessorInvoker) ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
         if (trackedEntity != null) {
             var seenBy = Set.copyOf(trackedEntity.getSeenBy());
             for (var observerConnection : seenBy) {
                 var observer = observerConnection.getPlayer();
                 trackedEntity.invokeRemovePlayer(observer);
                 
-                var trackedObserverEntity = (TrackedEntityMixin) ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
+                var trackedObserverEntity = (TrackedEntityAccessorInvoker) ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
                 if (trackedObserverEntity != null) {
                     trackedObserverEntity.invokeRemovePlayer(player);
                     trackedObserverEntity.invokeUpdatePlayer(player);
