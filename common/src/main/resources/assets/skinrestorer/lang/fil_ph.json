@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "Walang pagbabago sa skin",
     "skinrestorer.command.skin.failed": "Nabigo sa pagbabago ng skin: %s",
     "skinrestorer.command.skin.ok": "Nabago ang skin",
-    "skinrestorer.command.skin.loading": "Naglo-load ng skin..."
+    "skinrestorer.command.skin.loading": "Naglo-load ng skin...",
+    "skinrestorer.command.skin.config_reloaded": "Na-reload ang config"
 }

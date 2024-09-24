@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "Nincsenek skin változások",
     "skinrestorer.command.skin.failed": "Skin változtatás sikertelen: %s",
     "skinrestorer.command.skin.ok": "Skin megváltoztatva",
-    "skinrestorer.command.skin.loading": "Skin betöltése..."
+    "skinrestorer.command.skin.loading": "Skin betöltése...",
+    "skinrestorer.command.skin.config_reloaded": "A konfiguráció újratöltve"
 }

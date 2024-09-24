@@ -10,7 +10,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 public final class WebUtils {
     
@@ -18,35 +17,31 @@ public final class WebUtils {
     
     public static final String USER_AGENT;
     
+    private static HttpClient HTTP_CLIENT = null;
+    
     static {
         USER_AGENT = String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
-        
+    }
+    
+    public static void recreateHttpClient() {
+        HTTP_CLIENT = WebUtils.buildClient();
+    }
+    
+    private static HttpClient buildClient() {
         var builder = HttpClient.newBuilder();
-        var proxy = SkinRestorer.getConfig().getProxy();
+        
+        var proxy = SkinRestorer.getConfig().proxy();
+        proxy.ifPresent(value -> builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(value.host(), value.port()))));
+        
         try {
-            if (proxy != null) {
-                var colonIndex = proxy.lastIndexOf(':');
-                if (colonIndex != -1) {
-                    var host = proxy.substring(0, colonIndex);
-                    var port = Integer.parseInt(proxy.substring(colonIndex + 1));
-                    
-                    builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(host, port)));
-                }
-            }
-        } catch (Exception e) {
-            SkinRestorer.LOGGER.error("failed to parse proxy", e);
-        }
-        try {
-            builder.connectTimeout(Duration.of(SkinRestorer.getConfig().getRequestTimeout(), ChronoUnit.SECONDS));
+            builder.connectTimeout(Duration.of(SkinRestorer.getConfig().requestTimeout(), ChronoUnit.SECONDS));
         } catch (IllegalArgumentException e) {
             SkinRestorer.LOGGER.error("failed to set request timeout", e);
             builder.connectTimeout(Duration.of(10, ChronoUnit.SECONDS));
         }
         
-        HTTP_CLIENT = builder.build();
+        return builder.build();
     }
-    
-    private static final HttpClient HTTP_CLIENT;
     
     public static HttpResponse<String> executeRequest(HttpRequest request) throws IOException {
         try {
@@ -67,30 +62,16 @@ public final class WebUtils {
     }
     
     public static void throwOnClientErrors(HttpResponse<?> response) {
-        String message = null;
-        switch (response.statusCode()) {
-            case 400:
-                message = "bad request";
-                break;
-            case 401:
-                message = "unauthorized";
-                break;
-            case 403:
-                message = "forbidden";
-                break;
-            case 404:
-                message = "not found";
-                break;
-            case 405:
-                message = "method not allowed";
-                break;
-            case 408:
-                message = "request timeout";
-                break;
-            case 429:
-                message = "too many requests";
-                break;
-        }
+        String message = switch (response.statusCode()) {
+            case 400 -> "bad request";
+            case 401 -> "unauthorized";
+            case 403 -> "forbidden";
+            case 404 -> "not found";
+            case 405 -> "method not allowed";
+            case 408 -> "request timeout";
+            case 429 -> "too many requests";
+            default -> null;
+        };
         
         if (message != null)
             throw new IllegalStateException(message);

@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "Tidak ada perubahan skin",
     "skinrestorer.command.skin.failed": "Gagal mengubah skin: %s",
     "skinrestorer.command.skin.ok": "Skin diubah",
-    "skinrestorer.command.skin.loading": "Memuat skin..."
+    "skinrestorer.command.skin.loading": "Memuat skin...",
+    "skinrestorer.command.skin.config_reloaded": "Konfigurasi telah dimuat ulang"
 }

@@ -7,7 +7,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLPaths;
 
 @Mod(SkinRestorer.MOD_ID)
 @Mod.EventBusSubscriber(modid = SkinRestorer.MOD_ID)
@@ -16,7 +15,7 @@ public final class SkinRestorerForge {
     public SkinRestorerForge() {
         MinecraftForge.EVENT_BUS.register(SkinRestorerForge.class);
         
-        SkinRestorer.onInitialize(FMLPaths.CONFIGDIR.get());
+        SkinRestorer.onInitialize();
     }
     
     @SubscribeEvent

@@ -5,6 +5,7 @@ import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 public final class Config {
     
@@ -13,32 +14,45 @@ public final class Config {
     
     private String language = "en_us";
     
+    private boolean refreshSkinOnJoin = false;
+    
     private boolean fetchSkinOnFirstJoin = true;
     
     private FirstJoinSkinProvider firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
     
     private String proxy = "";
+    private transient Proxy parsedProxy = null;
     
     private long requestTimeout = 10;
     
-    public String getLanguage() {
+    private ProvidersConfig providers = ProvidersConfig.DEFAULT;
+    
+    public String language() {
         return this.language;
+    }
+    
+    public boolean refreshSkinOnJoin() {
+        return this.refreshSkinOnJoin;
     }
     
     public boolean fetchSkinOnFirstJoin() {
         return this.fetchSkinOnFirstJoin;
     }
     
-    public FirstJoinSkinProvider getFirstJoinSkinProvider() {
+    public FirstJoinSkinProvider firstJoinSkinProvider() {
         return this.firstJoinSkinProvider;
     }
     
-    public String getProxy() {
-        return this.proxy;
+    public Optional<Proxy> proxy() {
+        return Optional.ofNullable(this.parsedProxy);
     }
     
-    public long getRequestTimeout() {
+    public long requestTimeout() {
         return this.requestTimeout;
+    }
+    
+    public ProvidersConfig providersConfig() {
+        return this.providers;
     }
     
     public static Config load(Path path) {
@@ -62,16 +76,41 @@ public final class Config {
     }
     
     private void verifyAndFix() {
-        if (this.language == null || this.language.isEmpty())
+        if (this.language == null || this.language.isEmpty()) {
+            SkinRestorer.LOGGER.warn("Language config is null or empty, defaulting to 'en_us'");
             this.language = "en_us";
+        }
         
-        if (this.firstJoinSkinProvider == null)
+        if (this.firstJoinSkinProvider == null) {
+            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider config is null, defaulting to MOJANG");
             this.firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
+        }
         
-        if (this.proxy == null)
+        if (this.proxy == null) {
+            SkinRestorer.LOGGER.warn("Proxy config is null, defaulting to an empty string");
             this.proxy = "";
+        }
         
-        if (this.requestTimeout <= 0)
+        if (!this.proxy.isEmpty()) {
+            try {
+                this.parsedProxy = Proxy.parse(this.proxy);
+            } catch (Exception e) {
+                SkinRestorer.LOGGER.warn("Could not parse proxy config", e);
+                this.parsedProxy = null;
+            }
+        }
+        
+        if (this.requestTimeout <= 0) {
+            SkinRestorer.LOGGER.warn("Request timeout config is less than or equal to 0, defaulting to 10");
             this.requestTimeout = 10;
+        }
+        
+        if (this.providers == null) {
+            SkinRestorer.LOGGER.warn("Providers config is null, using default");
+            this.providers = ProvidersConfig.DEFAULT;
+        }
+        
+        if (!this.providers.isValid())
+            this.providers.fix();
     }
 }
