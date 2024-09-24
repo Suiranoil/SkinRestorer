@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.util;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.skin.SkinIO;
+import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
 import net.lionarius.skinrestorer.translation.Translation;
 
 import java.io.BufferedReader;
@@ -17,24 +18,28 @@ public final class FileUtils {
     
     private FileUtils() {}
     
-    public static void tryMigrateOldSkinDirectory(Path newDirectory) {
+    public static void tryMigrateOldSkinDirectory(Path oldDirectory, Path newDirectory) {
         try {
-            var configDirectory = SkinRestorer.getConfigDir();
-            try (var stream = Files.list(configDirectory)) {
+            try (var stream = Files.list(oldDirectory)) {
                 var files = stream.filter(file -> {
-                    var name = file.getFileName();
+                    var name = file.getFileName().toString();
                     return Files.isRegularFile(file)
                            && !name.startsWith(Translation.LEGACY_TRANSLATION_FILENAME)
                            && !name.startsWith(Config.CONFIG_FILENAME)
+                           && !name.startsWith(MojangSkinProvider.PROFILE_CACHE_FILENAME)
                            && name.endsWith(SkinIO.FILE_EXTENSION);
                 }).toList();
                 
                 if (!files.isEmpty() && !Files.exists(newDirectory))
                     Files.createDirectories(newDirectory);
                 
-                
-                for (var file : files)
-                    Files.move(file, newDirectory.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                for (var file : files) {
+                    var newFile = newDirectory.resolve(file.getFileName());
+                    if (!Files.exists(newFile))
+                        Files.move(file, newFile, StandardCopyOption.ATOMIC_MOVE);
+                    else
+                        Files.delete(file);
+                }
             }
         } catch (Exception e) {
             SkinRestorer.LOGGER.error("could not migrate skin directory", e);

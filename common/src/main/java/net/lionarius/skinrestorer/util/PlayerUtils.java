@@ -1,11 +1,12 @@
 package net.lionarius.skinrestorer.util;
 
-import com.google.gson.JsonArray;
+import com.google.common.collect.Iterables;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
-import net.lionarius.skinrestorer.mixin.TrackedEntityMixin;
+import net.lionarius.skinrestorer.mixin.TrackedEntityAccessorInvoker;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ChunkMap;
@@ -49,14 +50,14 @@ public final class PlayerUtils {
                 )
         ));
         
-        var trackedEntity = (TrackedEntityMixin) ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
+        var trackedEntity = (TrackedEntityAccessorInvoker) ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
         if (trackedEntity != null) {
             var seenBy = Set.copyOf(trackedEntity.getSeenBy());
             for (var observerConnection : seenBy) {
                 var observer = observerConnection.getPlayer();
                 trackedEntity.invokeRemovePlayer(observer);
                 
-                var trackedObserverEntity = (TrackedEntityMixin) ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
+                var trackedObserverEntity = (TrackedEntityAccessorInvoker) ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
                 if (trackedObserverEntity != null) {
                     trackedObserverEntity.invokeRemovePlayer(player);
                     trackedObserverEntity.invokeUpdatePlayer(player);
@@ -84,14 +85,14 @@ public final class PlayerUtils {
         }
     }
     
-    public static void sendActivePlayerEffects(ServerPlayer player) {
+    private static void sendActivePlayerEffects(ServerPlayer player) {
         for (var effect : player.getActiveEffects()) {
             player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effect));
         }
     }
     
     public static Property getPlayerSkin(GameProfile profile) {
-        return profile.getProperties().get(TEXTURES_KEY).stream().findFirst().orElse(null);
+        return Iterables.getFirst(profile.getProperties().get(TEXTURES_KEY), null);
     }
     
     public static void applyRestoredSkin(GameProfile profile, Property skin) {
@@ -100,7 +101,6 @@ public final class PlayerUtils {
         if (skin != null)
             profile.getProperties().put(TEXTURES_KEY, skin);
     }
-    
     
     public static boolean areSkinPropertiesEquals(Property x, Property y) {
         if (x == y)
@@ -121,24 +121,9 @@ public final class PlayerUtils {
         return xJson.equals(yJson);
     }
     
-    public static Property findTexturesProperty(JsonArray properties) {
-        Property textures = null;
-        for (var property : properties) {
-            var propertyObject = property.getAsJsonObject();
-            if (propertyObject == null)
-                continue;
-            
-            try {
-                textures = JsonUtils.fromJson(propertyObject, Property.class);
-                break;
-            } catch (Exception e) {
-                // ignored
-            }
-        }
-        
-        if (textures == null)
-            throw new IllegalStateException("no textures in profile");
-        
-        return textures;
+    public static GameProfile toProfile(MinecraftProfilePropertiesResponse response) {
+        final GameProfile profile = new GameProfile(response.id(), response.name());
+        profile.getProperties().putAll(response.properties());
+        return profile;
     }
 }
