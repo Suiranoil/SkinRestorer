@@ -9,11 +9,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.util.JsonUtils;
-import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.lionarius.skinrestorer.util.Result;
-import net.lionarius.skinrestorer.util.WebUtils;
-import net.minecraft.util.StringUtil;
+import net.lionarius.skinrestorer.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -67,7 +63,7 @@ public final class ElyBySkinProvider implements SkinProvider {
     @Override
     public Result<Optional<Property>, Exception> fetchSkin(String username, SkinVariant variant) {
         try {
-            if (!StringUtil.isValidPlayerName(username))
+            if (!StringUtils.isValidPlayerName(username))
                 throw new IllegalArgumentException("invalid username");
             
             var usernameLowerCase = username.toLowerCase(Locale.ROOT);
