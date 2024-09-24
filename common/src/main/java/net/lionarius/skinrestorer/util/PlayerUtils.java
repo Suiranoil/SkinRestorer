@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
 import net.lionarius.skinrestorer.mixin.TrackedEntityAccessorInvoker;
 import net.minecraft.network.chat.Component;
@@ -106,7 +107,6 @@ public final class PlayerUtils {
             profile.getProperties().put(TEXTURES_KEY, skin);
     }
     
-    
     public static boolean areSkinPropertiesEquals(Property x, Property y) {
         if (x == y)
             return true;
@@ -124,5 +124,11 @@ public final class PlayerUtils {
             return false;
         
         return xJson.equals(yJson);
+    }
+    
+    public static GameProfile toProfile(MinecraftProfilePropertiesResponse response) {
+        final GameProfile profile = new GameProfile(response.id(), response.name());
+        profile.getProperties().putAll(response.properties());
+        return profile;
     }
 }
