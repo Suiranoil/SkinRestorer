@@ -42,7 +42,7 @@ public final class SkinProviderRegistry {
     
     public void register(@NotNull String name, @NotNull SkinProvider provider, boolean isPublic) {
         if (this.registry.containsKey(name))
-            throw new IllegalArgumentException("Skin provider with name " + name + " is already registered");
+            return;
         
         this.registry.put(name, new Entry(provider, isPublic));
     }

@@ -19,6 +19,7 @@ public final class Translation {
     public static final String COMMAND_SKIN_FAILED_KEY = "skinrestorer.command.skin.failed";
     public static final String COMMAND_SKIN_OK_KEY = "skinrestorer.command.skin.ok";
     public static final String COMMAND_SKIN_LOADING_KEY = "skinrestorer.command.skin.loading";
+    public static final String COMMAND_SKIN_CONFIG_RELOADED_KEY = "skinrestorer.command.skin.config_reloaded";
     
     private static Map<String, String> translations;
     private static final Map<String, String> fallback;
@@ -46,11 +47,11 @@ public final class Translation {
     }
     
     public static void reloadTranslations() {
-        translations = Translation.loadTranslationMap(SkinRestorer.getConfig().getLanguage());
+        translations = Translation.loadTranslationMap(SkinRestorer.getConfig().language());
     }
     
     private static ImmutableMap<String, String> loadTranslationMap(String lang) {
-        var json = FileUtils.readResource(SkinRestorer.resource(String.format("lang/%s.json", lang)));
+        var json = FileUtils.readResource(SkinRestorer.assetPath(String.format("lang/%s.json", lang)));
         
         var type = new TypeToken<Map<String, String>>() {}.getType();
         Map<String, String> map = null;

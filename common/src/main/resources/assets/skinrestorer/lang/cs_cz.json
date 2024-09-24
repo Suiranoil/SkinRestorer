@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "Žádné změny skinu",
     "skinrestorer.command.skin.failed": "Nepodařilo se změnit skin: %s",
     "skinrestorer.command.skin.ok": "Skin změněn",
-    "skinrestorer.command.skin.loading": "Načítání skinu..."
+    "skinrestorer.command.skin.loading": "Načítání skinu...",
+    "skinrestorer.command.skin.config_reloaded": "Konfigurace byla znovu načtena"
 }

@@ -4,8 +4,6 @@ on:
         paths-ignore:
             - '.github/**'
             - '*.md'
-        tags-ignore:
-            - '*'
     pull_request:
         paths-ignore:
             - '.github/**'
