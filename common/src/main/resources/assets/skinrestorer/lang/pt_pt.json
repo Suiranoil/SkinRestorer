@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "Nenhuma alteração de skin",
     "skinrestorer.command.skin.failed": "Falha ao alterar a skin: %s",
     "skinrestorer.command.skin.ok": "Skin alterada",
-    "skinrestorer.command.skin.loading": "Carregando skin..."
+    "skinrestorer.command.skin.loading": "Carregando skin...",
+    "skinrestorer.command.skin.config_reloaded": "Configuração recarregada"
 }

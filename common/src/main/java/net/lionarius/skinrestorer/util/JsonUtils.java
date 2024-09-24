@@ -1,16 +1,28 @@
 package net.lionarius.skinrestorer.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.util.UUIDTypeAdapter;
 import net.lionarius.skinrestorer.SkinRestorer;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.UUID;
 
 public final class JsonUtils {
     
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
+            .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
+            .registerTypeAdapter(GameProfile.class, new GameProfile.Serializer())
+            .setPrettyPrinting()
+            .create();
     
     private JsonUtils() {}
     
@@ -31,7 +43,7 @@ public final class JsonUtils {
     }
     
     public static JsonObject parseJson(String json) {
-        return JsonParser.parseString(json).getAsJsonObject();
+        return GSON.fromJson(json, JsonObject.class);
     }
     
     public static JsonObject skinPropertyToJson(Property property) {

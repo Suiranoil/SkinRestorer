@@ -3,5 +3,6 @@
     "skinrestorer.command.skin.no_changes": "Изменений скина нет",
     "skinrestorer.command.skin.failed": "Не удалось изменить скин: %s",
     "skinrestorer.command.skin.ok": "Скин изменён",
-    "skinrestorer.command.skin.loading": "Загрузка скина..."
+    "skinrestorer.command.skin.loading": "Загрузка скина...",
+    "skinrestorer.command.skin.config_reloaded": "Конфигурация была перезагружена"
 }

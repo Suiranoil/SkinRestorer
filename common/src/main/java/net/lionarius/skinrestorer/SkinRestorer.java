@@ -1,7 +1,9 @@
 package net.lionarius.skinrestorer;
 
 import com.mojang.authlib.GameProfile;
+import net.lionarius.skinrestorer.config.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.config.Config;
+import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
 import net.lionarius.skinrestorer.skin.SkinValue;
@@ -10,6 +12,7 @@ import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
+import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -53,19 +56,28 @@ public final class SkinRestorer {
         return Optional.ofNullable(SkinRestorer.providersRegistry.get(name));
     }
     
-    public static void onInitialize(Path rootConfigDir) {
-        SkinRestorer.configDir = rootConfigDir.resolve(SkinRestorer.MOD_ID);
+    public static void onInitialize() {
+        SkinRestorer.configDir = Services.PLATFORM.getConfigDirectory().resolve(SkinRestorer.MOD_ID);
         SkinRestorer.reloadConfig();
         
         SkinRestorer.providersRegistry.register(EmptySkinProvider.PROVIDER_NAME, SkinProvider.EMPTY, false);
-        SkinRestorer.providersRegistry.register(MojangSkinProvider.PROVIDER_NAME, SkinProvider.MOJANG);
-        SkinRestorer.providersRegistry.register(ElyBySkinProvider.PROVIDER_NAME, SkinProvider.ELY_BY);
-        SkinRestorer.providersRegistry.register(MineskinSkinProvider.PROVIDER_NAME, SkinProvider.MINESKIN);
+        
+        SkinRestorer.registerDefaultSkinProvider(MojangSkinProvider.PROVIDER_NAME, SkinProvider.MOJANG, SkinRestorer.getConfig().providersConfig().mojang());
+        SkinRestorer.registerDefaultSkinProvider(ElyBySkinProvider.PROVIDER_NAME, SkinProvider.ELY_BY, SkinRestorer.getConfig().providersConfig().ely_by());
+        SkinRestorer.registerDefaultSkinProvider(MineskinSkinProvider.PROVIDER_NAME, SkinProvider.MINESKIN, SkinRestorer.getConfig().providersConfig().mineskin());
+    }
+    
+    private static void registerDefaultSkinProvider(String defaultName, SkinProvider provider, BuiltInProviderConfig config) {
+        var isDefaultName = config.name().equals(defaultName);
+        SkinRestorer.providersRegistry.register(defaultName, provider, config.enabled() && isDefaultName);
+        
+        if (!isDefaultName)
+            SkinRestorer.providersRegistry.register(config.name(), provider, config.enabled());
     }
     
     public static void onServerStarted(MinecraftServer server) {
         Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
-        FileUtils.tryMigrateOldSkinDirectory(worldSkinDirectory);
+        FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
         
         SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
     }
@@ -73,9 +85,14 @@ public final class SkinRestorer {
     public static void reloadConfig() {
         SkinRestorer.config = Config.load(SkinRestorer.getConfigDir());
         Translation.reloadTranslations();
+        WebUtils.recreateHttpClient();
+        
+        MojangSkinProvider.createCache();
+        ElyBySkinProvider.createCache();
+        MineskinSkinProvider.createCache();
     }
     
-    public static String resource(String name) {
+    public static String assetPath(String name) {
         return String.format("/assets/%s/%s", SkinRestorer.MOD_ID, name);
     }
     
@@ -116,7 +133,7 @@ public final class SkinRestorer {
             boolean save
     ) {
         return CompletableFuture.supplyAsync(
-                        () -> SkinRestorer.getProvider(context.name()).map(provider -> provider.getSkin(context.argument(), context.variant()))
+                        () -> SkinRestorer.getProvider(context.name()).map(provider -> provider.fetchSkin(context.argument(), context.variant()))
                 )
                 .thenApplyAsync(result -> {
                     if (result.isEmpty())

@@ -3,8 +3,8 @@ plugins {
 }
 
 base {
-    archivesName = "${mod_id}-${project.name}"
-    version = "${mod_version}+${minecraft_version}"
+    archivesName = "${mod_id}"
+    version = "${mod_version}+${minecraft_version}-${project.name}"
 }
 
 java {
