@@ -32,20 +32,22 @@ public abstract class ServerLoginPacketListenerImplMixin {
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
             skinrestorer$pendingSkin = CompletableFuture.supplyAsync(() -> {
-                assert authenticatedProfile != null;
-                var originalSkin = PlayerUtils.getPlayerSkin(authenticatedProfile);
+                final var profile = authenticatedProfile;
                 
-                if (SkinRestorer.getSkinStorage().hasSavedSkin(authenticatedProfile.getId())) {
+                assert profile != null;
+                var originalSkin = PlayerUtils.getPlayerSkin(profile);
+                
+                if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
                     if (originalSkin != null) { // update to the latest official skin
-                        var value = SkinRestorer.getSkinStorage().getSkin(authenticatedProfile.getId());
-                        SkinRestorer.getSkinStorage().setSkin(authenticatedProfile.getId(), value.setOriginalValue(originalSkin));
+                        var value = SkinRestorer.getSkinStorage().getSkin(profile.getId());
+                        SkinRestorer.getSkinStorage().setSkin(profile.getId(), value.setOriginalValue(originalSkin));
                     }
                     
                     if (SkinRestorer.getConfig().refreshSkinOnJoin()) {
-                        var currentSkin = SkinRestorer.getSkinStorage().getSkin(authenticatedProfile.getId());
+                        var currentSkin = SkinRestorer.getSkinStorage().getSkin(profile.getId());
                         var context = currentSkin.toProviderContext();
                         
-                        skinrestorer$fetchSkin(authenticatedProfile, context);
+                        skinrestorer$fetchSkin(profile, context);
                     }
                     
                     return null;
@@ -54,10 +56,10 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 if (originalSkin == null && SkinRestorer.getConfig().fetchSkinOnFirstJoin()) {
                     var context = new SkinProviderContext(
                             SkinRestorer.getConfig().firstJoinSkinProvider().getName(),
-                            authenticatedProfile.getName(),
+                            profile.getName(),
                             null
                     );
-                    skinrestorer$fetchSkin(authenticatedProfile, context);
+                    skinrestorer$fetchSkin(profile, context);
                 }
                 
                 return null;
