@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
-import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.*;
@@ -42,13 +41,13 @@ public final class MojangSkinProvider implements SkinProvider {
             throw new IllegalArgumentException(e);
         }
         
-        PROFILE_CACHE = new GameProfileCache((names, callback) -> {
+        PROFILE_CACHE = new GameProfileCache((names, agent, callback) -> {
             for (var name : names) {
                 try {
                     var profile = MojangSkinProvider.getProfile(name);
                     callback.onProfileLookupSucceeded(profile);
                 } catch (IOException e) {
-                    callback.onProfileLookupFailed(name, e);
+                    callback.onProfileLookupFailed(new GameProfile(null, name), e);
                 }
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
@@ -131,7 +130,7 @@ public final class MojangSkinProvider implements SkinProvider {
         var request = HttpRequest.newBuilder()
                 .uri(MojangSkinProvider.SESSION_SERVER_URI
                         .resolve("/session/minecraft/profile/")
-                        .resolve(UndashedUuid.toString(uuid) + "?unsigned=false")
+                        .resolve(uuid.toString() + "?unsigned=false")
                 )
                 .GET()
                 .build();
@@ -142,6 +141,6 @@ public final class MojangSkinProvider implements SkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with uuid " + uuid);
         
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
+        return PlayerUtils.toProfile(JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class));
     }
 }

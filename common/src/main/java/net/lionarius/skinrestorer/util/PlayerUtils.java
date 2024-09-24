@@ -136,8 +136,8 @@ public final class PlayerUtils {
     }
     
     public static GameProfile toProfile(MinecraftProfilePropertiesResponse response) {
-        final GameProfile profile = new GameProfile(response.id(), response.name());
-        profile.getProperties().putAll(response.properties());
+        final GameProfile profile = new GameProfile(response.getId(), response.getName());
+        profile.getProperties().putAll(response.getProperties());
         return profile;
     }
 }
