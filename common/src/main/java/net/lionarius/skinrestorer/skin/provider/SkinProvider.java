@@ -12,6 +12,8 @@ public interface SkinProvider {
     ElyBySkinProvider ELY_BY = new ElyBySkinProvider();
     MineskinSkinProvider MINESKIN = new MineskinSkinProvider();
     
+    String[] BUILTIN_PROVIDER_NAMES = new String[]{EmptySkinProvider.PROVIDER_NAME, MojangSkinProvider.PROVIDER_NAME, ElyBySkinProvider.PROVIDER_NAME, MineskinSkinProvider.PROVIDER_NAME};
+    
     String getArgumentName();
     
     boolean hasVariantSupport();

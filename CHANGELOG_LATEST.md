@@ -1,4 +1,9 @@
 ### Added
-- Added `firstJoinSkinProvider` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Config#firstjoinskinprovider))
+- Added `config reload` command for dynamic configuration updates
+- Added `refreshSkinOnJoin` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#refreshskinonjoin))
+- Implemented caching for skin providers
+- Added provider configurations (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providers))
+- Added username and url validation for requests
 ### Fixed
-- Fixed ability to set config values to `null`
+- Fixed old skin directory migration not working
+- Prevented overwriting existing skin files during migration
