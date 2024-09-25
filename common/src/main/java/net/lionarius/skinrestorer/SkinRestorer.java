@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public final class SkinRestorer {
         var isDefaultName = config.name().equals(defaultName);
         SkinRestorer.providersRegistry.register(defaultName, provider, config.enabled() && isDefaultName);
         
-        if (!isDefaultName)
+        if (!isDefaultName && Arrays.stream(SkinProvider.BUILTIN_PROVIDER_NAMES).noneMatch(name -> name.equals(config.name())))
             SkinRestorer.providersRegistry.register(config.name(), provider, config.enabled());
     }
     
