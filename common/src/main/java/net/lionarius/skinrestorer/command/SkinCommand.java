@@ -49,7 +49,8 @@ public final class SkinCommand {
         var providers = SkinRestorer.getProvidersRegistry().getPublicProviders();
         for (var entry : providers)
             set.then(buildSetSubcommand(entry.first(), entry.second()));
-        base.then(set);
+        if (!providers.isEmpty())
+            base.then(set);
         
         base.then(
                 literal("config")
