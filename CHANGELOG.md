@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2024-09-26
+### Added
+- Added `config reload` command for dynamic configuration updates
+- Added `refreshSkinOnJoin` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#refreshskinonjoin))
+- Implemented caching for skin providers
+- Added provider configurations (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providers))
+- Added username and url validation for requests
+### Fixed
+- Fixed old skin directory migration not working
+- Prevented overwriting existing skin files during migration
+
 ## [2.0.3] - 2024-08-20
 ### Added
 - Added `firstJoinSkinProvider` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Config#firstjoinskinprovider))

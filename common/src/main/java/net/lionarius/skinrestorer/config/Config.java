@@ -14,7 +14,7 @@ public final class Config {
     
     private String language = "en_us";
     
-    private boolean refreshSkinOnJoin = false;
+    private boolean refreshSkinOnJoin = true;
     
     private boolean fetchSkinOnFirstJoin = true;
     
