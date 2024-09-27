@@ -25,10 +25,12 @@ For a detailed list of available commands and their usage, please visit the [com
 
 ## 🪙 Donation
 
-If you enjoy using **SkinRestorer** and would like to support its development, you can contribute through cryptocurrency donations.
+If you enjoy using **SkinRestorer** and would like to support its development, you can contribute through the following platforms:
 
-Bitcoin (BTC): `1Ndbwny8pxdnWXFgadp95fp97y5JqMJKTX`\
-USDT (TRC20): `TGXn8wrqku5KLzwPWQAeH7wgnV4UzwHEae`\
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/lionarius)
+
+Bitcoin (BTC): `1Ndbwny8pxdnWXFgadp95fp97y5JqMJKTX`  
+USDT (TRC20): `TGXn8wrqku5KLzwPWQAeH7wgnV4UzwHEae`  
 USDT (TON): `UQAQF18Xlmx-V1oZ90C2YOju5qI7q1LgrCP5QaIUhqIELmDS`
 
 Thank you for your generosity!
