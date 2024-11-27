@@ -22,6 +22,9 @@ publishMods {
 
         minecraftVersions.addAll(minecraft_version_list.split(','))
         serverRequired = true
+
+        if (project.name == 'fabric')
+            optional(fabric_optional_dependencies.split(','))
     }
 
     modrinth {
@@ -31,5 +34,8 @@ publishMods {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
 
         minecraftVersions.addAll(minecraft_version_list.split(','))
+
+        if (project.name == 'fabric')
+            optional(fabric_optional_dependencies.split(','))
     }
 }
