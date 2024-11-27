@@ -4,6 +4,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.SkinShuffleSkinProvider;
+import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,10 +37,16 @@ public class SkinShuffleCompatibility {
         if (!property.hasSignature())
             return;
         
-        server.execute(() -> SkinRestorer.applySkin(
-                server,
-                Collections.singleton(player.getGameProfile()),
-                new SkinValue(SkinShuffleSkinProvider.PROVIDER_NAME, null, null, property)
-        ));
+        server.execute(() -> {
+            SkinRestorer.applySkin(
+                    server,
+                    Collections.singleton(player.getGameProfile()),
+                    new SkinValue(SkinShuffleSkinProvider.PROVIDER_NAME, null, null, property),
+                    !server.usesAuthentication()
+            );
+            
+            if (server.usesAuthentication() && SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID()))
+                SkinRestorer.getSkinStorage().deleteSkin(player.getUUID());
+        });
     }
 }
