@@ -1,8 +1,8 @@
 package net.lionarius.skinrestorer.forge.compat.skinshuffle;
 
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.compat.skinshuffle.*;
 import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
+import net.lionarius.skinrestorer.compat.skinshuffle.*;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraftforge.event.network.CustomPayloadEvent;

@@ -2,7 +2,7 @@ plugins {
     id 'multiloader-loader'
     id 'idea'
     id 'eclipse'
-    
+
     id 'net.minecraftforge.gradle'
     id 'org.parchmentmc.librarian.forgegradle'
     id 'org.spongepowered.mixin'

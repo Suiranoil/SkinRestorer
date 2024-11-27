@@ -6,7 +6,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jetbrains.annotations.NotNull;
 
-public record SkinShuffleSkinRefreshV1Payload(Property textureProperty) implements CustomPacketPayload, SkinShuffleSkinRefreshPayload {
+public record SkinShuffleSkinRefreshV1Payload(
+        Property textureProperty) implements CustomPacketPayload, SkinShuffleSkinRefreshPayload {
     
     public static final CustomPacketPayload.Type<SkinShuffleSkinRefreshV1Payload> PACKET_ID = new CustomPacketPayload.Type<>(SkinShuffleCompatibility.resourceLocation("refresh"));
     public static final StreamCodec<FriendlyByteBuf, SkinShuffleSkinRefreshV1Payload> PACKET_CODEC = StreamCodec.of(

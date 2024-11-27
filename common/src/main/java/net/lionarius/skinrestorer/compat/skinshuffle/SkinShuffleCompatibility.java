@@ -36,6 +36,10 @@ public class SkinShuffleCompatibility {
         if (!property.hasSignature())
             return;
         
-        server.execute(() -> SkinRestorer.applySkin(server, Collections.singleton(player.getGameProfile()), new SkinValue(SkinShuffleSkinProvider.PROVIDER_NAME, null, null, property)));
+        server.execute(() -> SkinRestorer.applySkin(
+                server,
+                Collections.singleton(player.getGameProfile()),
+                new SkinValue(SkinShuffleSkinProvider.PROVIDER_NAME, null, null, property)
+        ));
     }
 }

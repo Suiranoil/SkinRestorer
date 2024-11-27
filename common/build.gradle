@@ -1,6 +1,6 @@
 plugins {
     id 'multiloader-common'
-    
+
     id 'fabric-loom'
 }
 
@@ -18,7 +18,7 @@ loom {
     if (aw.exists()) {
         accessWidenerPath.set(aw)
     }
-    
+
     mixin {
         useLegacyMixinAp = false
     }
