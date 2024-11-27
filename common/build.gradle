@@ -11,6 +11,8 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
     }
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
+
+    implementation("org.mineskin:java-client:${mineskin_client_version}")
 }
 
 loom {

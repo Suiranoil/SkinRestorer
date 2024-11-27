@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public final class JsonUtils {
     
-    private static final Gson GSON = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
             .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
             .registerTypeAdapter(GameProfile.class, new GameProfile.Serializer())

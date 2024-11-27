@@ -6,7 +6,7 @@ publishMods {
     if (project.name == 'fabric')
         file = remapJar.archiveFile
     else
-        file = jar.archiveFile
+        file = tasks.named('jarJar').get().archiveFile
 
     modLoaders.add(project.name)
     type = STABLE

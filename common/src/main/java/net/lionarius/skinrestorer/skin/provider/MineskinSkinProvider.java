@@ -4,21 +4,26 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.google.gson.JsonObject;
 import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.mineskin.Java11RequestHandler;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
 import org.jetbrains.annotations.NotNull;
+import org.mineskin.MineSkinClient;
+import org.mineskin.data.Variant;
+import org.mineskin.data.Visibility;
+import org.mineskin.request.GenerateRequest;
+import org.mineskin.response.QueueResponse;
 
-import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpRequest;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +32,7 @@ public final class MineskinSkinProvider implements SkinProvider {
     public static final String PROVIDER_NAME = "web";
     
     private static final URI API_URI;
+    private static MineSkinClient MINESKIN_CLIENT;
     
     private static LoadingCache<Pair<URI, SkinVariant>, Optional<Property>> SKIN_CACHE;
     
@@ -39,6 +45,20 @@ public final class MineskinSkinProvider implements SkinProvider {
     }
     
     public static void reload() {
+        MINESKIN_CLIENT = MineSkinClient
+                .builder()
+                .userAgent(WebUtils.USER_AGENT)
+                .gson(JsonUtils.GSON)
+                .timeout((int) Duration.ofSeconds(SkinRestorer.getConfig().requestTimeout()).toMillis())
+                .requestHandler((userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
+                        userAgent,
+                        apiKey,
+                        timeout,
+                        gson,
+                        SkinRestorer.getConfig().proxy().map(proxy -> new InetSocketAddress(proxy.host(), proxy.port())).orElse(null)
+                ))
+                .build();
+        
         createCache();
     }
     
@@ -80,29 +100,26 @@ public final class MineskinSkinProvider implements SkinProvider {
     }
     
     private static Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
-        var result = MineskinSkinProvider.uploadToMineskin(uri, variant);
-        var texture = result.getAsJsonObject("data").getAsJsonObject("texture");
-        var textures = new Property(PlayerUtils.TEXTURES_KEY, texture.get("value").getAsString(), texture.get("signature").getAsString());
+        var mineskinVariant = switch (variant) {
+            case CLASSIC -> Variant.CLASSIC;
+            case SLIM -> Variant.SLIM;
+        };
         
-        return Optional.of(textures);
-    }
-    
-    private static JsonObject uploadToMineskin(URI url, SkinVariant variant) throws IOException {
-        var body = ("{\"variant\":\"%s\",\"name\":\"%s\",\"visibility\":%d,\"url\":\"%s\"}")
-                .formatted(variant.toString(), "none", 0, url);
+        var request = GenerateRequest.url(uri)
+                .variant(mineskinVariant)
+                .name("skinrestorer-skin")
+                .visibility(Visibility.UNLISTED);
         
-        var request = HttpRequest.newBuilder()
-                .uri(MineskinSkinProvider.API_URI.resolve("/generate/url"))
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .header("Content-Type", "application/json")
-                .build();
+        var skin = MINESKIN_CLIENT.queue().submit(request)
+                .thenApply(QueueResponse::getJob)
+                .thenCompose(jobInfo -> jobInfo.waitForCompletion(MINESKIN_CLIENT))
+                .thenCompose(jobReference -> jobReference.getOrLoadSkin(MINESKIN_CLIENT))
+                .join();
         
-        var response = WebUtils.executeRequest(request);
-        WebUtils.throwOnClientErrors(response);
-        
-        if (response.statusCode() != 200)
-            throw new IllegalArgumentException("could not get mineskin skin");
-        
-        return JsonUtils.parseJson(response.body());
+        return Optional.of(new Property(
+                PlayerUtils.TEXTURES_KEY,
+                skin.texture().data().value(),
+                skin.texture().data().signature()
+        ));
     }
 }

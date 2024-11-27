@@ -9,5 +9,21 @@ plugins {
 
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT' apply false
 
-    id 'me.modmuss50.mod-publish-plugin' version '0.6.3' apply false
+    id 'me.modmuss50.mod-publish-plugin' version '0.8.1' apply false
+}
+
+allprojects {
+    repositories {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'MineSkin'
+                    url = 'https://repo.inventivetalent.org/repository/public'
+                }
+            }
+            filter {
+                includeGroupAndSubgroups('org.mineskin')
+            }
+        }
+    }
 }
