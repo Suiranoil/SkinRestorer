@@ -93,9 +93,9 @@ public final class SkinRestorer {
         Translation.reloadTranslations();
         WebUtils.recreateHttpClient();
         
-        MojangSkinProvider.createCache();
-        ElyBySkinProvider.createCache();
-        MineskinSkinProvider.createCache();
+        MojangSkinProvider.reload();
+        ElyBySkinProvider.reload();
+        MineskinSkinProvider.reload();
     }
     
     public static String assetPath(String name) {

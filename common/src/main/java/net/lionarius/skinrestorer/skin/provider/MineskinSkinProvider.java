@@ -38,7 +38,11 @@ public final class MineskinSkinProvider implements SkinProvider {
         }
     }
     
-    public static void createCache() {
+    public static void reload() {
+        createCache();
+    }
+    
+    private static void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().mineskin();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
