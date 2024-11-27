@@ -42,7 +42,7 @@ public final class FileUtils {
                 }
             }
         } catch (Exception e) {
-            SkinRestorer.LOGGER.error("could not migrate skin directory", e);
+            SkinRestorer.LOGGER.error("Could not migrate skin directory", e);
         }
     }
     
@@ -55,7 +55,7 @@ public final class FileUtils {
                 return StringUtils.readString(reader);
             }
         } catch (IOException e) {
-            SkinRestorer.LOGGER.error("failed to read resource", e);
+            SkinRestorer.LOGGER.error("Failed to read resource", e);
             return null;
         }
     }
@@ -67,7 +67,7 @@ public final class FileUtils {
             
             return Files.readString(file);
         } catch (Exception e) {
-            SkinRestorer.LOGGER.error("failed to read file", e);
+            SkinRestorer.LOGGER.error("Failed to read file", e);
             return null;
         }
     }
@@ -83,7 +83,7 @@ public final class FileUtils {
             
             Files.writeString(file, content);
         } catch (IOException e) {
-            SkinRestorer.LOGGER.error("failed to write file", e);
+            SkinRestorer.LOGGER.error("Failed to write file", e);
         }
     }
     
@@ -92,7 +92,7 @@ public final class FileUtils {
             if (Files.exists(file))
                 Files.delete(file);
         } catch (IOException e) {
-            SkinRestorer.LOGGER.error("failed to delete file", e);
+            SkinRestorer.LOGGER.error("Failed to delete file", e);
         }
     }
 }

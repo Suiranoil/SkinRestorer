@@ -54,7 +54,7 @@ public final class JsonUtils {
             
             return json;
         } catch (Exception e) {
-            SkinRestorer.LOGGER.error(e.toString());
+            SkinRestorer.LOGGER.error("Could not parse skin property", e);
             return null;
         }
     }
