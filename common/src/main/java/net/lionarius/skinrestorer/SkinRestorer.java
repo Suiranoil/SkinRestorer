@@ -109,11 +109,11 @@ public final class SkinRestorer {
             if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId()))
                 value = value.setOriginalValue(PlayerUtils.getPlayerSkin(profile));
             
-            if (save)
-                SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
-            
             if (PlayerUtils.areSkinPropertiesEquals(value.value(), PlayerUtils.getPlayerSkin(profile)))
                 continue;
+            
+            if (save)
+                SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
             
             PlayerUtils.applyRestoredSkin(profile, value.value());
             
