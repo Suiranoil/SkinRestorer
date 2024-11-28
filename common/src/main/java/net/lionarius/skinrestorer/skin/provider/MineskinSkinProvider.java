@@ -45,11 +45,14 @@ public final class MineskinSkinProvider implements SkinProvider {
     }
     
     public static void reload() {
+        var config = SkinRestorer.getConfig();
+        var configApiKey = config.providersConfig().mineskin().apiKey();
+        
         MINESKIN_CLIENT = MineSkinClient
                 .builder()
                 .userAgent(WebUtils.USER_AGENT)
                 .gson(JsonUtils.GSON)
-                .timeout((int) Duration.ofSeconds(SkinRestorer.getConfig().requestTimeout()).toMillis())
+                .timeout((int) Duration.ofSeconds(config.requestTimeout()).toMillis())
                 .requestHandler((userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
                         userAgent,
                         apiKey,
@@ -57,6 +60,7 @@ public final class MineskinSkinProvider implements SkinProvider {
                         gson,
                         SkinRestorer.getConfig().proxy().map(proxy -> new InetSocketAddress(proxy.host(), proxy.port())).orElse(null)
                 ))
+                .apiKey(configApiKey.isEmpty() ? null : configApiKey)
                 .build();
         
         createCache();

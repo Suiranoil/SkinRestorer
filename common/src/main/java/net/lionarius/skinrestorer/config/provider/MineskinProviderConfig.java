@@ -10,6 +10,7 @@ public class MineskinProviderConfig implements BuiltInProviderConfig, GsonPostPr
     private boolean enabled;
     private String name;
     private CacheConfig cache;
+    private String apiKey;
     
     public MineskinProviderConfig() {
         this.enabled = true;
@@ -29,6 +30,10 @@ public class MineskinProviderConfig implements BuiltInProviderConfig, GsonPostPr
         return cache;
     }
     
+    public String apiKey() {
+        return apiKey;
+    }
+    
     @Override
     public void gsonPostProcess() {
         if (this.name == null || this.name.isEmpty()) {
@@ -41,6 +46,11 @@ public class MineskinProviderConfig implements BuiltInProviderConfig, GsonPostPr
             this.cache = DEFAULT_CACHE_VALUE;
         } else {
             this.cache.validate(DEFAULT_CACHE_VALUE);
+        }
+        
+        if (this.apiKey == null) {
+            SkinRestorer.LOGGER.warn("Mineskin API key is null, defaulting to an empty string");
+            this.apiKey = "";
         }
     }
 }
