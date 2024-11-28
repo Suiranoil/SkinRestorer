@@ -26,9 +26,9 @@ public final class ProvidersConfig {
         if (this == ProvidersConfig.DEFAULT)
             return true;
         
-        return this.mojang == null || !this.mojang.isValid()
-               || this.ely_by == null || !this.ely_by.isValid()
-               || this.mineskin == null || !this.mineskin.isValid();
+        return (this.mojang != null && this.mojang.isValid())
+               && (this.ely_by != null && this.ely_by.isValid())
+               && (this.mineskin != null && this.mineskin.isValid());
     }
     
     public void fix() {
