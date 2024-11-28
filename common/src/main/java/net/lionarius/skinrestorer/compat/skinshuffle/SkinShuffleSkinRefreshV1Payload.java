@@ -15,15 +15,15 @@ public record SkinShuffleSkinRefreshV1Payload(
             SkinShuffleSkinRefreshV1Payload::decode
     );
     
-    private static void encode(FriendlyByteBuf buf, SkinShuffleSkinRefreshV1Payload value) {
+    public static void encode(FriendlyByteBuf buf, SkinShuffleSkinRefreshV1Payload value) {
         var textureProperty = value.textureProperty();
         
         buf.writeUtf(textureProperty.name());
         buf.writeUtf(textureProperty.value());
         buf.writeNullable(textureProperty.signature(), FriendlyByteBuf::writeUtf);
     }
-    
-    private static SkinShuffleSkinRefreshV1Payload decode(FriendlyByteBuf buf) {
+
+    public static SkinShuffleSkinRefreshV1Payload decode(FriendlyByteBuf buf) {
         return new SkinShuffleSkinRefreshV1Payload(new Property(buf.readUtf(), buf.readUtf(), buf.readNullable(FriendlyByteBuf::readUtf)));
     }
     
