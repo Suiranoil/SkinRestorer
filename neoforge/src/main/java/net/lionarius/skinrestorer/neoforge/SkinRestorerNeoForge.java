@@ -1,7 +1,6 @@
 package net.lionarius.skinrestorer.neoforge;
 
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -22,11 +21,11 @@ public final class SkinRestorerNeoForge {
     
     @SubscribeEvent
     public static void onCommandRegister(RegisterCommandsEvent event) {
-        SkinCommand.register(event.getDispatcher());
+        SkinRestorer.Events.onCommandRegister(event.getDispatcher());
     }
     
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        SkinRestorer.onServerStarted(event.getServer());
+        SkinRestorer.Events.onServerStarted(event.getServer());
     }
 }

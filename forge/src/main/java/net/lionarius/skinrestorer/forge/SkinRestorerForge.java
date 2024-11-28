@@ -1,7 +1,6 @@
 package net.lionarius.skinrestorer.forge;
 
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -21,11 +20,11 @@ public final class SkinRestorerForge {
     
     @SubscribeEvent
     public static void onCommandRegister(RegisterCommandsEvent event) {
-        SkinCommand.register(event.getDispatcher());
+        SkinRestorer.Events.onCommandRegister(event.getDispatcher());
     }
     
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
-        SkinRestorer.onServerStarted(event.getServer());
+        SkinRestorer.Events.onServerStarted(event.getServer());
     }
 }

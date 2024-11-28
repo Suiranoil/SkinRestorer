@@ -1,6 +1,8 @@
 package net.lionarius.skinrestorer;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.CommandDispatcher;
+import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.platform.Services;
@@ -13,6 +15,7 @@ import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,6 +64,10 @@ public final class SkinRestorer {
         return ResourceLocation.fromNamespaceAndPath(SkinRestorer.MOD_ID, name);
     }
     
+    public static String assetPath(String name) {
+        return String.format("/assets/%s/%s", SkinRestorer.MOD_ID, name);
+    }
+    
     public static void onInitialize() {
         SkinRestorer.configDir = Services.PLATFORM.getConfigDirectory().resolve(SkinRestorer.MOD_ID);
         SkinRestorer.reloadConfig();
@@ -81,13 +88,6 @@ public final class SkinRestorer {
             SkinRestorer.providersRegistry.register(config.name(), provider, config.enabled());
     }
     
-    public static void onServerStarted(MinecraftServer server) {
-        Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
-        FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
-        
-        SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
-    }
-    
     public static void reloadConfig() {
         SkinRestorer.config = Config.load(SkinRestorer.getConfigDir());
         Translation.reloadTranslations();
@@ -96,10 +96,6 @@ public final class SkinRestorer {
         MojangSkinProvider.reload();
         ElyBySkinProvider.reload();
         MineskinSkinProvider.reload();
-    }
-    
-    public static String assetPath(String name) {
-        return String.format("/assets/%s/%s", SkinRestorer.MOD_ID, name);
     }
     
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<GameProfile> targets, SkinValue value, boolean save) {
@@ -159,5 +155,24 @@ public final class SkinRestorer {
                     SkinRestorer.LOGGER.error(e.toString());
                     return Result.error(e.getMessage());
                 });
+    }
+    
+    public static class Events {
+        private Events() {}
+        
+        public static void onServerStarted(MinecraftServer server) {
+            Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
+            FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
+            
+            SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
+        }
+        
+        public static void onCommandRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
+            SkinCommand.register(dispatcher);
+        }
+        
+        public static void onPlayerDisconnect(ServerPlayer player) {
+            SkinRestorer.getSkinStorage().removeSkin(player.getUUID());
+        }
     }
 }
