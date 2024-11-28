@@ -9,6 +9,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.util.UUIDTypeAdapter;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.util.gson.PostProcessingEnabler;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public final class JsonUtils {
     
     public static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapterFactory(new PostProcessingEnabler())
             .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
             .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
             .registerTypeAdapter(GameProfile.class, new GameProfile.Serializer())
