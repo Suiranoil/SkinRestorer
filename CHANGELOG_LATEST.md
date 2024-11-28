@@ -1,9 +1,8 @@
 ### Added
-- Added `config reload` command for dynamic configuration updates
-- Added `refreshSkinOnJoin` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#refreshskinonjoin))
-- Implemented caching for skin providers
-- Added provider configurations (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providers))
-- Added username and url validation for requests
+- Added support for [SkinShuffle](https://modrinth.com/mod/skinshuffle) clients (requires FabricAPI on Fabric)
+  (closes [#34](https://github.com/Suiranoil/SkinRestorer/issues/34))
+- Added `providers.mineskin.apiKey` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration##providersmineskin))
+### Changed
+- Migrated to MineSkin's new API V2
 ### Fixed
-- Fixed old skin directory migration not working
-- Prevented overwriting existing skin files during migration
+- Fixed `providers` config validation
