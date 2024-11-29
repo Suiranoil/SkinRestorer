@@ -24,7 +24,7 @@ public class SkinShuffleCompatibility {
     }
     
     public static ResourceLocation resourceLocation(String name) {
-        return ResourceLocation.fromNamespaceAndPath(SkinShuffleCompatibility.MOD_ID, name);
+        return new ResourceLocation(SkinShuffleCompatibility.MOD_ID, name);
     }
     
     public static void onPlayerJoin(ServerPlayer player) {

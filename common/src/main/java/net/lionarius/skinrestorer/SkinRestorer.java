@@ -61,7 +61,7 @@ public final class SkinRestorer {
     }
     
     public static ResourceLocation resourceLocation(String name) {
-        return ResourceLocation.fromNamespaceAndPath(SkinRestorer.MOD_ID, name);
+        return new ResourceLocation(SkinRestorer.MOD_ID, name);
     }
     
     public static String assetPath(String name) {

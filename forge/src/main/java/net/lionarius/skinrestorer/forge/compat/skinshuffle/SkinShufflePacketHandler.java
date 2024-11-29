@@ -1,39 +1,53 @@
 package net.lionarius.skinrestorer.forge.compat.skinshuffle;
 
-import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
+import io.netty.buffer.Unpooled;
 import net.lionarius.skinrestorer.compat.skinshuffle.*;
+import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.event.network.CustomPayloadEvent;
-import net.minecraftforge.network.Channel;
 import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.EventNetworkChannel;
 
 public class SkinShufflePacketHandler {
     private SkinShufflePacketHandler() {
     }
-    
-    private static final Channel<CustomPacketPayload> INSTANCE = ChannelBuilder
-            .named(SkinRestorer.resourceLocation("skin_shuffle_compat"))
+
+    private static final EventNetworkChannel HANDSHAKE_INSTANCE = ChannelBuilder
+            .named(SkinShuffleHandshakePayload.PACKET_ID.id())
             .optional()
-            .payloadChannel()
-            .any()
-            .clientbound()
-            .add(SkinShuffleHandshakePayload.PACKET_ID, SkinShuffleHandshakePayload.PACKET_CODEC, (payload, context) -> {
-            })
-            .serverbound()
-            .add(SkinShuffleSkinRefreshV1Payload.PACKET_ID, SkinShuffleSkinRefreshV1Payload.PACKET_CODEC, SkinShufflePacketHandler::handleSkinRefreshPacket)
-            .add(SkinShuffleSkinRefreshV2Payload.PACKET_ID, SkinShuffleSkinRefreshV2Payload.PACKET_CODEC, SkinShufflePacketHandler::handleSkinRefreshPacket)
-            .build();
+            .eventNetworkChannel();
     
+    private static final EventNetworkChannel SKIN_REFRESH_V1_INSTANCE = ChannelBuilder
+            .named(SkinShuffleSkinRefreshV1Payload.PACKET_ID.id())
+            .optional()
+            .eventNetworkChannel()
+            .addListener(SkinShufflePacketHandler::skinRefreshV1Listener);
+    
+    private static final EventNetworkChannel SKIN_REFRESH_V2_INSTANCE = ChannelBuilder
+            .named(SkinShuffleSkinRefreshV2Payload.PACKET_ID.id())
+            .optional()
+            .eventNetworkChannel()
+            .addListener(SkinShufflePacketHandler::skinRefreshV2Listener);
+
     protected static void initialize() {
         // NO-OP
     }
-    
+
     public static void sendHandshake(Connection connection) {
-        INSTANCE.send(SkinShuffleHandshakePayload.INSTANCE, connection);
+        HANDSHAKE_INSTANCE.send(new FriendlyByteBuf(Unpooled.buffer(0, 0)), connection);
     }
     
+    private static void skinRefreshV1Listener(CustomPayloadEvent event) {
+        var payload = SkinShuffleSkinRefreshV1Payload.PACKET_CODEC.decode(event.getPayload());
+        handleSkinRefreshPacket(payload, event.getSource());
+    }
+
+    private static void skinRefreshV2Listener(CustomPayloadEvent event) {
+        var payload = SkinShuffleSkinRefreshV2Payload.PACKET_CODEC.decode(event.getPayload());
+        handleSkinRefreshPacket(payload, event.getSource());
+    }
+
     private static void handleSkinRefreshPacket(SkinShuffleSkinRefreshPayload payload, CustomPayloadEvent.Context context) {
         var sender = context.getSender();
         
