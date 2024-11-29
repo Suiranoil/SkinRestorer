@@ -27,13 +27,13 @@ public abstract class PlayerListMixin {
     
     @Inject(method = "remove", at = @At("TAIL"))
     private void remove(ServerPlayer player, CallbackInfo ci) {
-        SkinRestorer.getSkinStorage().removeSkin(player.getUUID());
+        SkinRestorer.Events.onPlayerDisconnect(player);
     }
     
     @Inject(method = "removeAll", at = @At("HEAD"))
     private void removeAll(CallbackInfo ci) {
-        for (ServerPlayer player : getPlayers()) {
-            SkinRestorer.getSkinStorage().removeSkin(player.getUUID());
+        for (var player : getPlayers()) {
+            SkinRestorer.Events.onPlayerDisconnect(player);
         }
     }
     

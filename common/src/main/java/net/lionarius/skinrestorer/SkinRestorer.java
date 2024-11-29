@@ -1,8 +1,10 @@
 package net.lionarius.skinrestorer;
 
 import com.mojang.authlib.GameProfile;
-import net.lionarius.skinrestorer.config.BuiltInProviderConfig;
+import com.mojang.brigadier.CommandDispatcher;
+import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.Config;
+import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
@@ -13,6 +15,8 @@ import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -20,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -57,11 +60,20 @@ public final class SkinRestorer {
         return Optional.ofNullable(SkinRestorer.providersRegistry.get(name));
     }
     
+    public static ResourceLocation resourceLocation(String name) {
+        return ResourceLocation.fromNamespaceAndPath(SkinRestorer.MOD_ID, name);
+    }
+    
+    public static String assetPath(String name) {
+        return String.format("/assets/%s/%s", SkinRestorer.MOD_ID, name);
+    }
+    
     public static void onInitialize() {
         SkinRestorer.configDir = Services.PLATFORM.getConfigDirectory().resolve(SkinRestorer.MOD_ID);
         SkinRestorer.reloadConfig();
         
         SkinRestorer.providersRegistry.register(EmptySkinProvider.PROVIDER_NAME, SkinProvider.EMPTY, false);
+        SkinRestorer.providersRegistry.register(SkinShuffleSkinProvider.PROVIDER_NAME, SkinProvider.SKIN_SHUFFLE, false);
         
         SkinRestorer.registerDefaultSkinProvider(MojangSkinProvider.PROVIDER_NAME, SkinProvider.MOJANG, SkinRestorer.getConfig().providersConfig().mojang());
         SkinRestorer.registerDefaultSkinProvider(ElyBySkinProvider.PROVIDER_NAME, SkinProvider.ELY_BY, SkinRestorer.getConfig().providersConfig().ely_by());
@@ -72,15 +84,8 @@ public final class SkinRestorer {
         var isDefaultName = config.name().equals(defaultName);
         SkinRestorer.providersRegistry.register(defaultName, provider, config.enabled() && isDefaultName);
         
-        if (!isDefaultName && Arrays.stream(SkinProvider.BUILTIN_PROVIDER_NAMES).noneMatch(name -> name.equals(config.name())))
+        if (!isDefaultName && !SkinProvider.BUILTIN_PROVIDER_NAMES.contains(config.name()))
             SkinRestorer.providersRegistry.register(config.name(), provider, config.enabled());
-    }
-    
-    public static void onServerStarted(MinecraftServer server) {
-        Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
-        FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
-        
-        SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
     }
     
     public static void reloadConfig() {
@@ -88,13 +93,9 @@ public final class SkinRestorer {
         Translation.reloadTranslations();
         WebUtils.recreateHttpClient();
         
-        MojangSkinProvider.createCache();
-        ElyBySkinProvider.createCache();
-        MineskinSkinProvider.createCache();
-    }
-    
-    public static String assetPath(String name) {
-        return String.format("/assets/%s/%s", SkinRestorer.MOD_ID, name);
+        MojangSkinProvider.reload();
+        ElyBySkinProvider.reload();
+        MineskinSkinProvider.reload();
     }
     
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<GameProfile> targets, SkinValue value, boolean save) {
@@ -104,11 +105,11 @@ public final class SkinRestorer {
             if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId()))
                 value = value.setOriginalValue(PlayerUtils.getPlayerSkin(profile));
             
-            if (save)
-                SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
-            
             if (PlayerUtils.areSkinPropertiesEquals(value.value(), PlayerUtils.getPlayerSkin(profile)))
                 continue;
+            
+            if (save)
+                SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
             
             PlayerUtils.applyRestoredSkin(profile, value.value());
             
@@ -154,5 +155,24 @@ public final class SkinRestorer {
                     SkinRestorer.LOGGER.error(e.toString());
                     return Result.error(e.getMessage());
                 });
+    }
+    
+    public static class Events {
+        private Events() {}
+        
+        public static void onServerStarted(MinecraftServer server) {
+            Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
+            FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
+            
+            SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
+        }
+        
+        public static void onCommandRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
+            SkinCommand.register(dispatcher);
+        }
+        
+        public static void onPlayerDisconnect(ServerPlayer player) {
+            SkinRestorer.getSkinStorage().removeSkin(player.getUUID());
+        }
     }
 }

@@ -36,7 +36,7 @@ public final class WebUtils {
         try {
             builder.connectTimeout(Duration.of(SkinRestorer.getConfig().requestTimeout(), ChronoUnit.SECONDS));
         } catch (IllegalArgumentException e) {
-            SkinRestorer.LOGGER.error("failed to set request timeout", e);
+            SkinRestorer.LOGGER.error("Failed to set request timeout", e);
             builder.connectTimeout(Duration.of(10, ChronoUnit.SECONDS));
         }
         
