@@ -14,6 +14,26 @@ if (at.exists()) {
     minecraft.accessTransformers.file(at)
 }
 
+jarJar.enable()
+
+tasks.named('jar') {
+    archiveClassifier = 'thin'
+}
+
+tasks.named('jarJar') {
+    archiveClassifier = ''
+}
+
+jar.finalizedBy('jarJar')
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+
+    implementation(jarJar(group: 'org.mineskin', name: 'java-client', version: mineskin_client_version)) {
+        jarJar.ranged(it, "[${mineskin_client_version},)")
+    }
+}
+
 subsystems {
     parchment {
         minecraftVersion = parchment_minecraft
@@ -35,8 +55,4 @@ runs {
         programArgument '--nogui'
         workingDirectory = file('../run/server')
     }
-}
-
-dependencies {
-    implementation "net.neoforged:neoforge:${neoforge_version}"
 }

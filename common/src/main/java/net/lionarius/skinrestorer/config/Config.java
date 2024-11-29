@@ -1,13 +1,15 @@
 package net.lionarius.skinrestorer.config;
 
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.config.provider.ProvidersConfig;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
+import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
-public final class Config {
+public final class Config implements GsonPostProcessable {
     
     public static final String CONFIG_FILENAME = "config.json";
     
@@ -68,14 +70,13 @@ public final class Config {
         if (config == null)
             config = new Config();
         
-        config.verifyAndFix();
-        
         FileUtils.writeFile(path.resolve(Config.CONFIG_FILENAME), JsonUtils.toJson(config));
         
         return config;
     }
     
-    private void verifyAndFix() {
+    @Override
+    public void gsonPostProcess() {
         if (this.language == null || this.language.isEmpty()) {
             SkinRestorer.LOGGER.warn("Language config is null or empty, defaulting to 'en_us'");
             this.language = "en_us";
@@ -95,7 +96,7 @@ public final class Config {
             try {
                 this.parsedProxy = Proxy.parse(this.proxy);
             } catch (Exception e) {
-                SkinRestorer.LOGGER.warn("Could not parse proxy config", e);
+                SkinRestorer.LOGGER.warn("Could not parse proxy config: {}", e.getMessage());
                 this.parsedProxy = null;
             }
         }
@@ -109,8 +110,5 @@ public final class Config {
             SkinRestorer.LOGGER.warn("Providers config is null, using default");
             this.providers = ProvidersConfig.DEFAULT;
         }
-        
-        if (!this.providers.isValid())
-            this.providers.fix();
     }
 }

@@ -72,17 +72,17 @@ public abstract class ServerLoginPacketListenerImplMixin {
     
     @Unique
     private static void skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
-        SkinRestorer.LOGGER.debug("fetching {}'s skin", profile.getName());
+        SkinRestorer.LOGGER.debug("Fetching {}'s skin", profile.getName());
         
         var result = SkinRestorer.getProvider(context.name()).map(
                 provider -> provider.fetchSkin(context.argument(), context.variant())
-        ).orElseGet(() -> Result.error(new IllegalArgumentException("skin provider is not registered: " + context.name())));
+        ).orElseGet(() -> Result.error(new IllegalArgumentException("Skin provider is not registered: " + context.name())));
         
         if (!result.isError()) {
             var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
             SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
         } else {
-            SkinRestorer.LOGGER.warn("failed to fetch skin", result.getErrorValue());
+            SkinRestorer.LOGGER.warn("Failed to fetch skin: {}", result.getErrorValue().getMessage());
         }
     }
 }

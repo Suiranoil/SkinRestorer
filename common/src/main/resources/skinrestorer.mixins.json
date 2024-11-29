@@ -5,9 +5,9 @@
     "compatibilityLevel": "JAVA_8",
     "refmap": "${mod_id}.refmap.json",
     "mixins": [
+        "ChunkMapAccessor",
         "PlayerListMixin",
         "ServerLoginPacketListenerImplMixin",
-        "ChunkMapAccessor",
         "TrackedEntityAccessorInvoker"
     ],
     "injectors": {

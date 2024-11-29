@@ -52,11 +52,13 @@ public final class MojangSkinProvider implements SkinProvider {
                 }
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
-        
-        
     }
     
-    public static void createCache() {
+    public static void reload() {
+        createCache();
+    }
+    
+    private static void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().mojang();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
