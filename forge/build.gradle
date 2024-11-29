@@ -17,11 +17,13 @@ mixin {
 
 jarJar.enable()
 
+tasks.named('jar') {
+    archiveClassifier = 'thin'
+}
+
 tasks.named('jarJar') {
     archiveClassifier = ''
 }
-
-jar.finalizedBy('jarJar')
 
 minecraft {
     mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"

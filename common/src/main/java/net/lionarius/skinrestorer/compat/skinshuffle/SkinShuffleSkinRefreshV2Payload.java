@@ -2,18 +2,14 @@ package net.lionarius.skinrestorer.compat.skinshuffle;
 
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public record SkinShuffleSkinRefreshV2Payload(
         Property textureProperty) implements CustomPacketPayload, SkinShuffleSkinRefreshPayload {
     
-    public static final CustomPacketPayload.Type<SkinShuffleSkinRefreshV2Payload> PACKET_ID = new CustomPacketPayload.Type<>(SkinShuffleCompatibility.resourceLocation("skin_refresh"));
-    public static final StreamCodec<FriendlyByteBuf, SkinShuffleSkinRefreshV2Payload> PACKET_CODEC = StreamCodec.of(
-            SkinShuffleSkinRefreshV2Payload::encode,
-            SkinShuffleSkinRefreshV2Payload::decode
-    );
+    public static final ResourceLocation PACKET_ID = SkinShuffleCompatibility.resourceLocation("skin_refresh");
 
     public static void encode(FriendlyByteBuf buf, SkinShuffleSkinRefreshV2Payload value) {
         var textureProperty = value.textureProperty();
@@ -36,7 +32,12 @@ public record SkinShuffleSkinRefreshV2Payload(
     }
     
     @Override
-    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+    public void write(@NotNull FriendlyByteBuf buf) {
+        encode(buf, this);
+    }
+    
+    @Override
+    public @NotNull ResourceLocation id() {
         return PACKET_ID;
     }
 }
