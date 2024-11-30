@@ -2,6 +2,7 @@ package net.lionarius.skinrestorer.neoforge.compat.skinshuffle;
 
 import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.lionarius.skinrestorer.compat.skinshuffle.*;
+import net.neoforged.neoforge.network.NetworkConstants;
 import net.neoforged.neoforge.network.NetworkEvent;
 import net.neoforged.neoforge.network.NetworkRegistry;
 import net.neoforged.neoforge.network.event.EventNetworkChannel;
@@ -15,18 +16,21 @@ public final class SkinShufflePacketHandler {
             .named(SkinShuffleHandshakePayload.PACKET_ID)
             .serverAcceptedVersions(NetworkRegistry.acceptMissingOr("1"))
             .clientAcceptedVersions(NetworkRegistry.acceptMissingOr("1"))
+            .networkProtocolVersion(() -> NetworkConstants.NETVERSION)
             .eventNetworkChannel();
     
     private static final EventNetworkChannel SKIN_REFRESH_V1_INSTANCE = NetworkRegistry.ChannelBuilder
             .named(SkinShuffleSkinRefreshV1Payload.PACKET_ID)
             .serverAcceptedVersions(NetworkRegistry.acceptMissingOr("1"))
             .clientAcceptedVersions(NetworkRegistry.acceptMissingOr("1"))
+            .networkProtocolVersion(() -> NetworkConstants.NETVERSION)
             .eventNetworkChannel();
     
     private static final EventNetworkChannel SKIN_REFRESH_V2_INSTANCE = NetworkRegistry.ChannelBuilder
             .named(SkinShuffleSkinRefreshV2Payload.PACKET_ID)
             .serverAcceptedVersions(NetworkRegistry.acceptMissingOr("1"))
             .clientAcceptedVersions(NetworkRegistry.acceptMissingOr("1"))
+            .networkProtocolVersion(() -> NetworkConstants.NETVERSION)
             .eventNetworkChannel();
     
     static void initialize() {
