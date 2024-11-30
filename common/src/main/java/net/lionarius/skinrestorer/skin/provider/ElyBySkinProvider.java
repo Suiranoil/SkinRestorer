@@ -36,7 +36,11 @@ public final class ElyBySkinProvider implements SkinProvider {
         }
     }
     
-    public static void createCache() {
+    public static void reload() {
+        createCache();
+    }
+    
+    private static void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().ely_by();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
