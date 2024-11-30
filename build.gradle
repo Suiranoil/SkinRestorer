@@ -1,13 +1,29 @@
 plugins {
     // see https://fabricmc.net/develop/ for new versions
-    id 'fabric-loom' version '1.7-SNAPSHOT' apply false
+    id 'fabric-loom' version '1.8-SNAPSHOT' apply false
     // see https://projects.neoforged.net/neoforged/neogradle for new versions
     id 'net.neoforged.gradle.userdev' version '7.0.153' apply false
     // see https://files.minecraftforge.net/net/minecraftforge/gradle/ForgeGradle/ for new versions
-    id 'net.minecraftforge.gradle' version '6.0.26' apply false
+    id 'net.minecraftforge.gradle' version '6.0.29' apply false
     id 'org.parchmentmc.librarian.forgegradle' version '1.+' apply false
 
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT' apply false
 
-    id 'me.modmuss50.mod-publish-plugin' version '0.6.3' apply false
+    id 'me.modmuss50.mod-publish-plugin' version '0.8.1' apply false
+}
+
+allprojects {
+    repositories {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = 'MineSkin'
+                    url = 'https://repo.inventivetalent.org/repository/public'
+                }
+            }
+            filter {
+                includeGroupAndSubgroups('org.mineskin')
+            }
+        }
+    }
 }

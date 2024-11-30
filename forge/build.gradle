@@ -2,7 +2,7 @@ plugins {
     id 'multiloader-loader'
     id 'idea'
     id 'eclipse'
-    
+
     id 'net.minecraftforge.gradle'
     id 'org.parchmentmc.librarian.forgegradle'
     id 'org.spongepowered.mixin'
@@ -13,6 +13,20 @@ plugins {
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
+}
+
+jarJar.enable()
+
+tasks.named('jar') {
+    archiveClassifier = 'thin'
+}
+
+tasks.named('jarJar') {
+    archiveClassifier = ''
+}
+
+tasks.named('jar') {
+    dependsOn('jarJar')
 }
 
 minecraft {
@@ -58,6 +72,11 @@ dependencies {
 
     annotationProcessor('org.spongepowered:mixin:0.8.5-SNAPSHOT:processor')
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
+
+    // TODO: somehow fix forge gradle including dependencies of java-client
+    minecraftLibrary(jarJar(group: 'org.mineskin', name: 'java-client', version: mineskin_client_version)) {
+        jarJar.ranged(it, "[${mineskin_client_version},)")
+    }
 }
 
 // for some reason mixin plugin does not add 'MixinConfigs' to MANIFEST.MF so we do it manually
