@@ -8,6 +8,6 @@ public final class ForgeCompatibilityHelper implements CompatibilityHelper {
     
     @Override
     public void skinShuffle_sendHandshake(ServerPlayer player) {
-        SkinShufflePacketHandler.sendHandshake(player.connection.getConnection());
+        SkinShufflePacketHandler.sendHandshake(player.connection.connection);
     }
 }

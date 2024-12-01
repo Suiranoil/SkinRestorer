@@ -34,7 +34,7 @@ public class SkinShuffleCompatibility {
     public static void handleSkinRefresh(MinecraftServer server, ServerPlayer player, SkinShuffleSkinRefreshPayload payload) {
         var property = payload.textureProperty();
         
-        if (!property.name().equals(PlayerUtils.TEXTURES_KEY))
+        if (!property.getName().equals(PlayerUtils.TEXTURES_KEY))
             return;
         
         if (!property.hasSignature())
