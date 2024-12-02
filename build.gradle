@@ -17,8 +17,8 @@ allprojects {
         exclusiveContent {
             forRepository {
                 maven {
-                    name = 'MineSkin'
-                    url = 'https://repo.inventivetalent.org/repository/public'
+                    name = 'lionarius-repository'
+                    url = 'https://reposilite.lionarius.ru/releases'
                 }
             }
             filter {

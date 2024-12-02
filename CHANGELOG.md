@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated to MineSkin's new API V2
 ### Fixed
 - Fixed `providers` config validation
+### Removed
+- Dropped support for NeoForge on Minecraft 1.20.2-1.20.4
 
 ## [2.1.0] - 2024-09-26
 ### Added
