@@ -16,6 +16,7 @@ public class MineskinProviderConfig implements BuiltInProviderConfig, GsonPostPr
         this.enabled = true;
         this.name = MineskinSkinProvider.PROVIDER_NAME;
         this.cache = DEFAULT_CACHE_VALUE;
+        this.apiKey = "";
     }
     
     public boolean enabled() {

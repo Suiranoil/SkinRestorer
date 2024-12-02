@@ -73,7 +73,6 @@ dependencies {
     annotationProcessor('org.spongepowered:mixin:0.8.5-SNAPSHOT:processor')
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 
-    // TODO: somehow fix forge gradle including dependencies of java-client
     minecraftLibrary(jarJar(group: 'org.mineskin', name: 'java-client', version: mineskin_client_version)) {
         jarJar.ranged(it, "[${mineskin_client_version},)")
     }
