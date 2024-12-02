@@ -25,10 +25,6 @@ tasks.named('jarJar') {
     archiveClassifier = ''
 }
 
-tasks.named('jar') {
-    dependsOn('jarJar')
-}
-
 minecraft {
     mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"
 
