@@ -27,9 +27,7 @@ public class SkinIO {
     
     public SkinValue loadSkin(UUID uuid) {
         try {
-            var value = SkinIO.loadSkin(savePath.resolve(SkinIO.uuidToFilename(uuid)));
-            Objects.requireNonNull(value.provider());
-            return value;
+            return SkinIO.loadSkin(savePath.resolve(SkinIO.uuidToFilename(uuid)));
         } catch (Exception e) {
             return SkinValue.EMPTY;
         }
