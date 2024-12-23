@@ -22,7 +22,6 @@ import org.mineskin.response.QueueResponse;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -31,18 +30,9 @@ public final class MineskinSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "web";
     
-    private static final URI API_URI;
     private static MineSkinClient MINESKIN_CLIENT;
     
     private static LoadingCache<Pair<URI, SkinVariant>, Optional<Property>> SKIN_CACHE;
-    
-    static {
-        try {
-            API_URI = new URI("https://api.mineskin.org");
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
     
     public static void reload() {
         var config = SkinRestorer.getConfig();

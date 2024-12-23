@@ -3,11 +3,14 @@ package net.lionarius.skinrestorer.skin;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.skin.provider.EmptySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
+import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public record SkinValue(@NotNull String provider, @Nullable String argument, @Nullable SkinVariant variant,
-                        @Nullable Property value, @Nullable Property originalValue) {
+                        @Nullable Property value, @Nullable Property originalValue) implements GsonPostProcessable {
     
     public static final SkinValue EMPTY = new SkinValue(EmptySkinProvider.PROVIDER_NAME, null, null, null);
     
@@ -29,5 +32,10 @@ public record SkinValue(@NotNull String provider, @Nullable String argument, @Nu
     
     public SkinValue setOriginalValue(Property originalValue) {
         return new SkinValue(this.provider, this.argument, this.variant, this.value, originalValue);
+    }
+    
+    @Override
+    public void gsonPostProcess() {
+        Objects.requireNonNull(this.provider);
     }
 }
