@@ -16,32 +16,32 @@ body:
     attributes:
       label: Feature Description
       description: Detailed description of the feature
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: textarea
     id: motivation
     attributes:
       label: Motivation
       description: Why is this feature needed? What problem does it solve?
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: textarea
     id: use-cases
     attributes:
       label: Use Cases
       description: How would this feature be used and who would benefit?
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: textarea
     id: implementation-ideas
     attributes:
       label: Implementation Ideas (Optional)
       description: Any thoughts on how it could be implemented?
-      validations:
-        required: false
+    validations:
+      required: false
 
   - type: checkboxes
     id: confirmations
