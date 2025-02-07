@@ -83,5 +83,6 @@ body:
       options:
         - label: I've checked for existing issues
           required: true
-        - label: I've tested without other mods
         - label: This bug is reproducible consistently
+          required: true
+        - label: I've tested without other mods
