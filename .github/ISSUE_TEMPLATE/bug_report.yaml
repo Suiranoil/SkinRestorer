@@ -1,0 +1,87 @@
+name: Bug Report
+description: Report a bug encountered with SkinRestorer
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🐛 **Before submitting:**
+        - Ensure you're using the latest mod version
+        - Ensure this bug is reproducible consistently
+        - Check existing issues for duplicates
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: SkinRestorer Version
+      description: Exact version of the mod
+      placeholder: e.g., 2.2.1
+    validations:
+      required: true
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      description: Full Minecraft version
+      placeholder: e.g., 1.21.4
+    validations:
+      required: true
+
+  - type: input
+    id: loader-version
+    attributes:
+      label: Mod Loader & Version
+      description: Fabric/Quilt/Forge/NeoForge version
+      placeholder: e.g., Fabric 0.15.7
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: Java Version
+      placeholder: e.g. 17, 21
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What happened vs what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction Steps
+      placeholder: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: |
+        Please provide any relevant logs, especially error logs from your server console or `latest.log` file.
+        **Important**: Paste the FULL log content. Use a service like [mclo.gs](https://mclo.gs/).
+      render: shell
+      validations:
+        required: true
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I've checked for existing issues
+          required: true
+        - label: I've tested without other mods
+        - label: This bug is reproducible consistently
