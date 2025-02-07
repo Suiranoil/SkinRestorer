@@ -73,8 +73,8 @@ body:
         Please provide any relevant logs, especially error logs from your server console or `latest.log` file.
         **Important**: Paste the FULL log content. Use a service like [mclo.gs](https://mclo.gs/).
       render: shell
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: checkboxes
     id: confirmations
