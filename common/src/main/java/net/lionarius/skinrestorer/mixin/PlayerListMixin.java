@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
@@ -37,9 +38,42 @@ public abstract class PlayerListMixin {
         }
     }
     
-    @Inject(method = "placeNewPlayer", at = @At("HEAD"))
+    private void scheduleDelayedSkinApplication(ServerPlayer player, int tickDelay) {
+        UUID playerUUID = player.getUUID();
+        server.execute(() -> {
+            // Store the current tick count
+            long scheduledTick = server.getTickCount() + tickDelay;
+            
+            // Create a repeating check that will run until the desired tick
+            new Thread(() -> {
+                while (server.isRunning()) {
+                    try {
+                        Thread.sleep(50); // Wait 50ms (1 tick)
+                        if (server.getTickCount() >= scheduledTick) {
+                            server.execute(() -> {
+                                ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(playerUUID);
+                                if (onlinePlayer != null && SkinRestorer.getSkinStorage().hasSavedSkin(playerUUID)) {
+                                    SkinRestorer.applySkin(server, Collections.singleton(onlinePlayer.getGameProfile()),
+                                        SkinRestorer.getSkinStorage().getSkin(playerUUID));
+                                }
+                            });
+                            break;
+                        }
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }).start();
+        });
+    }
+    
+    @Inject(method = "placeNewPlayer", at = @At("TAIL"))
     private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
-        if (SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID()))
-            SkinRestorer.applySkin(server, Collections.singleton(player.getGameProfile()), SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
+        if (SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID())) {
+            // Try applying the skin multiple times over a period of time to ensure it gets applied
+            for (int i = 1; i <= 3; i++) {
+                scheduleDelayedSkinApplication(player, i * 20); // 20 ticks = 1 second
+            }
+        }
     }
 }
