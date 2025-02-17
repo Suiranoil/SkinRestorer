@@ -41,31 +41,22 @@ public abstract class PlayerListMixin {
     private void scheduleDelayedSkinApplication(ServerPlayer player, int tickDelay) {
         UUID playerUUID = player.getUUID();
         server.execute(() -> {
-            // Store the current tick count
             long scheduledTick = server.getTickCount() + tickDelay;
-            
-            // Create a repeating check that will run until the desired tick
-            new Thread(() -> {
-                while (server.isRunning()) {
-                    try {
-                        Thread.sleep(50); // Wait 50ms (1 tick)
-                        if (server.getTickCount() >= scheduledTick) {
-                            server.execute(() -> {
-                                ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(playerUUID);
-                                if (onlinePlayer != null && SkinRestorer.getSkinStorage().hasSavedSkin(playerUUID)) {
-                                    SkinRestorer.applySkin(server, Collections.singleton(onlinePlayer.getGameProfile()),
-                                        SkinRestorer.getSkinStorage().getSkin(playerUUID));
-                                }
-                            });
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        break;
-                    }
+    
+            server.execute(() -> {
+                while (server.getTickCount() < scheduledTick) {
+                    // Wait until scheduled tick
                 }
-            }).start();
+                ServerPlayer onlinePlayer = server.getPlayerList().getPlayer(playerUUID);
+                if (onlinePlayer != null && SkinRestorer.getSkinStorage().hasSavedSkin(playerUUID)) {
+                    SkinRestorer.applySkin(server, 
+                        Collections.singleton(onlinePlayer.getGameProfile()), 
+                        SkinRestorer.getSkinStorage().getSkin(playerUUID));
+                }
+            });
         });
     }
+
     
     @Inject(method = "placeNewPlayer", at = @At("TAIL"))
     private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
