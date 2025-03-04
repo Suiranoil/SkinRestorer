@@ -1,7 +1,7 @@
 # SkinRestorer
 
-<a href="https://modrinth.com/mod/skinrestorer"><img src="https://raw.githubusercontent.com/Suiranoil/badges/main/assets/minecraft/platform/modrinth/mini/badge.svg" alt="Modrinth" height="32"></a>
-<a href="https://www.curseforge.com/minecraft/mc-mods/skinrestorer"><img src="https://raw.githubusercontent.com/Suiranoil/badges/main/assets/minecraft/platform/curseforge/mini/badge.svg" alt="CurseForge" height="32"></a>
+<a href="https://modrinth.com/mod/skinrestorer"><img src="https://raw.githubusercontent.com/Suiranoil/badges/main/assets/minecraft/platform/modrinth/mini/badge.svg" alt="Modrinth"></a>
+<a href="https://www.curseforge.com/minecraft/mc-mods/skinrestorer"><img src="https://raw.githubusercontent.com/Suiranoil/badges/main/assets/minecraft/platform/curseforge/mini/badge.svg" alt="CurseForge"></a>
 
 A server-side mod for managing and restoring player skins.
 
@@ -33,7 +33,9 @@ the [commands wiki page](https://github.com/Suiranoil/SkinRestorer/wiki/Commands
 If you enjoy using **SkinRestorer** and would like to support its development, you can contribute through the following
 platforms:
 
-[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/lionarius)
+<a href="https://ko-fi.com/lionarius"><img src="https://raw.githubusercontent.com/Suiranoil/badges/main/assets/donation/kofi/mini/badge.svg" alt="Ko-fi" height="32"></a>
+
+<a href="https://boosty.to/lionarius"><img src="https://raw.githubusercontent.com/Suiranoil/badges/main/assets/donation/boosty/mini/badge.svg" alt="Boosty" height="32"></a>
 
 Bitcoin (BTC): `1Ndbwny8pxdnWXFgadp95fp97y5JqMJKTX`  
 USDT (TRC20): `TGXn8wrqku5KLzwPWQAeH7wgnV4UzwHEae`  
