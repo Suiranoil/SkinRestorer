@@ -1,6 +1,7 @@
 package net.lionarius.skinrestorer.mixin;
 
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.util.ServerUtils;
 import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,6 +10,7 @@ import net.minecraft.server.players.PlayerList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -39,6 +41,22 @@ public abstract class PlayerListMixin {
     
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
     private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
+        var delay = SkinRestorer.getConfig().skinApplyDelayOnJoin();
+        var uuid = player.getUUID();
+        
+        if (delay <= 0) {
+            skinrestorer$tryApplySkin(server, player);
+        } else {
+            ServerUtils.scheduleServerTask(server, () -> {
+                var actualPlayer = server.getPlayerList().getPlayer(uuid);
+                if (actualPlayer != null)
+                    skinrestorer$tryApplySkin(server, actualPlayer);
+            }, delay);
+        }
+    }
+    
+    @Unique
+    private static void skinrestorer$tryApplySkin(MinecraftServer server, ServerPlayer player) {
         if (SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID()))
             SkinRestorer.applySkin(server, Collections.singleton(player.getGameProfile()), SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
     }
