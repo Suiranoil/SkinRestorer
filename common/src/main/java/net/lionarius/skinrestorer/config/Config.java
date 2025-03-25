@@ -18,6 +18,8 @@ public final class Config implements GsonPostProcessable {
     
     private boolean refreshSkinOnJoin = true;
     
+    private int skinApplyDelayOnJoin = 0;
+    
     private boolean fetchSkinOnFirstJoin = true;
     
     private FirstJoinSkinProvider firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
@@ -35,6 +37,10 @@ public final class Config implements GsonPostProcessable {
     
     public boolean refreshSkinOnJoin() {
         return this.refreshSkinOnJoin;
+    }
+    
+    public int skinApplyDelayOnJoin() {
+        return this.skinApplyDelayOnJoin;
     }
     
     public boolean fetchSkinOnFirstJoin() {
@@ -80,6 +86,11 @@ public final class Config implements GsonPostProcessable {
         if (this.language == null || this.language.isEmpty()) {
             SkinRestorer.LOGGER.warn("Language config is null or empty, defaulting to 'en_us'");
             this.language = "en_us";
+        }
+        
+        if (this.skinApplyDelayOnJoin < 0) {
+            SkinRestorer.LOGGER.warn("SkinApplyDelayOnJoin config is less than 0, defaulting to 0");
+            this.skinApplyDelayOnJoin = 0;
         }
         
         if (this.firstJoinSkinProvider == null) {
