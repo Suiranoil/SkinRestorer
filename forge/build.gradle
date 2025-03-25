@@ -40,7 +40,7 @@ minecraft {
 
     runs {
         client {
-            workingDirectory file('../run/client')
+            workingDirectory rootProject.file('run/client')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Client'
             mods {
@@ -51,7 +51,7 @@ minecraft {
         }
 
         server {
-            workingDirectory file('../run/server')
+            workingDirectory rootProject.file('run/server')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Server'
             mods {
