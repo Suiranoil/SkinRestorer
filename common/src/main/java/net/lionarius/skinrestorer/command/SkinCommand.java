@@ -34,7 +34,7 @@ public final class SkinCommand {
     private SkinCommand() {}
     
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> base =
+        var base =
                 literal("skin")
                         .then(buildSetSubcommand("clear", SkinValue.EMPTY::toProviderContext))
                         .then(literal("reset")
@@ -44,7 +44,7 @@ public final class SkinCommand {
                                 )))
                         .then(literal("refresh").executes(context -> refreshSubcommand(context.getSource())));
         
-        LiteralArgumentBuilder<CommandSourceStack> set = literal("set");
+        var set = literal("set");
         
         var providers = SkinRestorer.getProvidersRegistry().getPublicProviders();
         for (var entry : providers)
@@ -92,7 +92,7 @@ public final class SkinCommand {
             Collection<GameProfile> targets,
             boolean setByOperator
     ) {
-        Collection<ServerPlayer> updatedPlayers = new HashSet<>();
+        var updatedPlayers = new HashSet<ServerPlayer>();
         for (var profile : targets) {
             SkinValue skin = null;
             if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId()))
@@ -199,7 +199,7 @@ public final class SkinCommand {
     }
     
     private static LiteralArgumentBuilder<CommandSourceStack> buildSetSubcommand(String name, SkinProvider provider) {
-        LiteralArgumentBuilder<CommandSourceStack> action = literal(name);
+        var action = literal(name);
         
         if (provider.hasVariantSupport()) {
             for (SkinVariant variant : SkinVariant.values()) {

@@ -3,56 +3,58 @@ plugins {
     id 'idea'
     id 'eclipse'
 
-    id 'net.neoforged.gradle.userdev'
+    id 'net.neoforged.moddev'
 
     id 'multiloader-publish'
 }
 
-// Automatically enable neoforge AccessTransformers if the file exists
-def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
-if (at.exists()) {
-    minecraft.accessTransformers.file(at)
-}
-
-jarJar.enable()
-
-tasks.named('jar') {
-    archiveClassifier = 'thin'
-}
-
-tasks.named('jarJar') {
-    archiveClassifier = ''
-}
-
-jar.finalizedBy('jarJar')
-
-dependencies {
-    implementation "net.neoforged:neoforge:${neoforge_version}"
-
-    implementation(jarJar(group: 'org.mineskin', name: 'java-client', version: mineskin_client_version)) {
-        jarJar.ranged(it, "[${mineskin_client_version},)")
+neoForge {
+    version = neoforge_version
+    
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        minecraft.accessTransformers.file(at)
     }
-}
 
-subsystems {
     parchment {
         minecraftVersion = parchment_minecraft
         mappingsVersion = parchment_version
     }
+
+    runs {
+        configureEach {
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+        }
+
+        client {
+            client()
+            gameDirectory = rootProject.file('run/client')
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            gameDirectory = rootProject.file('run/server')
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
 }
 
-runs {
-    configureEach {
-        modSource project.sourceSets.main
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+
+    jarJar(implementation('org.mineskin:java-client')) {
+        version {
+            strictly "[${mineskin_client_version},)"
+            prefer mineskin_client_version
+        }
     }
 
-    client {
-        workingDirectory = file('../run/client')
-    }
-
-    server {
-        programArgument '--nogui'
-        workingDirectory = file('../run/server')
-    }
+    additionalRuntimeClasspath "org.mineskin:java-client:${mineskin_client_version}"
 }

@@ -5,6 +5,8 @@ plugins {
 publishMods {
     if (project.name == 'fabric')
         file = remapJar.archiveFile
+    else if (project.name == 'neoforge')
+        file = jar.archiveFile
     else
         file = tasks.named('jarJar').get().archiveFile
 
