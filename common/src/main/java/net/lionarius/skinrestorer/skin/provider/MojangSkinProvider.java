@@ -5,8 +5,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import com.mojang.util.UndashedUuid;
@@ -48,26 +46,13 @@ public final class MojangSkinProvider implements SkinProvider {
             throw new IllegalArgumentException(e);
         }
         
-        PROFILE_CACHE = new GameProfileCache(new GameProfileRepository() {
-            @Override
-            public void findProfilesByNames(String[] names, ProfileLookupCallback callback) {
-                for (var name : names) {
-                    try {
-                        var profile = MojangSkinProvider.getProfile(name);
-                        callback.onProfileLookupSucceeded(profile);
-                    } catch (IOException e) {
-                        callback.onProfileLookupFailed(name, e);
-                    }
-                }
-            }
-            
-            @Override
-            public Optional<GameProfile> findProfileByName(String name) {
+        PROFILE_CACHE = new GameProfileCache((names, callback) -> {
+            for (var name : names) {
                 try {
                     var profile = MojangSkinProvider.getProfile(name);
-                    return Optional.of(profile);
+                    callback.onProfileLookupSucceeded(profile);
                 } catch (IOException e) {
-                    return Optional.empty();
+                    callback.onProfileLookupFailed(name, e);
                 }
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
