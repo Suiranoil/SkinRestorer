@@ -1,16 +1,16 @@
 package net.lionarius.skinrestorer.util;
 
-import com.google.common.collect.Queues;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class TickedScheduler implements Runnable {
     private final MinecraftServer server;
-    private final Queue<TickTask> queue = Queues.newPriorityBlockingQueue();
+    private final Queue<TickTask> queue = new PriorityBlockingQueue<>();
     private final Map<Integer, Integer> idMap = new ConcurrentHashMap<>();
     
     public TickedScheduler(MinecraftServer server) {
