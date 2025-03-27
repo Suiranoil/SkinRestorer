@@ -42,11 +42,11 @@ public abstract class PlayerListMixin {
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
     private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
         var delay = SkinRestorer.getConfig().skinApplyDelayOnJoin();
-        var uuid = player.getUUID();
         
         if (delay <= 0) {
             skinrestorer$tryApplySkin(server, player);
         } else {
+            var uuid = player.getUUID();
             ServerUtils.scheduleServerTask(server, () -> {
                 var actualPlayer = server.getPlayerList().getPlayer(uuid);
                 if (actualPlayer != null)
