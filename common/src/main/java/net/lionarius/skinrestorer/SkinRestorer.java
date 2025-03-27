@@ -11,10 +11,7 @@ import net.lionarius.skinrestorer.skin.SkinStorage;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.*;
 import net.lionarius.skinrestorer.translation.Translation;
-import net.lionarius.skinrestorer.util.FileUtils;
-import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.lionarius.skinrestorer.util.Result;
-import net.lionarius.skinrestorer.util.WebUtils;
+import net.lionarius.skinrestorer.util.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -37,6 +34,7 @@ public final class SkinRestorer {
     private static SkinStorage skinStorage;
     private static Path configDir;
     private static Config config;
+    private static TickedScheduler tickedScheduler;
     
     private SkinRestorer() {}
     
@@ -54,6 +52,10 @@ public final class SkinRestorer {
     
     public static SkinProviderRegistry getProvidersRegistry() {
         return SkinRestorer.providersRegistry;
+    }
+    
+    public static TickedScheduler getTickedScheduler() {
+        return SkinRestorer.tickedScheduler;
     }
     
     public static Optional<SkinProvider> getProvider(String name) {
@@ -119,6 +121,8 @@ public final class SkinRestorer {
             
             PlayerUtils.refreshPlayer(player);
             acceptedPlayers.add(player);
+            
+            SkinRestorer.getTickedScheduler().cancel(player.getUUID());
         }
         
         return acceptedPlayers;
@@ -165,6 +169,8 @@ public final class SkinRestorer {
             FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
             
             SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
+            SkinRestorer.tickedScheduler = new TickedScheduler(server);
+            server.addTickable(SkinRestorer.tickedScheduler);
         }
         
         public static void onCommandRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
