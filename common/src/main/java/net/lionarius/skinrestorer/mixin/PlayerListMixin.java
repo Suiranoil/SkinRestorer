@@ -1,7 +1,6 @@
 package net.lionarius.skinrestorer.mixin;
 
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.util.ServerUtils;
 import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,7 +46,7 @@ public abstract class PlayerListMixin {
             skinrestorer$tryApplySkin(server, player);
         } else {
             var uuid = player.getUUID();
-            ServerUtils.scheduleServerTask(server, () -> {
+            SkinRestorer.getTickedScheduler().schedule(() -> {
                 var actualPlayer = server.getPlayerList().getPlayer(uuid);
                 if (actualPlayer != null)
                     skinrestorer$tryApplySkin(server, actualPlayer);
