@@ -50,7 +50,7 @@ public abstract class PlayerListMixin {
                 var actualPlayer = server.getPlayerList().getPlayer(uuid);
                 if (actualPlayer != null)
                     skinrestorer$tryApplySkin(server, actualPlayer);
-            }, delay);
+            }, delay, uuid);
         }
     }
     
