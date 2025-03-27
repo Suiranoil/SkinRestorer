@@ -1,2 +1,6 @@
-### Fixed
-- Fixed game not closing because of mineskin working threads (closes [#41](https://github.com/Suiranoil/SkinRestorer/issues/41))
+### Added
+- Added `skinApplyDelayOnJoin` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#skinapplydelayonjoin))
+### Changed
+- Updated to 1.21.5
+### Removed
+- [NeoForge] Dropped support for NeoForge on Minecraft 1.20.5-1.20.6
