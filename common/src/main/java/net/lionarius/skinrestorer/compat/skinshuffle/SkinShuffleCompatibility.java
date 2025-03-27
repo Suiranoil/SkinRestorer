@@ -5,7 +5,6 @@ import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.SkinShuffleSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.lionarius.skinrestorer.util.ServerUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,7 +40,7 @@ public class SkinShuffleCompatibility {
         if (!property.hasSignature())
             return;
         
-        ServerUtils.scheduleServerTask(server, () -> {
+        server.execute(() -> {
             SkinRestorer.applySkin(
                     server,
                     Collections.singleton(player.getGameProfile()),
