@@ -121,6 +121,8 @@ public final class SkinRestorer {
             
             PlayerUtils.refreshPlayer(player);
             acceptedPlayers.add(player);
+            
+            SkinRestorer.getTickedScheduler().cancel(player.getUUID());
         }
         
         return acceptedPlayers;

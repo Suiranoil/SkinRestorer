@@ -28,6 +28,11 @@ public class TickedScheduler implements Runnable {
         this.queue.add(new TickTask(serverTick, serverTick + delay, taskId, task));
     }
     
+    public void cancel(Object id) {
+        var taskId = id.hashCode();
+        this.idMap.remove(taskId);
+    }
+    
     @Override
     public void run() {
         TickTask nextTask;
