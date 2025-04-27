@@ -39,11 +39,11 @@ public final class Translation {
     }
     
     public static MutableComponent translatableWithFallback(String key) {
-        return Component.translatableWithFallback(key, Translation.get(key));
+        return Component.translatable(Translation.get(key));
     }
     
     public static MutableComponent translatableWithFallback(String key, Object... args) {
-        return Component.translatableWithFallback(key, Translation.get(key), args);
+        return Component.translatable(Translation.get(key), args);
     }
     
     public static void reloadTranslations() {
