@@ -14,8 +14,6 @@ dependencies {
     }
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
-    modCompileOnly "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
-
     include implementation("org.mineskin:java-client:${mineskin_client_version}")
 }
 

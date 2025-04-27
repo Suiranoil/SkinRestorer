@@ -40,7 +40,7 @@ public final class PlayerUtils {
     }
     
     public static void refreshPlayer(ServerPlayer player) {
-        ServerLevel serverLevel = player.serverLevel();
+        ServerLevel serverLevel = player.getLevel();
         PlayerList playerList = serverLevel.getServer().getPlayerList();
         ChunkMap chunkMap = serverLevel.getChunkSource().chunkMap;
         
@@ -70,16 +70,15 @@ public final class PlayerUtils {
         if (!player.isDeadOrDying()) {
             player.connection.send(
                     new ClientboundRespawnPacket(
-                            player.level().dimensionTypeId(),
-                            player.level().dimension(),
-                            BiomeManager.obfuscateSeed(player.serverLevel().getSeed()),
+                            player.getLevel().dimensionTypeId(),
+                            player.getLevel().dimension(),
+                            BiomeManager.obfuscateSeed(player.getLevel().getSeed()),
                             player.gameMode.getGameModeForPlayer(),
                             player.gameMode.getPreviousGameModeForPlayer(),
-                            player.level().isDebug(),
-                            player.serverLevel().isFlat(),
+                            player.getLevel().isDebug(),
+                            player.getLevel().isFlat(),
                             (byte) 3,
-                            player.getLastDeathLocation(),
-                            player.getPortalCooldown()
+                            player.getLastDeathLocation()
                     )
             );
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
