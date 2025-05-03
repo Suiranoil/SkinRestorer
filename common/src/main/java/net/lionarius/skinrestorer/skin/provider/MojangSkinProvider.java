@@ -39,8 +39,8 @@ public final class MojangSkinProvider implements SkinProvider {
         try {
             ENVIRONMENT = EnvironmentParser.getEnvironmentFromProperties().orElse(YggdrasilEnvironment.PROD.getEnvironment());
             
-            SERVICES_SERVER_URI = new URI(ENVIRONMENT.servicesHost());
-            SESSION_SERVER_URI = new URI(ENVIRONMENT.sessionHost());
+            SERVICES_SERVER_URI = new URI(ENVIRONMENT.getServicesHost());
+            SESSION_SERVER_URI = new URI(ENVIRONMENT.getSessionHost());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
