@@ -2,14 +2,14 @@ plugins {
     // see https://fabricmc.net/develop/ for new versions
     id 'fabric-loom' version '1.10-SNAPSHOT' apply false
     // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
-    id 'net.neoforged.moddev' version '2.0.80' apply false
+    id 'net.neoforged.moddev' version '2.0.+' apply false
     // see https://files.minecraftforge.net/net/minecraftforge/gradle/ForgeGradle/ for new versions
-    id 'net.minecraftforge.gradle' version '6.0.35' apply false
+    id 'net.minecraftforge.gradle' version '6.0.+' apply false
     id 'org.parchmentmc.librarian.forgegradle' version '1.+' apply false
 
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT' apply false
 
-    id 'me.modmuss50.mod-publish-plugin' version '0.8.4' apply false
+    id 'me.modmuss50.mod-publish-plugin' version '0.8.+' apply false
 }
 
 allprojects {
