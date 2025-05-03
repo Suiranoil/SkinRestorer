@@ -1,6 +1,4 @@
 ### Added
-- Added `skinApplyDelayOnJoin` config option (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#skinapplydelayonjoin))
+- Added support for minecraft 1.19-1.19.4
 ### Changed
-- Updated to 1.21.5
-### Removed
-- [NeoForge] Dropped support for NeoForge on Minecraft 1.20.5-1.20.6
+- Use services and session server urls from environment
