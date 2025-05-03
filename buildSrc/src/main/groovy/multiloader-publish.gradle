@@ -25,8 +25,8 @@ publishMods {
         minecraftVersions.addAll(minecraft_version_list.split(','))
         serverRequired = true
 
-        if (project.name == 'fabric')
-            optional(fabric_optional_dependencies.split(','))
+        if (project.hasProperty('optional_dependencies') && !optional_dependencies.isEmpty())
+            optional(optional_dependencies.split(','))
     }
 
     modrinth {
@@ -37,7 +37,7 @@ publishMods {
 
         minecraftVersions.addAll(minecraft_version_list.split(','))
 
-        if (project.name == 'fabric')
-            optional(fabric_optional_dependencies.split(','))
+        if (project.hasProperty('optional_dependencies') && !optional_dependencies.isEmpty())
+            optional(optional_dependencies.split(','))
     }
 }
