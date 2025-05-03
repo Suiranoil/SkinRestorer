@@ -26,15 +26,19 @@ public abstract class ServerLoginPacketListenerImplMixin {
     @Unique
     private CompletableFuture<Void> skinrestorer$pendingSkin;
     
-    @Inject(method = "handleAcceptedLogin", at = @At(value = "INVOKE",
-                                                                     target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"),
-            cancellable = true)
+    @Shadow
+    protected abstract GameProfile createFakeProfile(GameProfile original);
+    
+    @Inject(method = "handleAcceptedLogin", at = @At(value = "HEAD"), cancellable = true)
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
             skinrestorer$pendingSkin = CompletableFuture.supplyAsync(() -> {
-                final var profile = gameProfile;
-                
+                var profile = gameProfile;
                 assert profile != null;
+                
+                if (!profile.isComplete())
+                    profile = createFakeProfile(profile);
+                
                 var originalSkin = PlayerUtils.getPlayerSkin(profile);
                 
                 if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
