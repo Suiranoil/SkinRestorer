@@ -128,7 +128,7 @@ public final class SkinCommand {
             boolean save,
             boolean setByOperator
     ) {
-        src.sendSystemMessage(Translation.translatableWithFallback(Translation.COMMAND_SKIN_LOADING_KEY));
+        src.sendSuccess(Translation.translatableWithFallback(Translation.COMMAND_SKIN_LOADING_KEY), false);
         
         SkinRestorer.setSkinAsync(src.getServer(), targets, context, save).thenAccept(result -> {
             if (result.isError()) {
