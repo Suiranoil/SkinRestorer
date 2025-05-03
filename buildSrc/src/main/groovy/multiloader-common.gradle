@@ -83,7 +83,6 @@ processResources {
             'group'                        : project.group, //Else we target the task's group.
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
-            'fabric_loader_version'        : fabric_loader_version,
             'mod_name'                     : mod_name,
             'mod_author'                   : mod_author,
             'mod_id'                       : mod_id,
@@ -92,16 +91,20 @@ processResources {
             'mod_issues'                   : mod_issues,
             'license'                      : license,
             'description'                  : project.description,
-            'forge_version'                : forge_version,
-            'forge_loader_version_range'   : forge_loader_version_range,
-            'neoforge_version'             : neoforge_version,
-            'neoforge_loader_version_range': neoforge_loader_version_range,
             'credits'                      : credits,
-            'java_version'                 : java_version
+            'java_version'                 : java_version,
+            
+            // Loader specific properties
+            'fabric_loader_version'        : project.hasProperty('fabric_loader_version') ? fabric_loader_version : '',
+            'forge_version'                : project.hasProperty('forge_version') ? forge_version : '',
+            'forge_loader_version_range'   : project.hasProperty('forge_loader_version_range') ? forge_loader_version_range : '',
+            'neoforge_version'             : project.hasProperty('neoforge_version') ? neoforge_version : '',
+            'neoforge_loader_version_range': project.hasProperty('neoforge_loader_version_range') ? neoforge_loader_version_range : ''
     ]
 
     filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
         expand expandProps
     }
+
     inputs.properties(expandProps)
 }
