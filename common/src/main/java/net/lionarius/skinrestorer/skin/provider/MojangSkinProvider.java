@@ -4,8 +4,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.*;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.SkinRestorer;
@@ -26,7 +27,8 @@ public final class MojangSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "mojang";
     
-    private static final URI API_URI;
+    private static final Environment ENVIRONMENT;
+    private static final URI SERVICES_SERVER_URI;
     private static final URI SESSION_SERVER_URI;
     
     public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
@@ -36,8 +38,10 @@ public final class MojangSkinProvider implements SkinProvider {
     
     static {
         try {
-            API_URI = new URI("https://api.mojang.com");
-            SESSION_SERVER_URI = new URI("https://sessionserver.mojang.com");
+            ENVIRONMENT = EnvironmentParser.getEnvironmentFromProperties().orElse(YggdrasilEnvironment.PROD.getEnvironment());
+            
+            SERVICES_SERVER_URI = new URI(ENVIRONMENT.servicesHost());
+            SESSION_SERVER_URI = new URI(ENVIRONMENT.sessionHost());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
@@ -113,8 +117,8 @@ public final class MojangSkinProvider implements SkinProvider {
     
     private static GameProfile getProfile(final String name) throws IOException {
         var request = HttpRequest.newBuilder()
-                .uri(MojangSkinProvider.API_URI
-                        .resolve("/users/profiles/minecraft/")
+                .uri(MojangSkinProvider.SERVICES_SERVER_URI
+                        .resolve("/minecraft/profile/lookup/name/")
                         .resolve(name)
                 )
                 .GET()
