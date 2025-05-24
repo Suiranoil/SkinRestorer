@@ -2,7 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "net.lionarius.skinrestorer.fabric.mixin",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_17",
     "refmap": "${mod_id}.refmap.json",
     "mixins": [
         "CommandsMixin",
