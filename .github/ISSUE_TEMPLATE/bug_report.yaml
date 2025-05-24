@@ -58,10 +58,12 @@ body:
     id: steps
     attributes:
       label: Reproduction Steps
+      description: Provide step-by-step instructions or a video showing how to reproduce the issue.
       placeholder: |
         1. 
         2. 
         3. 
+        Or a video demonstrating the issue.
     validations:
       required: true
 
