@@ -20,9 +20,6 @@ import java.util.List;
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
     
-    @Shadow
-    public abstract List<ServerPlayer> getPlayers();
-    
     @Shadow @Final
     private MinecraftServer server;
     
@@ -33,7 +30,7 @@ public abstract class PlayerListMixin {
     
     @Inject(method = "removeAll", at = @At("HEAD"))
     private void removeAll(CallbackInfo ci) {
-        for (var player : getPlayers()) {
+        for (var player : ((PlayerList) (Object) this).getPlayers()) {
             SkinRestorer.Events.onPlayerDisconnect(player);
         }
     }
