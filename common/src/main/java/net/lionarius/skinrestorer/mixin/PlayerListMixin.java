@@ -5,25 +5,16 @@ import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collections;
-import java.util.List;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
-    
-    @Shadow
-    public abstract List<ServerPlayer> getPlayers();
-    
-    @Shadow @Final
-    private MinecraftServer server;
     
     @Inject(method = "remove", at = @At("TAIL"))
     private void remove(ServerPlayer player, CallbackInfo ci) {
@@ -32,13 +23,14 @@ public abstract class PlayerListMixin {
     
     @Inject(method = "removeAll", at = @At("HEAD"))
     private void removeAll(CallbackInfo ci) {
-        for (var player : getPlayers()) {
+        for (var player : ((PlayerList) (Object) this).getPlayers()) {
             SkinRestorer.Events.onPlayerDisconnect(player);
         }
     }
     
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
     private void placeNewPlayer(Connection connection, ServerPlayer player, CallbackInfo ci) {
+        var server = ((PlayerList) (Object) this).getServer();
         var delay = SkinRestorer.getConfig().skinApplyDelayOnJoin();
         
         if (delay <= 0) {
