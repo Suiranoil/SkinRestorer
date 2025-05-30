@@ -15,6 +15,7 @@ import java.util.Collections;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
+    
     @Inject(method = "remove", at = @At("TAIL"))
     private void remove(ServerPlayer player, CallbackInfo ci) {
         SkinRestorer.Events.onPlayerDisconnect(player);

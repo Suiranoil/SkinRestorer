@@ -20,9 +20,6 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin {
     
-    @Shadow @Nullable
-    private GameProfile gameProfile;
-    
     @Unique
     private CompletableFuture<Void> skinrestorer$pendingSkin;
     
