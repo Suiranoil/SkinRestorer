@@ -8,6 +8,7 @@
     "mixins": [
         "ChunkMapAccessor",
         "PlayerListMixin",
+        "ServerLoginPacketListenerImplAccessorInvoker",
         "ServerLoginPacketListenerImplMixin",
         "TrackedEntityAccessorInvoker"
     ],
