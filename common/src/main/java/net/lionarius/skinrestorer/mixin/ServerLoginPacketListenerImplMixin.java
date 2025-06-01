@@ -20,6 +20,12 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin {
     
+    @Shadow @Nullable
+    private GameProfile gameProfile;
+    
+    @Shadow
+    protected abstract GameProfile createFakeProfile(GameProfile original);
+    
     @Unique
     private CompletableFuture<Void> skinrestorer$pendingSkin;
     
@@ -27,11 +33,11 @@ public abstract class ServerLoginPacketListenerImplMixin {
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
             skinrestorer$pendingSkin = CompletableFuture.supplyAsync(() -> {
-                var profile = ((ServerLoginPacketListenerImplAccessorInvoker) this).getGameProfile();
+                var profile = gameProfile;
                 assert profile != null;
                 
                 if (!profile.isComplete())
-                    profile = ((ServerLoginPacketListenerImplAccessorInvoker) this).invokeCreateFakeProfile(profile);
+                    profile = createFakeProfile(profile);
                 
                 var originalSkin = PlayerUtils.getPlayerSkin(profile);
                 
