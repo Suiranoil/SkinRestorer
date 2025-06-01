@@ -7,7 +7,9 @@ import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,6 +20,9 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin {
     
+    @Shadow @Nullable
+    private GameProfile authenticatedProfile;
+    
     @Unique
     private CompletableFuture<Void> skinrestorer$pendingSkin;
     
@@ -27,7 +32,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
             skinrestorer$pendingSkin = CompletableFuture.supplyAsync(() -> {
-                final var profile = ((ServerLoginPacketListenerImplAccessorInvoker) this).getAuthenticatedProfile();
+                final var profile = authenticatedProfile;
                 
                 assert profile != null;
                 var originalSkin = PlayerUtils.getPlayerSkin(profile);
