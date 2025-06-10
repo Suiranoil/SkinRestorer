@@ -43,7 +43,8 @@ public final class MineskinSkinProvider implements SkinProvider {
                 .userAgent(WebUtils.USER_AGENT)
                 .gson(JsonUtils.GSON)
                 .timeout((int) Duration.ofSeconds(config.requestTimeout()).toMillis())
-                .requestHandler((userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
+                .requestHandler((baseUrl, userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
+                        baseUrl,
                         userAgent,
                         apiKey,
                         timeout,

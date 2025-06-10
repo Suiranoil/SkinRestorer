@@ -32,8 +32,8 @@ public class Java11RequestHandler extends RequestHandler {
     private final Gson gson;
     private final HttpClient httpClient;
     
-    public Java11RequestHandler(String userAgent, String apiKey, int timeout, Gson gson, InetSocketAddress proxy) {
-        super(userAgent, apiKey, timeout, gson);
+    public Java11RequestHandler(String baseUrl, String userAgent, String apiKey, int timeout, Gson gson, InetSocketAddress proxy) {
+        super(baseUrl, userAgent, apiKey, timeout, gson);
         this.gson = gson;
         
         HttpClient.Builder clientBuilder = HttpClient.newBuilder()
@@ -85,6 +85,7 @@ public class Java11RequestHandler extends RequestHandler {
     
     public <T, R extends MineSkinResponse<T>> R getJson(String url, Class<T> clazz, ResponseConstructor<T, R> constructor)
             throws IOException {
+        url = this.baseUrl + url;
         MineSkinClientImpl.LOGGER.fine("GET " + url);
         
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
@@ -110,6 +111,7 @@ public class Java11RequestHandler extends RequestHandler {
     
     public <T, R extends MineSkinResponse<T>> R postJson(String url, JsonObject data, Class<T> clazz, ResponseConstructor<T, R> constructor)
             throws IOException {
+        url = this.baseUrl + url;
         MineSkinClientImpl.LOGGER.fine("POST " + url);
         
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
@@ -137,6 +139,7 @@ public class Java11RequestHandler extends RequestHandler {
     
     public <T, R extends MineSkinResponse<T>> R postFormDataFile(String url, String key, String filename, InputStream in, Map<String, String> data, Class<T> clazz, ResponseConstructor<T, R> constructor)
             throws IOException {
+        url = this.baseUrl + url;
         MineSkinClientImpl.LOGGER.fine("POST " + url);
         
         String boundary = "mineskin-" + System.currentTimeMillis();
