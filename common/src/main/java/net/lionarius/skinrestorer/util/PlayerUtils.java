@@ -39,7 +39,7 @@ public final class PlayerUtils {
     }
     
     public static void refreshPlayer(ServerPlayer player) {
-        ServerLevel serverLevel = player.serverLevel();
+        ServerLevel serverLevel = player.level();
         PlayerList playerList = serverLevel.getServer().getPlayerList();
         ChunkMap chunkMap = serverLevel.getChunkSource().chunkMap;
         
