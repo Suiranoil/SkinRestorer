@@ -14,7 +14,7 @@
     },
     "icon": "assets/${mod_id}/icon.png",
     "license": "${license}",
-    "environment": "*",
+    "environment": "server",
     "entrypoints": {
         "main": [
             "net.lionarius.skinrestorer.fabric.SkinRestorerFabric"
