@@ -1,13 +1,13 @@
 package net.lionarius.skinrestorer.forge.compat.skinshuffle;
 
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 public final class SkinShuffleCompatibility {
     
     private SkinShuffleCompatibility() {}
     
     public static void initialize() {
-        PlayerEvent.PlayerLoggedInEvent.BUS.addListener(SkinShuffleGameEventHandler::onPlayerLoggedIn);
+        MinecraftForge.EVENT_BUS.register(SkinShuffleGameEventHandler.class);
         
         SkinShufflePacketHandler.initialize();
     }

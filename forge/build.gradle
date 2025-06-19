@@ -43,7 +43,6 @@ minecraft {
             workingDirectory rootProject.file('run/client')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Client'
-            property 'eventbus.api.strictRuntimeChecks', 'true'
             mods {
                 modClientRun {
                     source sourceSets.main
@@ -55,7 +54,6 @@ minecraft {
             workingDirectory rootProject.file('run/server')
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Server'
-            property 'eventbus.api.strictRuntimeChecks', 'true'
             mods {
                 modServerRun {
                     source sourceSets.main
@@ -68,8 +66,6 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:${forge_minecraft_version}-${forge_version}"
 
-    annotationProcessor('net.minecraftforge:eventbus-validator:7.0-beta.7')
-    
     annotationProcessor('org.spongepowered:mixin:0.8.5-SNAPSHOT:processor')
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 
