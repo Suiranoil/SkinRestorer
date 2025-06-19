@@ -26,7 +26,7 @@ tasks.named('jarJar') {
 }
 
 minecraft {
-    mappings channel: 'parchment', version: "${parchment_version}-${parchment_minecraft}"
+    mappings channel: 'parchment', version: "${parchment_minecraft}-${parchment_version}-${minecraft_version}"
 
     copyIdeResources = true //Calls processResources when in dev
 
