@@ -20,11 +20,11 @@ modId = "neoforge"
 mandatory = true
 versionRange = "[${neoforge_version},)"
 ordering = "NONE"
-side = "SERVER"
+side = "BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
-side = "SERVER"
+side = "BOTH"
