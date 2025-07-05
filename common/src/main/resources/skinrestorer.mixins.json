@@ -9,7 +9,8 @@
         "ChunkMapAccessor",
         "PlayerListMixin",
         "ServerLoginPacketListenerImplMixin",
-        "TrackedEntityAccessorInvoker"
+        "TrackedEntityAccessorInvoker",
+        "SkullBlockEntityMixin"
     ],
     "injectors": {
         "defaultRequire": 1
