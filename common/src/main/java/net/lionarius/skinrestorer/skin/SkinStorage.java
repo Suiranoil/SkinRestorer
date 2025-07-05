@@ -17,13 +17,20 @@ public class SkinStorage {
         return this.skinMap.containsKey(uuid) || this.skinIO.skinExists(uuid);
     }
     
-    public SkinValue getSkin(UUID uuid) {
+    public SkinValue getSkin(UUID uuid, boolean cache) {
         if (!skinMap.containsKey(uuid)) {
             var skin = skinIO.loadSkin(uuid);
+            if (!cache)
+                return skin;
+            
             setSkin(uuid, skin);
         }
         
         return skinMap.get(uuid);
+    }
+    
+    public SkinValue getSkin(UUID uuid) {
+        return this.getSkin(uuid, true);
     }
     
     public void removeSkin(UUID uuid, boolean save) {
