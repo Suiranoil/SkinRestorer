@@ -1,2 +1,2 @@
-### Fixed
-- Fix mod not loading on client
+### Added
+- Added support for player heads
