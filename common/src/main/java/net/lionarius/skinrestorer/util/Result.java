@@ -19,6 +19,18 @@ public class Result<S, E> {
         this.errorValue = errorValue;
     }
     
+    public static <S, E> Result<S, E> success(@NotNull S successValue) {
+        return new Result<>(successValue, null);
+    }
+    
+    public static <S, E> Result<S, E> error(@NotNull E errorValue) {
+        return new Result<>(null, errorValue);
+    }
+    
+    public static <S, E> Result<Optional<S>, E> ofNullable(S successValue) {
+        return Result.success(Optional.ofNullable(successValue));
+    }
+    
     public S getSuccessValue() {
         return successValue;
     }
@@ -68,17 +80,5 @@ public class Result<S, E> {
     @Override
     public int hashCode() {
         return Objects.hash(successValue, errorValue);
-    }
-    
-    public static <S, E> Result<S, E> success(@NotNull S successValue) {
-        return new Result<>(successValue, null);
-    }
-    
-    public static <S, E> Result<S, E> error(@NotNull E errorValue) {
-        return new Result<>(null, errorValue);
-    }
-    
-    public static <S, E> Result<Optional<S>, E> ofNullable(S successValue) {
-        return Result.success(Optional.ofNullable(successValue));
     }
 }
