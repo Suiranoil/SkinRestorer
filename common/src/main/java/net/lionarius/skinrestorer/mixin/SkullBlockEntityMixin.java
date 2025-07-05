@@ -4,8 +4,10 @@ import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.server.Services;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,10 +21,16 @@ import java.util.function.BooleanSupplier;
 @Mixin(SkullBlockEntity.class)
 public abstract class SkullBlockEntityMixin {
     
-    @Inject(method = "loadProfile", at = @At("HEAD"),
+    @Shadow
+    private static GameProfileCache profileCache;
+    
+    @Inject(method = "fetchGameProfile", at = @At("HEAD"),
             cancellable = true)
-    private static void fetchProfileByName(String name, Services services, BooleanSupplier hasCache, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
-        var profileOpt = services.profileCache().get(name);
+    private static void fetchProfileByName(String name, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
+        if (profileCache == null)
+            return;
+        
+        var profileOpt = profileCache.get(name);
         
         skinrestorer$replaceSkin(profileOpt, cir);
     }
