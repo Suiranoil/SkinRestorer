@@ -13,8 +13,6 @@ import java.time.temporal.ChronoUnit;
 
 public final class WebUtils {
     
-    private WebUtils() {}
-    
     public static final String USER_AGENT;
     
     private static HttpClient HTTP_CLIENT = null;
@@ -22,6 +20,8 @@ public final class WebUtils {
     static {
         USER_AGENT = String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
     }
+    
+    private WebUtils() {}
     
     public static void recreateHttpClient() {
         HTTP_CLIENT = WebUtils.buildClient();

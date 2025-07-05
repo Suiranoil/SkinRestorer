@@ -11,9 +11,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.event.EventNetworkChannel;
 
 public class SkinShufflePacketHandler {
-    private SkinShufflePacketHandler() {
-    }
-    
+
     private static final EventNetworkChannel HANDSHAKE_INSTANCE = NetworkRegistry.ChannelBuilder
             .named(SkinShuffleHandshakePayload.PACKET_ID)
             .clientAcceptedVersions(NetworkRegistry.acceptMissingOr(""))
@@ -40,6 +38,9 @@ public class SkinShufflePacketHandler {
         SKIN_REFRESH_V2_INSTANCE.addListener(SkinShufflePacketHandler::skinRefreshV2Listener);
     }
     
+    private SkinShufflePacketHandler() {
+    }
+
     public static void sendHandshake(Connection connection) {
         connection.send(new ClientboundCustomPayloadPacket(SkinShuffleHandshakePayload.PACKET_ID, new FriendlyByteBuf(Unpooled.buffer(0, 0))));
     }
