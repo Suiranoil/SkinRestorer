@@ -10,8 +10,6 @@ import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.EventNetworkChannel;
 
 public class SkinShufflePacketHandler {
-    private SkinShufflePacketHandler() {
-    }
 
     private static final EventNetworkChannel HANDSHAKE_INSTANCE = ChannelBuilder
             .named(SkinShuffleHandshakePayload.PACKET_ID.id())
@@ -32,6 +30,9 @@ public class SkinShufflePacketHandler {
 
     protected static void initialize() {
         // NO-OP
+    }
+    
+    private SkinShufflePacketHandler() {
     }
 
     public static void sendHandshake(Connection connection) {
