@@ -14,7 +14,7 @@ public record SkinShuffleSkinRefreshV2Payload(
             SkinShuffleSkinRefreshV2Payload::encode,
             SkinShuffleSkinRefreshV2Payload::decode
     );
-
+    
     public static void encode(FriendlyByteBuf buf, SkinShuffleSkinRefreshV2Payload value) {
         var textureProperty = value.textureProperty();
         
@@ -27,7 +27,7 @@ public record SkinShuffleSkinRefreshV2Payload(
             buf.writeUtf(textureProperty.signature());
         }
     }
-
+    
     public static SkinShuffleSkinRefreshV2Payload decode(FriendlyByteBuf buf) {
         if (buf.readBoolean()) {
             return new SkinShuffleSkinRefreshV2Payload(new Property(buf.readUtf(), buf.readUtf(), buf.readUtf()));

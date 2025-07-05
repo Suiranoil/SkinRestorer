@@ -22,7 +22,7 @@ public record SkinShuffleSkinRefreshV1Payload(
         buf.writeUtf(textureProperty.value());
         buf.writeNullable(textureProperty.signature(), FriendlyByteBuf::writeUtf);
     }
-
+    
     public static SkinShuffleSkinRefreshV1Payload decode(FriendlyByteBuf buf) {
         return new SkinShuffleSkinRefreshV1Payload(new Property(buf.readUtf(), buf.readUtf(), buf.readNullable(FriendlyByteBuf::readUtf)));
     }

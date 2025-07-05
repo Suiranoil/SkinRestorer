@@ -1,7 +1,7 @@
 package net.lionarius.skinrestorer.neoforge.compat.skinshuffle;
 
-import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.lionarius.skinrestorer.compat.skinshuffle.*;
+import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
