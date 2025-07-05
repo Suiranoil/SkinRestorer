@@ -100,6 +100,13 @@ public final class PlayerUtils {
         }
     }
     
+    public static GameProfile cloneGameProfile(GameProfile profile) {
+        var newProfile = new GameProfile(profile.getId(), profile.getName());
+        newProfile.getProperties().putAll(profile.getProperties());
+        
+        return newProfile;
+    }
+    
     public static Property getPlayerSkin(GameProfile profile) {
         return Iterables.getFirst(profile.getProperties().get(TEXTURES_KEY), null);
     }

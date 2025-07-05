@@ -8,10 +8,10 @@ import java.util.ServiceLoader;
 
 public final class Services {
     
-    private Services() {}
-    
     public final static PlatformHelper PLATFORM = load(PlatformHelper.class);
     public final static CompatibilityHelper COMPATIBILITY = load(CompatibilityHelper.class);
+    
+    private Services() {}
     
     private static <T> T load(Class<T> clazz) {
         final T loadedService = ServiceLoader.load(clazz)
