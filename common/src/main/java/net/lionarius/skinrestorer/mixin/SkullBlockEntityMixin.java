@@ -19,18 +19,10 @@ import java.util.function.BooleanSupplier;
 @Mixin(SkullBlockEntity.class)
 public abstract class SkullBlockEntityMixin {
     
-    @Inject(method = "fetchProfileByName", at = @At("HEAD"),
+    @Inject(method = "loadProfile", at = @At("HEAD"),
             cancellable = true)
-    private static void fetchProfileByName(String name, Services services, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
+    private static void fetchProfileByName(String name, Services services, BooleanSupplier hasCache, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
         var profileOpt = services.profileCache().get(name);
-        
-        skinrestorer$replaceSkin(profileOpt, cir);
-    }
-    
-    @Inject(method = "fetchProfileById", at = @At("HEAD"),
-            cancellable = true)
-    private static void fetchProfileById(UUID id, Services services, BooleanSupplier cacheUninitialized, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
-        var profileOpt = services.profileCache().get(id);
         
         skinrestorer$replaceSkin(profileOpt, cir);
     }
