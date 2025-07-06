@@ -70,7 +70,7 @@ public final class MojangSkinProvider implements SkinProvider {
                     return Optional.of(profile);
                 } catch (IOException e) {
                     SkinRestorer.LOGGER.error("Failed to find profile by name", e);
-                    return Optional.empty();
+                    throw new RuntimeException(e);
                 }
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
