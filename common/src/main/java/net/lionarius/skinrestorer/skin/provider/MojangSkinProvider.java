@@ -69,6 +69,7 @@ public final class MojangSkinProvider implements SkinProvider {
                     var profile = MojangSkinProvider.getProfile(name);
                     return Optional.of(profile);
                 } catch (IOException e) {
+                    SkinRestorer.LOGGER.error("Failed to find profile by name", e);
                     return Optional.empty();
                 }
             }
