@@ -10,6 +10,7 @@ import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.exception.TransparentException;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -58,7 +59,7 @@ public final class MojangSkinProvider implements SkinProvider {
                         var profile = MojangSkinProvider.getProfile(name);
                         callback.onProfileLookupSucceeded(profile);
                     } catch (IOException e) {
-                        callback.onProfileLookupFailed(name, e);
+                        throw new TransparentException(e);
                     }
                 }
             }
@@ -69,8 +70,7 @@ public final class MojangSkinProvider implements SkinProvider {
                     var profile = MojangSkinProvider.getProfile(name);
                     return Optional.of(profile);
                 } catch (IOException e) {
-                    SkinRestorer.LOGGER.error("Failed to find profile by name", e);
-                    throw new RuntimeException(e);
+                    throw new TransparentException(e);
                 }
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());

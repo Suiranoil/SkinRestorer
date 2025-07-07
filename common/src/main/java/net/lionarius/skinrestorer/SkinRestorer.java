@@ -1,10 +1,12 @@
 package net.lionarius.skinrestorer;
 
+import com.google.common.base.Throwables;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
+import net.lionarius.skinrestorer.exception.TransparentException;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
@@ -147,7 +149,7 @@ public final class SkinRestorer {
                     
                     var skinResult = result.get();
                     if (skinResult.isError())
-                        return Result.<Collection<ServerPlayer>, String>error(skinResult.getErrorValue().getMessage());
+                        throw new TransparentException(Throwables.getRootCause(skinResult.getErrorValue()));
                     
                     var skinValue = SkinValue.fromProviderContextWithValue(context, skinResult.getSuccessValue().orElse(null));
                     
@@ -156,7 +158,7 @@ public final class SkinRestorer {
                     return Result.<Collection<ServerPlayer>, String>success(acceptedPlayers);
                 }, server)
                 .exceptionally(e -> {
-                    SkinRestorer.LOGGER.error(e.toString());
+                    SkinRestorer.LOGGER.error("Failed to set skin '{}:{}'", context.name(), context.argument(), e);
                     return Result.error(e.getMessage());
                 });
     }
