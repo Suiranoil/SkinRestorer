@@ -9,6 +9,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.exception.TransparentException;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.*;
 import net.minecraft.server.players.GameProfileCache;
@@ -51,7 +52,7 @@ public final class MojangSkinProvider implements SkinProvider {
                     var profile = MojangSkinProvider.getProfile(name);
                     callback.onProfileLookupSucceeded(profile);
                 } catch (IOException e) {
-                    callback.onProfileLookupFailed(new GameProfile(null, name), e);
+                    throw new TransparentException(e);
                 }
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
