@@ -86,7 +86,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
             var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
             SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
         } else {
-            SkinRestorer.LOGGER.warn("Failed to fetch skin: {}", result.getErrorValue().getMessage());
+            SkinRestorer.LOGGER.warn("Failed to fetch skin '{}:{}'", context.name(), context.argument(), result.getErrorValue());
         }
     }
 }
