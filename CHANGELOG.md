@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2025-07-09
+### Changed
+- Log full exception and argument when unable to fetch/set skin
+### Fixed
+- Fixed mojang provider using offline uuids when unable to fetch actual uuid resulting in `no profile with uuid` error
+
 ## [2.4.0] - 2025-07-05
 ### Fixed
 - Added support for player heads
