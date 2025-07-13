@@ -17,32 +17,35 @@ import java.util.function.Consumer;
 
 @Mixin(SkullBlockEntity.class)
 public abstract class SkullBlockEntityMixin {
-
+    
     @Shadow
     private static GameProfileCache profileCache;
-
+    
     @Inject(method = "updateGameprofile", at = @At("HEAD"),
             cancellable = true)
     private static void fetchProfileByName(GameProfile profile, Consumer<GameProfile> profileConsumer, CallbackInfo ci) {
-        if (profileCache == null || profile.isComplete())
+        if (profileCache == null)
             return;
-
+        
+        if (profile == null || profile.isComplete() || profile.getName() == null)
+            return;
+        
         var profileOpt = profileCache.get(profile.getName());
-
+        
         skinrestorer$replaceSkin(profileOpt, profileConsumer, ci);
     }
-
+    
     @Unique
     private static void skinrestorer$replaceSkin(Optional<GameProfile> profileOpt, Consumer<GameProfile> profileConsumer, CallbackInfo ci) {
         if (profileOpt.isEmpty())
             return;
-
+        
         var profile = PlayerUtils.cloneGameProfile(profileOpt.get());
-
+        
         if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
             var skin = SkinRestorer.getSkinStorage().getSkin(profile.getId(), false);
             PlayerUtils.applyRestoredSkin(profile, skin.value());
-
+            
             profileConsumer.accept(profile);
             ci.cancel();
         }
