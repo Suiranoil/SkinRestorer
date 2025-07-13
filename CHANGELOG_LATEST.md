@@ -1,4 +1,2 @@
-### Changed
-- Log full exception and argument when unable to fetch/set skin
 ### Fixed
-- Fixed mojang provider using offline uuids when unable to fetch actual uuid resulting in `no profile with uuid` error
+- Fix crash when head profile name is null (fixes [#60](https://github.com/Suiranoil/SkinRestorer/issues/60) and [#61](https://github.com/Suiranoil/SkinRestorer/issues/61))
