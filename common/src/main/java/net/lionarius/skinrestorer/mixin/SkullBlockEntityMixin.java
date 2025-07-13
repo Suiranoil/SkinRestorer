@@ -30,6 +30,9 @@ public abstract class SkullBlockEntityMixin {
         if (profileCache == null)
             return;
         
+        if (name == null)
+            return;
+        
         var profileOpt = profileCache.get(name);
         
         skinrestorer$replaceSkin(profileOpt, cir);
