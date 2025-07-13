@@ -22,6 +22,9 @@ public abstract class SkullBlockEntityMixin {
     @Inject(method = "fetchProfileByName", at = @At("HEAD"),
             cancellable = true)
     private static void fetchProfileByName(String name, Services services, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
+        if (name == null)
+            return;
+        
         var profileOpt = services.profileCache().get(name);
         
         skinrestorer$replaceSkin(profileOpt, cir);
@@ -30,6 +33,9 @@ public abstract class SkullBlockEntityMixin {
     @Inject(method = "fetchProfileById", at = @At("HEAD"),
             cancellable = true)
     private static void fetchProfileById(UUID id, Services services, BooleanSupplier cacheUninitialized, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
+        if (id == null)
+            return;
+        
         var profileOpt = services.profileCache().get(id);
         
         skinrestorer$replaceSkin(profileOpt, cir);
