@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.mixin;
 import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.util.PlayerUtils;
+import net.minecraft.Util;
 import net.minecraft.server.Services;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -13,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -33,13 +35,20 @@ public abstract class SkullBlockEntityMixin {
         if (name == null)
             return;
         
-        var profileOpt = profileCache.get(name);
+        var profileOpt = Optional.<GameProfile>empty();
+        var gameProfileInfo = ((GameProfileCacheAccessor) profileCache).getProfilesByName().get(name.toLowerCase(Locale.ROOT));
+        
+        if (gameProfileInfo != null)
+            profileOpt = Optional.of(gameProfileInfo.getProfile());
         
         skinrestorer$replaceSkin(profileOpt, cir);
     }
     
     @Unique
     private static void skinrestorer$replaceSkin(Optional<GameProfile> profileOpt, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
+        if (SkinRestorer.getMinecraftServer() == null)
+            return;
+        
         if (profileOpt.isEmpty())
             return;
         
@@ -51,7 +60,7 @@ public abstract class SkullBlockEntityMixin {
                 PlayerUtils.applyRestoredSkin(profile, skin.value());
                 
                 return Optional.of(profile);
-            }));
+            }, Util.backgroundExecutor()));
         }
     }
 }
