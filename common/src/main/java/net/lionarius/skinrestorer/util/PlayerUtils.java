@@ -47,14 +47,14 @@ public final class PlayerUtils {
         playerList.broadcastAll(new ClientboundPlayerInfoRemovePacket(List.of(player.getUUID())));
         playerList.broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singleton(player)));
         
-        var trackedEntity = (TrackedEntityAccessorInvoker) ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
+        var trackedEntity = ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
         if (trackedEntity != null) {
             var seenBy = Set.copyOf(trackedEntity.getSeenBy());
             for (var observerConnection : seenBy) {
                 var observer = observerConnection.getPlayer();
                 trackedEntity.invokeRemovePlayer(observer);
                 
-                var trackedObserverEntity = (TrackedEntityAccessorInvoker) ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
+                var trackedObserverEntity = ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
                 if (trackedObserverEntity != null) {
                     trackedObserverEntity.invokeRemovePlayer(player);
                     trackedObserverEntity.invokeUpdatePlayer(player);

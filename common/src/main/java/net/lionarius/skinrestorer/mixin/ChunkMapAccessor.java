@@ -9,5 +9,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface ChunkMapAccessor {
     
     @Accessor
-    Int2ObjectMap<Object> getEntityMap();
+    Int2ObjectMap<TrackedEntityAccessorInvoker> getEntityMap();
 }
