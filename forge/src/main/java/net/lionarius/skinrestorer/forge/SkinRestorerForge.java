@@ -4,6 +4,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,5 +27,10 @@ public final class SkinRestorerForge {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         SkinRestorer.Events.onServerStarted(event.getServer());
+    }
+    
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        SkinRestorer.Events.onServerStopped(event.getServer());
     }
 }

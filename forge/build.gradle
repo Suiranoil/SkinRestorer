@@ -33,7 +33,7 @@ minecraft {
     // Automatically enable forge AccessTransformers if the file exists
     // This location is hardcoded in Forge and can not be changed.
     // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
-    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    def at = project(":common").file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
         accessTransformer = at
     }
@@ -87,4 +87,8 @@ sourceSets.each {
     def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
     it.output.resourcesDir = dir
     it.java.destinationDirectory = dir
+}
+
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
