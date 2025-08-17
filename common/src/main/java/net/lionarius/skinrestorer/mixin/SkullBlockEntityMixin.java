@@ -63,7 +63,7 @@ public abstract class SkullBlockEntityMixin {
                 PlayerUtils.applyRestoredSkin(profile, skin.value());
                 
                 return Optional.of(profile);
-            }, Util.backgroundExecutor().forName("getProfile")));
+            }, Util.backgroundExecutor()));
         }
     }
 }
