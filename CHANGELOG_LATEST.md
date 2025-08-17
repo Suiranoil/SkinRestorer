@@ -1,2 +1,3 @@
 ### Fixed
-- Fix crash when head profile name is null (fixes [#60](https://github.com/Suiranoil/SkinRestorer/issues/60) and [#61](https://github.com/Suiranoil/SkinRestorer/issues/61))
+- Fixed crash on client when loading player head skin (fixes [#63](https://github.com/Suiranoil/SkinRestorer/issues/63) and [#64](https://github.com/Suiranoil/SkinRestorer/issues/64))
+- Fixed server freeze when loading player head skin

@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ public final class SkinRestorer {
     private static Path configDir;
     private static Config config;
     private static TickedScheduler tickedScheduler;
+    private static MinecraftServer minecraftServer;
     
     private SkinRestorer() {}
     
@@ -58,6 +60,10 @@ public final class SkinRestorer {
     
     public static TickedScheduler getTickedScheduler() {
         return SkinRestorer.tickedScheduler;
+    }
+    
+    public static @Nullable MinecraftServer getMinecraftServer() {
+        return SkinRestorer.minecraftServer;
     }
     
     public static Optional<SkinProvider> getProvider(String name) {
@@ -173,6 +179,14 @@ public final class SkinRestorer {
             SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
             SkinRestorer.tickedScheduler = new TickedScheduler(server);
             server.addTickable(SkinRestorer.tickedScheduler);
+            
+            SkinRestorer.minecraftServer = server;
+        }
+        
+        public static void onServerStopped(MinecraftServer server) {
+            SkinRestorer.skinStorage = null;
+            SkinRestorer.tickedScheduler = null;
+            SkinRestorer.minecraftServer = null;
         }
         
         public static void onCommandRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
