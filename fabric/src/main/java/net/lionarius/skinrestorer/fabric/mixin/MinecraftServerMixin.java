@@ -15,4 +15,10 @@ public abstract class MinecraftServerMixin {
     private void onServerStarted(CallbackInfo ci) {
         SkinRestorer.Events.onServerStarted((MinecraftServer) (Object) this);
     }
+    
+    @Inject(method = "runServer",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;onServerExit()V"))
+    private void onServerStopped(CallbackInfo ci) {
+        SkinRestorer.Events.onServerStopped((MinecraftServer) (Object) this);
+    }
 }

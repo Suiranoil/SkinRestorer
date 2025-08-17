@@ -6,6 +6,14 @@ publishMods {
     file = project.layout.buildDirectory.file("libs/${project.archivesBaseName}-${project.version}.jar").map { it.asFile }.getOrNull()
 
     modLoaders.add(project.name)
+
+    if (project.hasProperty('additional_modloaders') && !additional_modloaders.isEmpty())
+    {
+        def loaders = additional_modloaders.split(',')
+        for (loader in loaders)
+            modLoaders.add(loader)
+    }
+    
     type = STABLE
     version = project.version
     displayName = "[${project.name.capitalize()}] ${mod_name} ${mod_version}"
