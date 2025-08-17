@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -30,7 +31,11 @@ public abstract class SkullBlockEntityMixin {
         if (profile == null || profile.isComplete() || profile.getName() == null)
             return;
         
-        var profileOpt = profileCache.get(profile.getName());
+        var profileOpt = Optional.<GameProfile>empty();
+        var gameProfileInfo = ((GameProfileCacheAccessor) profileCache).getProfilesByName().get(profile.getName().toLowerCase(Locale.ROOT));
+        
+        if (gameProfileInfo != null)
+            profileOpt = Optional.of(gameProfileInfo.getProfile());
         
         skinrestorer$replaceSkin(profileOpt, profileConsumer, ci);
     }

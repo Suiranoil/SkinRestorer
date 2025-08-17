@@ -6,6 +6,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 @Mod(SkinRestorer.MOD_ID)
 @Mod.EventBusSubscriber(modid = SkinRestorer.MOD_ID)
@@ -26,5 +27,10 @@ public final class SkinRestorerNeoForge {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         SkinRestorer.Events.onServerStarted(event.getServer());
+    }
+    
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        SkinRestorer.Events.onServerStopped(event.getServer());
     }
 }
