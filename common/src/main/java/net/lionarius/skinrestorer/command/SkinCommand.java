@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.command;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -17,12 +18,10 @@ import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.NameAndId;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -73,41 +72,37 @@ public final class SkinCommand {
         
         SkinProviderContext context = null;
         var save = true;
-        if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.id())) {
-            if (profile.properties().containsKey(PlayerUtils.TEXTURES_KEY)) {
+        if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
+            if (profile.getProperties().containsKey(PlayerUtils.TEXTURES_KEY)) {
                 save = false;
                 context = MojangSkinProvider.skinProviderContextFromProfile(profile);
             }
         } else {
-            context = SkinRestorer.getSkinStorage().getSkin(profile.id()).toProviderContext();
+            context = SkinRestorer.getSkinStorage().getSkin(profile.getId()).toProviderContext();
         }
         
         if (context == null)
             return 0;
         
-        return SkinCommand.setSubcommand(src, Collections.singleton(new NameAndId(profile)), context, save, false);
+        return SkinCommand.setSubcommand(src, Collections.singleton(profile), context, save, false);
     }
     
     private static int resetSubcommand(
             CommandSourceStack src,
-            Collection<NameAndId> targets,
+            Collection<GameProfile> targets,
             boolean setByOperator
     ) {
         var updatedPlayers = new HashSet<ServerPlayer>();
-        for (var nameAndId : targets) {
+        for (var profile : targets) {
             SkinValue skin = null;
-            if (SkinRestorer.getSkinStorage().hasSavedSkin(nameAndId.id()))
-                skin = SkinRestorer.getSkinStorage().getSkin(nameAndId.id()).replaceValueWithOriginal();
+            if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId()))
+                skin = SkinRestorer.getSkinStorage().getSkin(profile.getId()).replaceValueWithOriginal();
             
             if (skin == null)
                 continue;
             
-            var player = src.getServer().getPlayerList().getPlayer(nameAndId.id());
-            if (player == null)
-                continue;
-            
-            var updatedPlayer = SkinRestorer.applySkin(src.getServer(), Collections.singleton(player), skin, false);
-            SkinRestorer.getSkinStorage().deleteSkin(nameAndId.id());
+            var updatedPlayer = SkinRestorer.applySkin(src.getServer(), Collections.singleton(profile), skin, false);
+            SkinRestorer.getSkinStorage().deleteSkin(profile.getId());
             
             updatedPlayers.addAll(updatedPlayer);
         }
@@ -123,24 +118,19 @@ public final class SkinCommand {
         if (src.getPlayer() == null)
             return 0;
         
-        return resetSubcommand(src, Collections.singleton(src.getPlayer().nameAndId()), false);
+        return resetSubcommand(src, Collections.singleton(src.getPlayer().getGameProfile()), false);
     }
     
     private static int setSubcommand(
             CommandSourceStack src,
-            Collection<NameAndId> targets,
+            Collection<GameProfile> targets,
             SkinProviderContext context,
             boolean save,
             boolean setByOperator
     ) {
         src.sendSystemMessage(Translation.translatableWithFallback(Translation.COMMAND_SKIN_LOADING_KEY));
         
-        var profileTargets = targets.stream()
-                .map(nameAndId -> src.getServer().getPlayerList().getPlayer(nameAndId.id()))
-                .filter(Objects::nonNull)
-                .toList();
-        
-        SkinRestorer.setSkinAsync(src.getServer(), profileTargets, context, save).thenAccept(result -> {
+        SkinRestorer.setSkinAsync(src.getServer(), targets, context, save).thenAccept(result -> {
             if (result.isError()) {
                 src.sendFailure(Translation.translatableWithFallback(
                         Translation.COMMAND_SKIN_FAILED_KEY,
@@ -159,7 +149,7 @@ public final class SkinCommand {
     
     private static int setSubcommand(
             CommandSourceStack src,
-            Collection<NameAndId> targets,
+            Collection<GameProfile> targets,
             SkinProviderContext context,
             boolean setByOperator
     ) {
@@ -173,7 +163,7 @@ public final class SkinCommand {
         if (src.getPlayer() == null)
             return 0;
         
-        return setSubcommand(src, Collections.singleton(src.getPlayer().nameAndId()), context, false);
+        return setSubcommand(src, Collections.singleton(src.getPlayer().getGameProfile()), context, false);
     }
     
     private static int configReloadSubcommand(CommandContext<CommandSourceStack> context) {
@@ -266,7 +256,7 @@ public final class SkinCommand {
     }
     
     private static RequiredArgumentBuilder<CommandSourceStack, GameProfileArgument.Result> makeTargetsArgument(
-            BiFunction<CommandContext<CommandSourceStack>, Collection<NameAndId>, Integer> consumer
+            BiFunction<CommandContext<CommandSourceStack>, Collection<GameProfile>, Integer> consumer
     ) {
         return argument("targets", GameProfileArgument.gameProfile())
                 .requires(source -> source.hasPermission(2))

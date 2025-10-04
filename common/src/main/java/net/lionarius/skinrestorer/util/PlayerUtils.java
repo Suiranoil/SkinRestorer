@@ -1,11 +1,9 @@
 package net.lionarius.skinrestorer.util;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
 import net.minecraft.network.chat.Component;
@@ -98,26 +96,21 @@ public final class PlayerUtils {
     }
     
     public static GameProfile cloneGameProfile(GameProfile profile) {
-        var newProfile = new GameProfile(profile.id(), profile.name());
-        newProfile.properties().putAll(profile.properties());
+        var newProfile = new GameProfile(profile.getId(), profile.getName());
+        newProfile.getProperties().putAll(profile.getProperties());
         
         return newProfile;
     }
     
     public static Property getPlayerSkin(GameProfile profile) {
-        return Iterables.getFirst(profile.properties().get(TEXTURES_KEY), null);
+        return Iterables.getFirst(profile.getProperties().get(TEXTURES_KEY), null);
     }
     
-    public static GameProfile applyRestoredSkin(GameProfile profile, Property skin) {
-        var propertiesMap = profile.properties();
+    public static void applyRestoredSkin(GameProfile profile, Property skin) {
+        profile.getProperties().removeAll(TEXTURES_KEY);
         
-        var newProperties = LinkedHashMultimap.create(propertiesMap);
-        newProperties.removeAll(TEXTURES_KEY);
-        if (skin != null) {
-            newProperties.put(TEXTURES_KEY, skin);
-        }
-        
-        return new GameProfile(profile.id(), profile.name(), new PropertyMap(newProperties));
+        if (skin != null)
+            profile.getProperties().put(TEXTURES_KEY, skin);
     }
     
     public static boolean areSkinPropertiesEquals(Property x, Property y) {
@@ -141,7 +134,7 @@ public final class PlayerUtils {
     
     public static GameProfile toProfile(MinecraftProfilePropertiesResponse response) {
         final GameProfile profile = new GameProfile(response.id(), response.name());
-        profile.properties().putAll(response.properties());
+        profile.getProperties().putAll(response.properties());
         return profile;
     }
 }

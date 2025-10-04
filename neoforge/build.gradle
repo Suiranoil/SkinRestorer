@@ -55,4 +55,6 @@ dependencies {
             prefer mineskin_client_version
         }
     }
+
+    additionalRuntimeClasspath "org.mineskin:java-client:${mineskin_client_version}"
 }

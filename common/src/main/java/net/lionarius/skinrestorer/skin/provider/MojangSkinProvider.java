@@ -8,7 +8,6 @@ import com.mojang.authlib.*;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
-import com.mojang.authlib.yggdrasil.response.NameAndId;
 import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.exception.TransparentException;
@@ -17,7 +16,7 @@ import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
-import net.minecraft.server.players.CachedUserNameToIdResolver;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,11 +31,13 @@ import java.util.concurrent.TimeUnit;
 public final class MojangSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "mojang";
-    public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
+    
     private static final Environment ENVIRONMENT;
     private static final URI SERVICES_SERVER_URI;
     private static final URI SESSION_SERVER_URI;
-    private static final CachedUserNameToIdResolver PROFILE_CACHE;
+    
+    public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
+    private static final GameProfileCache PROFILE_CACHE;
     
     private static LoadingCache<UUID, Optional<Property>> SKIN_CACHE;
     
@@ -50,13 +51,13 @@ public final class MojangSkinProvider implements SkinProvider {
             throw new IllegalArgumentException(e);
         }
         
-        PROFILE_CACHE = new CachedUserNameToIdResolver(new GameProfileRepository() {
+        PROFILE_CACHE = new GameProfileCache(new GameProfileRepository() {
             @Override
             public void findProfilesByNames(String[] names, ProfileLookupCallback callback) {
                 for (var name : names) {
                     try {
                         var profile = MojangSkinProvider.getProfile(name);
-                        callback.onProfileLookupSucceeded(profile.name(), profile.id());
+                        callback.onProfileLookupSucceeded(profile);
                     } catch (IOException e) {
                         throw new TransparentException(e);
                     }
@@ -64,10 +65,10 @@ public final class MojangSkinProvider implements SkinProvider {
             }
             
             @Override
-            public Optional<NameAndId> findProfileByName(String name) {
+            public Optional<GameProfile> findProfileByName(String name) {
                 try {
                     var profile = MojangSkinProvider.getProfile(name);
-                    return Optional.of(new NameAndId(profile.id(), profile.name()));
+                    return Optional.of(profile);
                 } catch (IOException e) {
                     throw new TransparentException(e);
                 }
@@ -94,7 +95,7 @@ public final class MojangSkinProvider implements SkinProvider {
     }
     
     public static SkinProviderContext skinProviderContextFromProfile(GameProfile gameProfile) {
-        return new SkinProviderContext(MojangSkinProvider.PROVIDER_NAME, gameProfile.name(), null);
+        return new SkinProviderContext(MojangSkinProvider.PROVIDER_NAME, gameProfile.getName(), null);
     }
     
     @Override
@@ -117,7 +118,7 @@ public final class MojangSkinProvider implements SkinProvider {
             if (cachedProfile.isEmpty())
                 throw new IllegalArgumentException("no profile found for " + username);
             
-            return Result.success(SKIN_CACHE.get(cachedProfile.get().id()));
+            return Result.success(SKIN_CACHE.get(cachedProfile.get().getId()));
         } catch (UncheckedExecutionException e) {
             return Result.error((Exception) e.getCause());
         } catch (Exception e) {
@@ -132,7 +133,7 @@ public final class MojangSkinProvider implements SkinProvider {
         return Optional.ofNullable(textures);
     }
     
-    private static NameAndId getProfile(final String name) throws IOException {
+    private static GameProfile getProfile(final String name) throws IOException {
         var request = HttpRequest.newBuilder()
                 .uri(MojangSkinProvider.SERVICES_SERVER_URI
                         .resolve("/minecraft/profile/lookup/name/")
@@ -147,7 +148,7 @@ public final class MojangSkinProvider implements SkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with name " + name);
         
-        return JsonUtils.fromJson(response.body(), NameAndId.class);
+        return JsonUtils.fromJson(response.body(), GameProfile.class);
     }
     
     private static GameProfile getProfileWithProperties(UUID uuid) throws IOException {
@@ -165,6 +166,6 @@ public final class MojangSkinProvider implements SkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with uuid " + uuid);
         
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).profile();
+        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
     }
 }

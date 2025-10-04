@@ -57,6 +57,6 @@ public abstract class PlayerListMixin {
     @Unique
     private static void skinrestorer$tryApplySkin(MinecraftServer server, ServerPlayer player) {
         if (SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID()))
-            SkinRestorer.applySkin(server, Collections.singleton(player), SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
+            SkinRestorer.applySkin(server, Collections.singleton(player.getGameProfile()), SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.util.UUIDTypeAdapter;
@@ -21,6 +22,7 @@ public final class JsonUtils {
             .registerTypeAdapterFactory(new PostProcessingEnabler())
             .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
             .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
+            .registerTypeAdapter(GameProfile.class, new GameProfile.Serializer())
             .setPrettyPrinting()
             .create();
     
