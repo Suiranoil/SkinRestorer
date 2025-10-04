@@ -10,8 +10,7 @@
         "PlayerListMixin",
         "ServerLoginPacketListenerImplMixin",
         "TrackedEntityAccessorInvoker",
-        "SkullBlockEntityMixin",
-        "GameProfileCacheAccessor"
+        "PlayerAccessor"
     ],
     "injectors": {
         "defaultRequire": 1

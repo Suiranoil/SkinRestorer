@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.neoforge.compat.skinshuffle;
 
+import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.compat.skinshuffle.*;
 import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,6 +27,6 @@ public final class SkinShuffleModEventHandler {
     
     private static void handleSkinRefreshPacket(SkinShuffleSkinRefreshPayload payload, IPayloadContext context) {
         var player = (ServerPlayer) context.player();
-        SkinShuffleCompatibility.handleSkinRefresh(player.getServer(), player, payload);
+        SkinShuffleCompatibility.handleSkinRefresh(SkinRestorer.getMinecraftServer(), player, payload);
     }
 }

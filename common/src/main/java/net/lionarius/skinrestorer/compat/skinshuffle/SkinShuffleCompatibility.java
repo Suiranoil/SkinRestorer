@@ -43,7 +43,7 @@ public class SkinShuffleCompatibility {
         server.execute(() -> {
             SkinRestorer.applySkin(
                     server,
-                    Collections.singleton(player.getGameProfile()),
+                    Collections.singleton(player),
                     new SkinValue(SkinShuffleSkinProvider.PROVIDER_NAME, null, null, property),
                     !server.usesAuthentication()
             );

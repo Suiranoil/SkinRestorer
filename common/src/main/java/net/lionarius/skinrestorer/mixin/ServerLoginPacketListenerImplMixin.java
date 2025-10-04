@@ -27,7 +27,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
     private CompletableFuture<Void> skinrestorer$pendingSkin;
     
     @Inject(method = "verifyLoginAndFinishConnectionSetup", at = @At(value = "INVOKE",
-                                                                     target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"),
+                                                                     target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lnet/minecraft/server/players/NameAndId;)Lnet/minecraft/network/chat/Component;"),
             cancellable = true)
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
@@ -37,14 +37,14 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 assert profile != null;
                 var originalSkin = PlayerUtils.getPlayerSkin(profile);
                 
-                if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
+                if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.id())) {
                     if (originalSkin != null) { // update to the latest official skin
-                        var value = SkinRestorer.getSkinStorage().getSkin(profile.getId());
-                        SkinRestorer.getSkinStorage().setSkin(profile.getId(), value.setOriginalValue(originalSkin));
+                        var value = SkinRestorer.getSkinStorage().getSkin(profile.id());
+                        SkinRestorer.getSkinStorage().setSkin(profile.id(), value.setOriginalValue(originalSkin));
                     }
                     
                     if (SkinRestorer.getConfig().refreshSkinOnJoin()) {
-                        var currentSkin = SkinRestorer.getSkinStorage().getSkin(profile.getId());
+                        var currentSkin = SkinRestorer.getSkinStorage().getSkin(profile.id());
                         var context = currentSkin.toProviderContext();
                         
                         skinrestorer$fetchSkin(profile, context);
@@ -56,7 +56,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 if (originalSkin == null && SkinRestorer.getConfig().fetchSkinOnFirstJoin()) {
                     var context = new SkinProviderContext(
                             SkinRestorer.getConfig().firstJoinSkinProvider().getName(),
-                            profile.getName(),
+                            profile.name(),
                             null
                     );
                     skinrestorer$fetchSkin(profile, context);
@@ -72,7 +72,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
     
     @Unique
     private static void skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
-        SkinRestorer.LOGGER.debug("Fetching {}'s skin", profile.getName());
+        SkinRestorer.LOGGER.debug("Fetching {}'s skin", profile.name());
         
         var result = SkinRestorer.getProvider(context.name()).map(
                 provider -> provider.fetchSkin(context.argument(), context.variant())
@@ -80,7 +80,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
         
         if (!result.isError()) {
             var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
-            SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
+            SkinRestorer.getSkinStorage().setSkin(profile.id(), value);
         } else {
             SkinRestorer.LOGGER.warn("Failed to fetch skin '{}:{}'", context.name(), context.argument(), result.getErrorValue());
         }

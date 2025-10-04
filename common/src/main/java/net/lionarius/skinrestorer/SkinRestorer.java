@@ -1,12 +1,12 @@
 package net.lionarius.skinrestorer;
 
 import com.google.common.base.Throwables;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.exception.TransparentException;
+import net.lionarius.skinrestorer.mixin.PlayerAccessor;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
@@ -108,23 +108,26 @@ public final class SkinRestorer {
         MineskinSkinProvider.reload();
     }
     
-    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<GameProfile> targets, SkinValue value, boolean save) {
+    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value, boolean save) {
         var acceptedPlayers = new HashSet<ServerPlayer>();
         
-        for (var profile : targets) {
-            if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId()))
-                value = value.setOriginalValue(PlayerUtils.getPlayerSkin(profile));
+        for (var player : targets) {
+            var profile = player.getGameProfile();
+            var skin = PlayerUtils.getPlayerSkin(profile);
             
-            if (PlayerUtils.areSkinPropertiesEquals(value.value(), PlayerUtils.getPlayerSkin(profile)))
+            if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.id()))
+                value = value.setOriginalValue(skin);
+            
+            if (PlayerUtils.areSkinPropertiesEquals(value.value(), skin))
                 continue;
             
             if (save)
-                SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
+                SkinRestorer.getSkinStorage().setSkin(profile.id(), value);
             
-            PlayerUtils.applyRestoredSkin(profile, value.value());
+            var newProfile = PlayerUtils.applyRestoredSkin(profile, value.value());
+            ((PlayerAccessor) player).setGameProfile(newProfile);
             
-            var player = server.getPlayerList().getPlayer(profile.getId());
-            if (player == null)
+            if (player.connection == null)
                 continue;
             
             PlayerUtils.refreshPlayer(player);
@@ -136,13 +139,13 @@ public final class SkinRestorer {
         return acceptedPlayers;
     }
     
-    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<GameProfile> targets, SkinValue value) {
+    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value) {
         return SkinRestorer.applySkin(server, targets, value, true);
     }
     
     public static CompletableFuture<Result<Collection<ServerPlayer>, String>> setSkinAsync(
             MinecraftServer server,
-            Collection<GameProfile> targets,
+            Collection<ServerPlayer> targets,
             SkinProviderContext context,
             boolean save
     ) {

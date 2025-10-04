@@ -40,6 +40,6 @@ public class SkinShufflePacketHandler {
         if (!context.isServerSide() || sender == null)
             return;
         
-        SkinShuffleCompatibility.handleSkinRefresh(sender.getServer(), sender, payload);
+        SkinShuffleCompatibility.handleSkinRefresh(SkinRestorer.getMinecraftServer(), sender, payload);
     }
 }

@@ -32,6 +32,6 @@ public final class SkinShuffleCompatibility {
     }
     
     private static void handleSkinRefreshPacket(SkinShuffleSkinRefreshPayload payload, ServerPlayNetworking.Context context) {
-        net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility.handleSkinRefresh(context.player().getServer(), context.player(), payload);
+        net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility.handleSkinRefresh(SkinRestorer.getMinecraftServer(), context.player(), payload);
     }
 }
