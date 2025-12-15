@@ -15,7 +15,7 @@ import net.lionarius.skinrestorer.skin.provider.*;
 import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.*;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -70,8 +70,8 @@ public final class SkinRestorer {
         return Optional.ofNullable(SkinRestorer.providersRegistry.get(name));
     }
     
-    public static Identifier resourceLocation(String name) {
-        return Identifier.fromNamespaceAndPath(SkinRestorer.MOD_ID, name);
+    public static ResourceLocation resourceLocation(String name) {
+        return ResourceLocation.fromNamespaceAndPath(SkinRestorer.MOD_ID, name);
     }
     
     public static String assetPath(String name) {
