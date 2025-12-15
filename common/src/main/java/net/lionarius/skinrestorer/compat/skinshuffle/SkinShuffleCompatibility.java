@@ -5,7 +5,7 @@ import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.SkinShuffleSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -23,8 +23,8 @@ public class SkinShuffleCompatibility {
         return SkinShuffleCompatibility.SHOULD_APPLY;
     }
     
-    public static ResourceLocation resourceLocation(String name) {
-        return ResourceLocation.fromNamespaceAndPath(SkinShuffleCompatibility.MOD_ID, name);
+    public static Identifier resourceLocation(String name) {
+        return Identifier.fromNamespaceAndPath(SkinShuffleCompatibility.MOD_ID, name);
     }
     
     public static void onPlayerJoin(ServerPlayer player) {

@@ -15,6 +15,7 @@ import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
@@ -55,7 +56,7 @@ public final class SkinCommand {
         
         base.then(
                 literal("config")
-                        .requires(commandSourceStack -> commandSourceStack.hasPermission(4))
+                        .requires(commandSourceStack -> Commands.LEVEL_OWNERS.check(commandSourceStack.permissions()))
                         .then(literal("reload").executes(SkinCommand::configReloadSubcommand))
         );
         
@@ -269,7 +270,7 @@ public final class SkinCommand {
             BiFunction<CommandContext<CommandSourceStack>, Collection<NameAndId>, Integer> consumer
     ) {
         return argument("targets", GameProfileArgument.gameProfile())
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .executes(context -> consumer.apply(context, GameProfileArgument.getGameProfiles(context, "targets")));
     }
 }

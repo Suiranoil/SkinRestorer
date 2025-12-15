@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftServerMixin {
     
     @Inject(method = "runServer",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getNanos()J", ordinal = 0))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getNanos()J", ordinal = 0))
     private void onServerStarted(CallbackInfo ci) {
         SkinRestorer.Events.onServerStarted((MinecraftServer) (Object) this);
     }
