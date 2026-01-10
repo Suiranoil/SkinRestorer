@@ -17,10 +17,10 @@ neoForge {
         accessTransformers.from(at.absolutePath)
     }
 
-//    parchment {
-//        minecraftVersion = parchment_minecraft
-//        mappingsVersion = parchment_version
-//    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
 
     runs {
         configureEach {
