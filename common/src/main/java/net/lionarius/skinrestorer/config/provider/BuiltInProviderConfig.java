@@ -8,8 +8,13 @@ public abstract class BuiltInProviderConfig implements GsonPostProcessable {
     protected String name;
     protected CacheConfig cache;
     
+    
     public BuiltInProviderConfig(String name, CacheConfig cache) {
-        this.enabled = true;
+        this(name, cache, true);
+    }
+    
+    public BuiltInProviderConfig(String name, CacheConfig cache, boolean enabled) {
+        this.enabled = enabled;
         this.name = name;
         this.cache = cache;
     }
