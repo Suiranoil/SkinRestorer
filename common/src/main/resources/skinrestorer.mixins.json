@@ -7,10 +7,10 @@
     "refmap": "${mod_id}.refmap.json",
     "mixins": [
         "ChunkMapAccessor",
+        "PlayerAccessor",
         "PlayerListMixin",
         "ServerLoginPacketListenerImplMixin",
-        "TrackedEntityAccessorInvoker",
-        "PlayerAccessor"
+        "TrackedEntityAccessorInvoker"
     ],
     "injectors": {
         "defaultRequire": 1
