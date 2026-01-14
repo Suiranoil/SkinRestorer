@@ -1,3 +1,3 @@
-### Fixed
-- Fixed crash on client when loading player head skin (fixes [#63](https://github.com/Suiranoil/SkinRestorer/issues/63) and [#64](https://github.com/Suiranoil/SkinRestorer/issues/64))
-- Fixed server freeze when loading player head skin
+### Added
+- Added collection skin provider (allows assigning random skins from a predefined set) (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providerscollection))
+- Added `forceFirstJoinSkinFetch` config option to force skin fetch on first join even if player already has a skin (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#forcefirstjoinskinfetch))

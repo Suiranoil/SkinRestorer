@@ -22,6 +22,8 @@ import org.mineskin.response.QueueResponse;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -94,13 +96,18 @@ public final class MineskinSkinProvider implements SkinProvider {
         }
     }
     
-    private static Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
+    static Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
         var mineskinVariant = switch (variant) {
             case CLASSIC -> Variant.CLASSIC;
             case SLIM -> Variant.SLIM;
         };
         
-        var request = GenerateRequest.url(uri)
+        var request = "file".equals(uri.getScheme())
+                ? GenerateRequest.upload(Files.newInputStream(Path.of(uri)))
+                .variant(mineskinVariant)
+                .name("skinrestorer-skin")
+                .visibility(Visibility.UNLISTED)
+                : GenerateRequest.url(uri)
                 .variant(mineskinVariant)
                 .name("skinrestorer-skin")
                 .visibility(Visibility.UNLISTED);
