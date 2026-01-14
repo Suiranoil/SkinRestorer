@@ -22,6 +22,8 @@ public final class Config implements GsonPostProcessable {
     
     private boolean fetchSkinOnFirstJoin = true;
     
+    private boolean forceFirstJoinSkinFetch = false;
+    
     private FirstJoinSkinProvider firstJoinSkinProvider = FirstJoinSkinProvider.MOJANG;
     
     private String proxy = "";
@@ -45,6 +47,10 @@ public final class Config implements GsonPostProcessable {
     
     public boolean fetchSkinOnFirstJoin() {
         return this.fetchSkinOnFirstJoin;
+    }
+    
+    public boolean forceFirstJoinSkinFetch() {
+        return this.forceFirstJoinSkinFetch;
     }
     
     public FirstJoinSkinProvider firstJoinSkinProvider() {

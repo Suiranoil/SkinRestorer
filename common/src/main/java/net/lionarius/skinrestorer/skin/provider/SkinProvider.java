@@ -13,6 +13,7 @@ public interface SkinProvider {
     MojangSkinProvider MOJANG = new MojangSkinProvider();
     ElyBySkinProvider ELY_BY = new ElyBySkinProvider();
     MineskinSkinProvider MINESKIN = new MineskinSkinProvider();
+    CollectionSkinProvider COLLECTION = new CollectionSkinProvider();
     SkinShuffleSkinProvider SKIN_SHUFFLE = new SkinShuffleSkinProvider();
     
     Set<String> BUILTIN_PROVIDER_NAMES = ImmutableSet.of(
@@ -20,6 +21,7 @@ public interface SkinProvider {
             MojangSkinProvider.PROVIDER_NAME,
             ElyBySkinProvider.PROVIDER_NAME,
             MineskinSkinProvider.PROVIDER_NAME,
+            CollectionSkinProvider.PROVIDER_NAME,
             SkinShuffleSkinProvider.PROVIDER_NAME
     );
     
