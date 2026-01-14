@@ -1,23 +1,27 @@
 package net.lionarius.skinrestorer.config.provider;
 
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.config.provider.collection.CollectionProviderConfig;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 
 public final class ProvidersConfig implements GsonPostProcessable {
     public static final ProvidersConfig DEFAULT = new ProvidersConfig(
             new MojangProviderConfig(),
             new ElyByProviderConfig(),
-            new MineskinProviderConfig()
+            new MineskinProviderConfig(),
+            new CollectionProviderConfig()
     );
     
     private MojangProviderConfig mojang;
     private ElyByProviderConfig ely_by;
     private MineskinProviderConfig mineskin;
+    private CollectionProviderConfig collection;
     
-    public ProvidersConfig(MojangProviderConfig mojang, ElyByProviderConfig ely_by, MineskinProviderConfig mineskin) {
+    public ProvidersConfig(MojangProviderConfig mojang, ElyByProviderConfig ely_by, MineskinProviderConfig mineskin, CollectionProviderConfig collection) {
         this.mojang = mojang;
         this.ely_by = ely_by;
         this.mineskin = mineskin;
+        this.collection = collection;
     }
     
     public MojangProviderConfig mojang() {
@@ -30,6 +34,10 @@ public final class ProvidersConfig implements GsonPostProcessable {
     
     public MineskinProviderConfig mineskin() {
         return this.mineskin;
+    }
+    
+    public CollectionProviderConfig collection() {
+        return this.collection;
     }
     
     @Override
@@ -47,6 +55,11 @@ public final class ProvidersConfig implements GsonPostProcessable {
         if (this.mineskin == null) {
             SkinRestorer.LOGGER.warn("Mineskin provider config is null, using default");
             this.mineskin = ProvidersConfig.DEFAULT.mineskin();
+        }
+        
+        if (this.collection == null) {
+            SkinRestorer.LOGGER.warn("Collection provider config is null, using default");
+            this.collection = ProvidersConfig.DEFAULT.collection();
         }
     }
 }
