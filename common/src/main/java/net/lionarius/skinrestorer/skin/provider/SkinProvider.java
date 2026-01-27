@@ -13,6 +13,7 @@ public interface SkinProvider {
     MojangSkinProvider MOJANG = new MojangSkinProvider();
     ElyBySkinProvider ELY_BY = new ElyBySkinProvider();
     MineskinSkinProvider MINESKIN = new MineskinSkinProvider();
+    DraslSkinProvider DRASL = new DraslSkinProvider();
     CollectionSkinProvider COLLECTION = new CollectionSkinProvider();
     SkinShuffleSkinProvider SKIN_SHUFFLE = new SkinShuffleSkinProvider();
     
@@ -21,6 +22,7 @@ public interface SkinProvider {
             MojangSkinProvider.PROVIDER_NAME,
             ElyBySkinProvider.PROVIDER_NAME,
             MineskinSkinProvider.PROVIDER_NAME,
+            DraslSkinProvider.PROVIDER_NAME,
             CollectionSkinProvider.PROVIDER_NAME,
             SkinShuffleSkinProvider.PROVIDER_NAME
     );
