@@ -7,7 +7,9 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
+import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
+import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ChunkMap;
@@ -106,6 +108,37 @@ public final class PlayerUtils {
     
     public static Property getPlayerSkin(GameProfile profile) {
         return Iterables.getFirst(profile.properties().get(TEXTURES_KEY), null);
+    }
+    
+    public static Pair<String, SkinVariant> getSkinUrl(GameProfile profile) {
+        var skin = getPlayerSkin(profile);
+        if (skin == null)
+            return null;
+        
+        var textureJson = JsonUtils.skinPropertyToJson(skin);
+        if (textureJson == null || !textureJson.has("textures"))
+            return null;
+        
+        var textures = textureJson.getAsJsonObject("textures");
+        if (!textures.has("SKIN"))
+            return null;
+        
+        var skinTexture = textures.getAsJsonObject("SKIN");
+        if (!skinTexture.has("url"))
+            return null;
+        
+        String url = skinTexture.get("url").getAsString();
+        SkinVariant variant = SkinVariant.CLASSIC;
+
+        if (skinTexture.has("metadata")) {
+            var metadata = skinTexture.getAsJsonObject("metadata");
+            if (metadata.has("model")) {
+                String model = metadata.get("model").getAsString();
+                variant = model.equals("slim") ? SkinVariant.SLIM : SkinVariant.CLASSIC;
+            }
+        }
+        
+        return Pair.of(url, variant);
     }
     
     public static GameProfile applyRestoredSkin(GameProfile profile, Property skin) {

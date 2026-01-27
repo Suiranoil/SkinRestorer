@@ -2,6 +2,7 @@ package net.lionarius.skinrestorer.config;
 
 import com.google.gson.annotations.SerializedName;
 import net.lionarius.skinrestorer.skin.provider.CollectionSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.DraslSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.ElyBySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
 
@@ -10,6 +11,8 @@ public enum FirstJoinSkinProvider {
     MOJANG(MojangSkinProvider.PROVIDER_NAME),
     @SerializedName(value = "ELY.BY", alternate = {"ely.by", "ELY_BY", "ely_by"})
     ELY_BY(ElyBySkinProvider.PROVIDER_NAME),
+    @SerializedName(value = "DRASL", alternate = {"drasl"})
+    DRASL(DraslSkinProvider.PROVIDER_NAME),
     @SerializedName(value = "COLLECTION", alternate = {"collection"})
     COLLECTION(CollectionSkinProvider.PROVIDER_NAME);
     
