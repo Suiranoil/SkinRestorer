@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.skin.provider;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -7,12 +8,9 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import com.mojang.authlib.yggdrasil.response.NameAndId;
-import com.mojang.util.UndashedUuid;
-import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.mineskin.Java11RequestHandler;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
@@ -42,14 +40,14 @@ public final class DraslSkinProvider implements SkinProvider {
     private static MineSkinClient MINESKIN_CLIENT;
     
     private static LoadingCache<String, Optional<Property>> SKIN_CACHE;
+    private static Cache<String, Property> SIGNATURE_CACHE;
     
     private static URI BASE_URL;
     
     public static void reload() {
         var config = SkinRestorer.getConfig();
         var mineskinApiKey = config.providersConfig().mineskin().apiKey();
-        var draslConfig = config.providersConfig().drasl();
-        var draslUrl = draslConfig.url();
+        var draslUrl = config.providersConfig().drasl().url();
 
         if (draslUrl != null && !draslUrl.isEmpty()) {
             try {
@@ -90,6 +88,11 @@ public final class DraslSkinProvider implements SkinProvider {
                         return DraslSkinProvider.loadSkin(key);
                     }
                 });
+        
+        SIGNATURE_CACHE = CacheBuilder.newBuilder()
+                .expireAfterAccess(24, TimeUnit.HOURS)
+                .maximumSize(1000)
+                .build();
     }
     
     @Override
@@ -110,7 +113,7 @@ public final class DraslSkinProvider implements SkinProvider {
             
             var usernameLowerCase = username.toLowerCase();
             
-            return Result.success(SKIN_CACHE.get(username));
+            return Result.success(SKIN_CACHE.get(usernameLowerCase));
         } catch (UncheckedExecutionException e) {
             return Result.error((Exception) e.getCause());
         } catch (Exception e) {
@@ -126,12 +129,24 @@ public final class DraslSkinProvider implements SkinProvider {
         if (skin == null)
             return Optional.empty();
         
-        return DraslSkinProvider.signSkinUrl(skin.first(), skin.second());
+        var textureUrl = skin.first();
+        var variant = skin.second();
+        
+        var cachedSignature = SIGNATURE_CACHE.getIfPresent(textureUrl);
+        
+        if (cachedSignature != null) {
+            return Optional.of(cachedSignature);
+        }
+        
+        var signed = DraslSkinProvider.signSkinUrl(textureUrl, variant);
+        signed.ifPresent(prop -> SIGNATURE_CACHE.put(textureUrl, prop));
+        
+        return signed;
     }
     
     private static NameAndId getProfile(final String name) throws IOException {
         if (BASE_URL == null)
-            throw new IllegalStateException("Drasl is not configured, check your config.");
+            throw new IllegalStateException("Drasl is not configured in this server.");
         
         var request = HttpRequest.newBuilder()
                 .uri(DraslSkinProvider.BASE_URL
@@ -151,9 +166,6 @@ public final class DraslSkinProvider implements SkinProvider {
     }
     
     private static com.mojang.authlib.GameProfile getProfileWithProperties(UUID uuid) throws Exception {
-        if (BASE_URL == null)
-            throw new IllegalStateException("Drasl BASE_URL is not initialized. Make sure the Drasl provider is properly configured and loaded.");
-        
         var request = HttpRequest.newBuilder()
                 .uri(DraslSkinProvider.BASE_URL
                         .resolve("/session/minecraft/profile/")
