@@ -10,7 +10,7 @@ public final class DraslProviderConfig extends BuiltInProviderConfig {
     private String url;
 
     public DraslProviderConfig() {
-        super(DraslSkinProvider.PROVIDER_NAME, DEFAULT_CACHE_VALUE);
+        super(DraslSkinProvider.PROVIDER_NAME, DEFAULT_CACHE_VALUE, false);
 
         this.url = "";
     }

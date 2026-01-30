@@ -9,7 +9,6 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import com.mojang.authlib.yggdrasil.response.NameAndId;
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.mineskin.Java11RequestHandler;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -17,17 +16,10 @@ import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
-import org.mineskin.MineSkinClient;
-import org.mineskin.data.Variant;
-import org.mineskin.data.Visibility;
-import org.mineskin.request.GenerateRequest;
-import org.mineskin.response.QueueResponse;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.UUID;
@@ -37,8 +29,6 @@ public final class DraslSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "drasl";
     
-    private static MineSkinClient MINESKIN_CLIENT;
-    
     private static LoadingCache<String, Optional<Property>> SKIN_CACHE;
     private static Cache<String, Property> SIGNATURE_CACHE;
     
@@ -46,7 +36,6 @@ public final class DraslSkinProvider implements SkinProvider {
     
     public static void reload() {
         var config = SkinRestorer.getConfig();
-        var mineskinApiKey = config.providersConfig().mineskin().apiKey();
         var draslUrl = config.providersConfig().drasl().url();
 
         if (draslUrl != null && !draslUrl.isEmpty()) {
@@ -56,22 +45,6 @@ public final class DraslSkinProvider implements SkinProvider {
                 SkinRestorer.LOGGER.warn("Invalid Drasl base URL: {}", draslUrl, e);
             }
         }
-
-        MINESKIN_CLIENT = MineSkinClient
-                .builder()
-                .userAgent(WebUtils.USER_AGENT)
-                .gson(JsonUtils.GSON)
-                .timeout((int) Duration.ofSeconds(config.requestTimeout()).toMillis())
-                .requestHandler((baseUrl, userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
-                        baseUrl,
-                        userAgent,
-                        apiKey,
-                        timeout,
-                        gson,
-                        SkinRestorer.getConfig().proxy().map(proxy -> new InetSocketAddress(proxy.host(), proxy.port())).orElse(null)
-                ))
-                .apiKey(mineskinApiKey.isEmpty() ? null : mineskinApiKey)
-                .build();
         
         createCache();
     }
@@ -138,7 +111,7 @@ public final class DraslSkinProvider implements SkinProvider {
             return Optional.of(cachedSignature);
         }
         
-        var signed = DraslSkinProvider.signSkinUrl(textureUrl, variant);
+        var signed = MineskinSkinProvider.loadSkin(new URI(textureUrl), variant);
         signed.ifPresent(prop -> SIGNATURE_CACHE.put(textureUrl, prop));
         
         return signed;
@@ -181,29 +154,5 @@ public final class DraslSkinProvider implements SkinProvider {
             throw new IllegalArgumentException("no profile with uuid " + uuid);
         
         return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).profile();
-    }
-    
-    private static Optional<Property> signSkinUrl(String textureUrl, SkinVariant variant) throws Exception {
-        var mineskinVariant = switch (variant) {
-            case CLASSIC -> Variant.CLASSIC;
-            case SLIM -> Variant.SLIM;
-        };
-        
-        var request = GenerateRequest.url(new URI(textureUrl))
-                .variant(mineskinVariant)
-                .name("skinrestorer-skin")
-                .visibility(Visibility.UNLISTED);
-        
-        var skin = MINESKIN_CLIENT.queue().submit(request)
-                .thenApply(QueueResponse::getJob)
-                .thenCompose(jobInfo -> jobInfo.waitForCompletion(MINESKIN_CLIENT))
-                .thenCompose(jobReference -> jobReference.getOrLoadSkin(MINESKIN_CLIENT))
-                .join();
-        
-        return Optional.of(new Property(
-                PlayerUtils.TEXTURES_KEY,
-                skin.texture().data().value(),
-                skin.texture().data().signature()
-        ));
     }
 }
