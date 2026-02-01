@@ -38,7 +38,7 @@ public final class MojangSkinProvider implements SkinProvider {
     private static final URI SESSION_SERVER_URI;
     private static final CachedUserNameToIdResolver PROFILE_CACHE;
     
-    private static LoadingCache<UUID, Optional<Property>> SKIN_CACHE;
+    private LoadingCache<UUID, Optional<Property>> skinCache;
     
     static {
         try {
@@ -75,20 +75,21 @@ public final class MojangSkinProvider implements SkinProvider {
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
     }
     
-    public static void reload() {
-        createCache();
+    @Override
+    public void reload() {
+        this.createCache();
     }
     
-    private static void createCache() {
+    private void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().mojang();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
-        SKIN_CACHE = CacheBuilder.newBuilder()
+        this.skinCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull UUID key) throws Exception {
-                        return MojangSkinProvider.loadSkin(key);
+                        return MojangSkinProvider.this.loadSkin(key);
                     }
                 });
     }
@@ -117,7 +118,7 @@ public final class MojangSkinProvider implements SkinProvider {
             if (cachedProfile.isEmpty())
                 throw new IllegalArgumentException("no profile found for " + username);
             
-            return Result.success(SKIN_CACHE.get(cachedProfile.get().id()));
+            return Result.success(this.skinCache.get(cachedProfile.get().id()));
         } catch (UncheckedExecutionException e) {
             return Result.error((Exception) e.getCause());
         } catch (Exception e) {
@@ -125,7 +126,7 @@ public final class MojangSkinProvider implements SkinProvider {
         }
     }
     
-    private static Optional<Property> loadSkin(UUID uuid) throws Exception {
+    private Optional<Property> loadSkin(UUID uuid) throws Exception {
         var profile = MojangSkinProvider.getProfileWithProperties(uuid);
         var textures = PlayerUtils.getPlayerSkin(profile);
         

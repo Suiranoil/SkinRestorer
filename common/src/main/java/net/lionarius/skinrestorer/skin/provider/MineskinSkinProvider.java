@@ -32,15 +32,21 @@ public final class MineskinSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "web";
     
-    private static MineSkinClient MINESKIN_CLIENT;
+    private MineSkinClient mineskinClient;
     
-    private static LoadingCache<Pair<URI, SkinVariant>, Optional<Property>> SKIN_CACHE;
+    private LoadingCache<Pair<URI, SkinVariant>, Optional<Property>> skinCache;
     
-    public static void reload() {
+    @Override
+    public void reload() {
+        this.reloadClient();
+        this.createCache();
+    }
+    
+    private void reloadClient() {
         var config = SkinRestorer.getConfig();
         var configApiKey = config.providersConfig().mineskin().apiKey();
         
-        MINESKIN_CLIENT = MineSkinClient
+        this.mineskinClient = MineSkinClient
                 .builder()
                 .userAgent(WebUtils.USER_AGENT)
                 .gson(JsonUtils.GSON)
@@ -55,20 +61,18 @@ public final class MineskinSkinProvider implements SkinProvider {
                 ))
                 .apiKey(configApiKey.isEmpty() ? null : configApiKey)
                 .build();
-        
-        createCache();
     }
     
-    private static void createCache() {
+    private void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().mineskin();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
-        SKIN_CACHE = CacheBuilder.newBuilder()
+        this.skinCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull Pair<URI, SkinVariant> key) throws Exception {
-                        return MineskinSkinProvider.loadSkin(key.first(), key.second());
+                        return MineskinSkinProvider.this.loadSkin(key.first(), key.second());
                     }
                 });
     }
@@ -88,7 +92,7 @@ public final class MineskinSkinProvider implements SkinProvider {
         try {
             var uri = new URI(url);
             
-            return Result.success(SKIN_CACHE.get(Pair.of(uri, variant)));
+            return Result.success(this.skinCache.get(Pair.of(uri, variant)));
         } catch (UncheckedExecutionException e) {
             return Result.error((Exception) e.getCause());
         } catch (Exception e) {
@@ -96,7 +100,7 @@ public final class MineskinSkinProvider implements SkinProvider {
         }
     }
     
-    static Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
+    Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
         var mineskinVariant = switch (variant) {
             case CLASSIC -> Variant.CLASSIC;
             case SLIM -> Variant.SLIM;
@@ -112,10 +116,10 @@ public final class MineskinSkinProvider implements SkinProvider {
                 .name("skinrestorer-skin")
                 .visibility(Visibility.UNLISTED);
         
-        var skin = MINESKIN_CLIENT.queue().submit(request)
+        var skin = this.mineskinClient.queue().submit(request)
                 .thenApply(QueueResponse::getJob)
-                .thenCompose(jobInfo -> jobInfo.waitForCompletion(MINESKIN_CLIENT))
-                .thenCompose(jobReference -> jobReference.getOrLoadSkin(MINESKIN_CLIENT))
+                .thenCompose(jobInfo -> jobInfo.waitForCompletion(this.mineskinClient))
+                .thenCompose(jobReference -> jobReference.getOrLoadSkin(this.mineskinClient))
                 .join();
         
         return Optional.of(new Property(

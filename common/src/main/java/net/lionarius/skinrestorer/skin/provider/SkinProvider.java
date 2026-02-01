@@ -32,4 +32,6 @@ public interface SkinProvider {
     boolean hasVariantSupport();
     
     Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant);
+    
+    default void reload() {}
 }

@@ -105,11 +105,11 @@ public final class SkinRestorer {
         Translation.reloadTranslations();
         WebUtils.recreateHttpClient();
         
-        MojangSkinProvider.reload();
-        ElyBySkinProvider.reload();
-        MineskinSkinProvider.reload();
-        DraslSkinProvider.reload();
-        CollectionSkinProvider.reload();
+        SkinProvider.MOJANG.reload();
+        SkinProvider.ELY_BY.reload();
+        SkinProvider.MINESKIN.reload();
+        SkinProvider.DRASL.reload();
+        SkinProvider.COLLECTION.reload();
     }
     
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value, boolean save) {

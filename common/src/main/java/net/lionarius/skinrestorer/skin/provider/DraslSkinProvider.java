@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import com.mojang.authlib.yggdrasil.response.NameAndId;
@@ -17,52 +18,56 @@ import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.UUID;
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public final class DraslSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "drasl";
     
-    private static LoadingCache<String, Optional<Property>> SKIN_CACHE;
-    private static Cache<String, Property> SIGNATURE_CACHE;
+    private LoadingCache<String, Optional<Property>> skinCache;
+    private Cache<String, Property> signatureCache;
     
-    private static URI BASE_URL;
+    private URI baseUrl;
     
-    public static void reload() {
+    @Override
+    public void reload() {
+        this.reloadUrl();
+        this.createCache();
+    }
+    
+    private void reloadUrl() {
         var config = SkinRestorer.getConfig();
         var draslUrl = config.providersConfig().drasl().url();
-
+        
         if (draslUrl != null && !draslUrl.isEmpty()) {
             try {
-                BASE_URL = new URI(draslUrl);
+                this.baseUrl = new URI(draslUrl);
             } catch (URISyntaxException e) {
                 SkinRestorer.LOGGER.warn("Invalid Drasl base URL: {}", draslUrl, e);
             }
         }
-        
-        createCache();
     }
     
-    private static void createCache() {
+    private void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().drasl();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
-        SKIN_CACHE = CacheBuilder.newBuilder()
+        this.skinCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull String key) throws Exception {
-                        return DraslSkinProvider.loadSkin(key);
+                        return DraslSkinProvider.this.loadSkin(key);
                     }
                 });
         
-        SIGNATURE_CACHE = CacheBuilder.newBuilder()
+        this.signatureCache = CacheBuilder.newBuilder()
                 .expireAfterAccess(24, TimeUnit.HOURS)
                 .maximumSize(1000)
                 .build();
@@ -86,7 +91,7 @@ public final class DraslSkinProvider implements SkinProvider {
             
             var usernameLowerCase = username.toLowerCase();
             
-            return Result.success(SKIN_CACHE.get(usernameLowerCase));
+            return Result.success(this.skinCache.get(usernameLowerCase));
         } catch (UncheckedExecutionException e) {
             return Result.error((Exception) e.getCause());
         } catch (Exception e) {
@@ -94,7 +99,7 @@ public final class DraslSkinProvider implements SkinProvider {
         }
     }
     
-    private static Optional<Property> loadSkin(String username) throws Exception {
+    private Optional<Property> loadSkin(String username) throws Exception {
         var nameAndId = getProfile(username);
         var profile = getProfileWithProperties(nameAndId.id());
         var skin = PlayerUtils.getSkinUrl(profile);
@@ -105,24 +110,24 @@ public final class DraslSkinProvider implements SkinProvider {
         var textureUrl = skin.first();
         var variant = skin.second();
         
-        var cachedSignature = SIGNATURE_CACHE.getIfPresent(textureUrl);
+        var cachedSignature = this.signatureCache.getIfPresent(textureUrl);
         
         if (cachedSignature != null) {
             return Optional.of(cachedSignature);
         }
         
-        var signed = MineskinSkinProvider.loadSkin(new URI(textureUrl), variant);
-        signed.ifPresent(prop -> SIGNATURE_CACHE.put(textureUrl, prop));
+        var signed = SkinProvider.MINESKIN.loadSkin(new URI(textureUrl), variant);
+        signed.ifPresent(prop -> this.signatureCache.put(textureUrl, prop));
         
         return signed;
     }
     
-    private static NameAndId getProfile(final String name) throws IOException {
-        if (BASE_URL == null)
+    private NameAndId getProfile(final String name) throws IOException {
+        if (this.baseUrl == null)
             throw new IllegalStateException("Drasl is not configured in this server.");
         
         var request = HttpRequest.newBuilder()
-                .uri(DraslSkinProvider.BASE_URL
+                .uri(this.baseUrl
                         .resolve("/minecraft/profile/lookup/name/")
                         .resolve(name)
                 )
@@ -138,9 +143,9 @@ public final class DraslSkinProvider implements SkinProvider {
         return JsonUtils.fromJson(response.body(), NameAndId.class);
     }
     
-    private static com.mojang.authlib.GameProfile getProfileWithProperties(UUID uuid) throws Exception {
+    private GameProfile getProfileWithProperties(UUID uuid) throws Exception {
         var request = HttpRequest.newBuilder()
-                .uri(DraslSkinProvider.BASE_URL
+                .uri(this.baseUrl
                         .resolve("/session/minecraft/profile/")
                         .resolve(uuid.toString().replace("-", ""))
                 )

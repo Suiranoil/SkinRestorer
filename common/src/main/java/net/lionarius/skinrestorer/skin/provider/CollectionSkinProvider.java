@@ -22,17 +22,17 @@ public final class CollectionSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "collection";
     
-    private static LoadingCache<Integer, Optional<Property>> SKIN_CACHE;
+    private LoadingCache<Integer, Optional<Property>> skinCache;
     
-    private static List<Pair<URI, SkinVariant>> COLLECTION_SKINS;
+    private List<Pair<URI, SkinVariant>> collectionSkins;
     
-    public static void reload() {
-        COLLECTION_SKINS = loadCollectionSkins();
-        
-        createCache();
+    @Override
+    public void reload() {
+        this.loadCollectionSkins();
+        this.createCache();
     }
     
-    private static List<Pair<URI, SkinVariant>> loadCollectionSkins() {
+    private void loadCollectionSkins() {
         List<Pair<URI, SkinVariant>> skins = new ArrayList<>();
         
         var config = SkinRestorer.getConfig().providersConfig().collection();
@@ -44,20 +44,20 @@ public final class CollectionSkinProvider implements SkinProvider {
             }
         }
         
-        return skins;
+        this.collectionSkins = skins;
     }
     
-    private static void createCache() {
+    private void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().collection();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
-        SKIN_CACHE = CacheBuilder.newBuilder()
+        this.skinCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull Integer key) throws Exception {
-                        var skinEntry = COLLECTION_SKINS.get(key);
-                        return MineskinSkinProvider.loadSkin(skinEntry.first(), skinEntry.second());
+                        var skinEntry = CollectionSkinProvider.this.collectionSkins.get(key);
+                        return SkinProvider.MINESKIN.loadSkin(skinEntry.first(), skinEntry.second());
                     }
                 });
     }
@@ -74,14 +74,14 @@ public final class CollectionSkinProvider implements SkinProvider {
     
     @Override
     public Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant) {
-        if (COLLECTION_SKINS.isEmpty()) {
+        if (this.collectionSkins.isEmpty()) {
             return Result.error(new IllegalStateException("No collection skins configured"));
         }
         
-        var skinIndex = Math.abs(argument.hashCode()) % COLLECTION_SKINS.size();
+        var skinIndex = Math.abs(argument.hashCode()) % this.collectionSkins.size();
         
         try {
-            return Result.success(SKIN_CACHE.get(skinIndex));
+            return Result.success(this.skinCache.get(skinIndex));
         } catch (UncheckedExecutionException e) {
             return Result.error((Exception) e.getCause());
         } catch (Exception e) {

@@ -30,7 +30,7 @@ public final class ElyBySkinProvider implements SkinProvider {
     
     private static final URI API_URI;
     
-    private static LoadingCache<String, Optional<Property>> SKIN_CACHE;
+    private LoadingCache<String, Optional<Property>> skinCache;
     
     static {
         try {
@@ -40,20 +40,21 @@ public final class ElyBySkinProvider implements SkinProvider {
         }
     }
     
-    public static void reload() {
-        createCache();
+    @Override
+    public void reload() {
+        this.createCache();
     }
     
-    private static void createCache() {
+    private void createCache() {
         var config = SkinRestorer.getConfig().providersConfig().ely_by();
         var time = config.cache().enabled() ? config.cache().duration() : 0;
         
-        SKIN_CACHE = CacheBuilder.newBuilder()
+        this.skinCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull String key) throws Exception {
-                        return ElyBySkinProvider.loadSkin(key);
+                        return ElyBySkinProvider.this.loadSkin(key);
                     }
                 });
     }
@@ -76,7 +77,7 @@ public final class ElyBySkinProvider implements SkinProvider {
             
             var usernameLowerCase = username.toLowerCase(Locale.ROOT);
             
-            return Result.success(SKIN_CACHE.get(usernameLowerCase));
+            return Result.success(this.skinCache.get(usernameLowerCase));
         } catch (UncheckedExecutionException e) {
             return Result.error((Exception) e.getCause());
         } catch (Exception e) {
@@ -84,8 +85,8 @@ public final class ElyBySkinProvider implements SkinProvider {
         }
     }
     
-    private static Optional<Property> loadSkin(String username) throws Exception {
-        var profile = ElyBySkinProvider.getElyByProfile(username);
+    private Optional<Property> loadSkin(String username) throws Exception {
+        var profile = getElyByProfile(username);
         var textures = PlayerUtils.getPlayerSkin(profile);
         
         return Optional.ofNullable(textures);
@@ -93,7 +94,7 @@ public final class ElyBySkinProvider implements SkinProvider {
     
     private static GameProfile getElyByProfile(String username) throws IOException {
         var request = HttpRequest.newBuilder()
-                .uri(ElyBySkinProvider.API_URI
+                .uri(API_URI
                         .resolve("/textures/signed/")
                         .resolve(username + "?unsigned=false")
                 )
