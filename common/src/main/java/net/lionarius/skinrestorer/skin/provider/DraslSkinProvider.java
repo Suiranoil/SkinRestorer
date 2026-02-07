@@ -80,7 +80,7 @@ public final class DraslSkinProvider implements SkinProvider {
     
     @Override
     public boolean hasVariantSupport() {
-        return true;
+        return false;
     }
     
     @Override
