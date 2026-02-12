@@ -76,6 +76,11 @@ public final class MojangSkinProvider implements SkinProvider {
     }
     
     @Override
+    public String getProviderName() {
+        return MojangSkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
     public void reload() {
         this.createCache();
     }

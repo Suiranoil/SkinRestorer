@@ -63,6 +63,11 @@ public final class CollectionSkinProvider implements SkinProvider {
     }
     
     @Override
+    public String getProviderName() {
+        return CollectionSkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
     public String getArgumentName() {
         return "seed";
     }

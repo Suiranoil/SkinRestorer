@@ -60,6 +60,11 @@ public final class ElyBySkinProvider implements SkinProvider {
     }
     
     @Override
+    public String getProviderName() {
+        return ElyBySkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
     public String getArgumentName() {
         return "username";
     }

@@ -18,14 +18,16 @@ public interface SkinProvider {
     SkinShuffleSkinProvider SKIN_SHUFFLE = new SkinShuffleSkinProvider();
     
     Set<String> BUILTIN_PROVIDER_NAMES = ImmutableSet.of(
-            EmptySkinProvider.PROVIDER_NAME,
-            MojangSkinProvider.PROVIDER_NAME,
-            ElyBySkinProvider.PROVIDER_NAME,
-            MineskinSkinProvider.PROVIDER_NAME,
-            DraslSkinProvider.PROVIDER_NAME,
-            CollectionSkinProvider.PROVIDER_NAME,
-            SkinShuffleSkinProvider.PROVIDER_NAME
+            SkinProvider.EMPTY.getProviderName(),
+            SkinProvider.MOJANG.getProviderName(),
+            SkinProvider.ELY_BY.getProviderName(),
+            SkinProvider.MINESKIN.getProviderName(),
+            SkinProvider.DRASL.getProviderName(),
+            SkinProvider.COLLECTION.getProviderName(),
+            SkinProvider.SKIN_SHUFFLE.getProviderName()
     );
+    
+    String getProviderName();
     
     String getArgumentName();
     

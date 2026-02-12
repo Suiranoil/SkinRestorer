@@ -78,6 +78,11 @@ public final class MineskinSkinProvider implements SkinProvider {
     }
     
     @Override
+    public String getProviderName() {
+        return MineskinSkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
     public String getArgumentName() {
         return "url";
     }

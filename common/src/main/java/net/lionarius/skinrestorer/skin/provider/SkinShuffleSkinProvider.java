@@ -11,6 +11,11 @@ public final class SkinShuffleSkinProvider implements SkinProvider {
     public static final String PROVIDER_NAME = "skinshuffle";
     
     @Override
+    public String getProviderName() {
+        return SkinShuffleSkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
     public String getArgumentName() {
         return "unsupported";
     }

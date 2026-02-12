@@ -36,6 +36,11 @@ public final class DraslSkinProvider implements SkinProvider {
     private URI baseUrl;
     
     @Override
+    public String getProviderName() {
+        return DraslSkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
     public void reload() {
         this.reloadUrl();
         this.createCache();

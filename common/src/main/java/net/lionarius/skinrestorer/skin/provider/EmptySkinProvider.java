@@ -11,6 +11,11 @@ public final class EmptySkinProvider implements SkinProvider {
     public static final String PROVIDER_NAME = "empty";
     
     @Override
+    public String getProviderName() {
+        return EmptySkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
     public String getArgumentName() {
         return "placeholder";
     }
