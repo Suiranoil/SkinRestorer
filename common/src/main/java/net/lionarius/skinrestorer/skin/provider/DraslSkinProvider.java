@@ -30,10 +30,16 @@ public final class DraslSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "drasl";
     
+    private final MineskinSkinProvider mineskinProvider;
+    
     private LoadingCache<String, Optional<Property>> skinCache;
     private Cache<String, Property> signatureCache;
     
     private URI baseUrl;
+    
+    public DraslSkinProvider(MineskinSkinProvider mineskinProvider) {
+        this.mineskinProvider = mineskinProvider;
+    }
     
     @Override
     public String getProviderName() {
@@ -121,7 +127,7 @@ public final class DraslSkinProvider implements SkinProvider {
             return Optional.of(cachedSignature);
         }
         
-        var signed = SkinProvider.MINESKIN.loadSkin(new URI(textureUrl), variant);
+        var signed = this.mineskinProvider.loadSkin(new URI(textureUrl), variant);
         signed.ifPresent(prop -> this.signatureCache.put(textureUrl, prop));
         
         return signed;

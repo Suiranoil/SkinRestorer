@@ -22,9 +22,15 @@ public final class CollectionSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "collection";
     
+    private final MineskinSkinProvider mineskinProvider;
+    
     private LoadingCache<Integer, Optional<Property>> skinCache;
     
     private List<Pair<URI, SkinVariant>> collectionSkins;
+    
+    public CollectionSkinProvider(MineskinSkinProvider mineskinProvider) {
+        this.mineskinProvider = mineskinProvider;
+    }
     
     @Override
     public void reload() {
@@ -57,7 +63,7 @@ public final class CollectionSkinProvider implements SkinProvider {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull Integer key) throws Exception {
                         var skinEntry = CollectionSkinProvider.this.collectionSkins.get(key);
-                        return SkinProvider.MINESKIN.loadSkin(skinEntry.first(), skinEntry.second());
+                        return CollectionSkinProvider.this.mineskinProvider.loadSkin(skinEntry.first(), skinEntry.second());
                     }
                 });
     }
