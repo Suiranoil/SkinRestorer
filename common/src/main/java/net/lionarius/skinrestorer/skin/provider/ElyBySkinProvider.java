@@ -91,7 +91,7 @@ public final class ElyBySkinProvider implements SkinProvider {
     }
     
     private Optional<Property> loadSkin(String username) throws Exception {
-        var profile = getElyByProfile(username);
+        var profile = ElyBySkinProvider.getElyByProfile(username);
         var textures = PlayerUtils.getPlayerSkin(profile);
         
         return Optional.ofNullable(textures);
