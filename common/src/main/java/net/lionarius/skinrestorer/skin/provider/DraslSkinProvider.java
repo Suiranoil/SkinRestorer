@@ -4,29 +4,17 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
-import com.mojang.authlib.yggdrasil.response.NameAndId;
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.lionarius.skinrestorer.util.Result;
-import net.lionarius.skinrestorer.util.WebUtils;
-import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpRequest;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public final class DraslSkinProvider implements SkinProvider {
+public final class DraslSkinProvider extends YggdrasilSkinProvider {
     
     public static final String PROVIDER_NAME = "drasl";
     
@@ -85,29 +73,10 @@ public final class DraslSkinProvider implements SkinProvider {
     }
     
     @Override
-    public String getArgumentName() {
-        return "username";
-    }
-    
-    @Override
-    public boolean hasVariantSupport() {
-        return false;
-    }
-    
-    @Override
-    public Result<Optional<Property>, Exception> fetchSkin(String username, SkinVariant variant) {
-        try {
-            if (!StringUtil.isValidPlayerName(username))
-                throw new IllegalArgumentException("invalid username");
-            
-            var usernameLowerCase = username.toLowerCase();
-            
-            return Result.success(this.skinCache.get(usernameLowerCase));
-        } catch (UncheckedExecutionException e) {
-            return Result.error((Exception) e.getCause());
-        } catch (Exception e) {
-            return Result.error(e);
-        }
+    protected Optional<Property> fetchSkinImpl(String username) throws Exception {
+        var usernameLowerCase = username.toLowerCase();
+        
+        return this.skinCache.get(usernameLowerCase);
     }
     
     private Optional<Property> loadSkin(String username) throws Exception {
@@ -133,42 +102,13 @@ public final class DraslSkinProvider implements SkinProvider {
         return signed;
     }
     
-    private NameAndId getProfile(final String name) throws IOException {
-        if (this.baseUrl == null)
-            throw new IllegalStateException("Drasl is not configured in this server.");
-        
-        var request = HttpRequest.newBuilder()
-                .uri(this.baseUrl
-                        .resolve("/minecraft/profile/lookup/name/")
-                        .resolve(name)
-                )
-                .GET()
-                .build();
-        
-        var response = WebUtils.executeRequest(request);
-        WebUtils.throwOnClientErrors(response);
-        
-        if (response.statusCode() != 200)
-            throw new IllegalArgumentException("no profile with name " + name);
-        
-        return JsonUtils.fromJson(response.body(), NameAndId.class);
+    @Override
+    protected URI baseSessionServerUrl() {
+        return this.baseUrl;
     }
     
-    private GameProfile getProfileWithProperties(UUID uuid) throws Exception {
-        var request = HttpRequest.newBuilder()
-                .uri(this.baseUrl
-                        .resolve("/session/minecraft/profile/")
-                        .resolve(uuid.toString().replace("-", ""))
-                )
-                .GET()
-                .build();
-        
-        var response = WebUtils.executeRequest(request);
-        WebUtils.throwOnClientErrors(response);
-        
-        if (response.statusCode() != 200)
-            throw new IllegalArgumentException("no profile with uuid " + uuid);
-        
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).profile();
+    @Override
+    protected URI baseServicesServerUrl() {
+        return this.baseUrl;
     }
 }
