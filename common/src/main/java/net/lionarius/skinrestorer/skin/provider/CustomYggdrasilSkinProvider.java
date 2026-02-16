@@ -8,6 +8,7 @@ import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.config.provider.custom.CustomYggdrasilProviderConfig;
+import net.lionarius.skinrestorer.skin.provider.builtin.MineskinSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import org.jetbrains.annotations.NotNull;
 

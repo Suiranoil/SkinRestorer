@@ -1,23 +1,24 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.skin.SkinVariant;
+import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.util.Result;
 
 import java.util.Optional;
 
-public final class SkinShuffleSkinProvider implements SkinProvider {
+public final class EmptySkinProvider implements SkinProvider {
     
-    public static final String PROVIDER_NAME = "skinshuffle";
+    public static final String PROVIDER_NAME = "empty";
     
     @Override
     public String getProviderName() {
-        return SkinShuffleSkinProvider.PROVIDER_NAME;
+        return EmptySkinProvider.PROVIDER_NAME;
     }
     
     @Override
     public String getArgumentName() {
-        return "unsupported";
+        return "placeholder";
     }
     
     @Override
@@ -27,6 +28,10 @@ public final class SkinShuffleSkinProvider implements SkinProvider {
     
     @Override
     public Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant) {
-        return Result.error(new UnsupportedOperationException("SkinShuffle Provider does not support fetching skins"));
+        return this.fetchSkin();
+    }
+    
+    public Result<Optional<Property>, Exception> fetchSkin() {
+        return Result.ofNullable(null);
     }
 }

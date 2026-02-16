@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.skin.provider;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.skin.SkinVariant;
+import net.lionarius.skinrestorer.skin.provider.builtin.*;
 import net.lionarius.skinrestorer.util.Result;
 
 import java.util.Optional;

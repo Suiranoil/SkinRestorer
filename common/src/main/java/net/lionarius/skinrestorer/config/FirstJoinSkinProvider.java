@@ -1,10 +1,10 @@
 package net.lionarius.skinrestorer.config;
 
 import com.google.gson.annotations.SerializedName;
-import net.lionarius.skinrestorer.skin.provider.CollectionSkinProvider;
-import net.lionarius.skinrestorer.skin.provider.DraslSkinProvider;
-import net.lionarius.skinrestorer.skin.provider.ElyBySkinProvider;
-import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.CollectionSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.DraslSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.ElyBySkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 
 public enum FirstJoinSkinProvider {
     @SerializedName(value = "MOJANG", alternate = {"mojang"})

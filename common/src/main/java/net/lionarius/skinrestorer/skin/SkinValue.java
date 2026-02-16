@@ -1,7 +1,7 @@
 package net.lionarius.skinrestorer.skin;
 
 import com.mojang.authlib.properties.Property;
-import net.lionarius.skinrestorer.skin.provider.EmptySkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.EmptySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 import org.jetbrains.annotations.NotNull;

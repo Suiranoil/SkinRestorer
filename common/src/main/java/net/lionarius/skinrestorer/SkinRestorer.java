@@ -13,6 +13,7 @@ import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.*;
+import net.lionarius.skinrestorer.skin.provider.builtin.*;
 import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.*;
 import net.minecraft.commands.CommandSourceStack;

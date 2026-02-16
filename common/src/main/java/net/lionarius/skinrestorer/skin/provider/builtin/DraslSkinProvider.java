@@ -1,4 +1,4 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -6,6 +6,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.skin.provider.YggdrasilSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import org.jetbrains.annotations.NotNull;
 

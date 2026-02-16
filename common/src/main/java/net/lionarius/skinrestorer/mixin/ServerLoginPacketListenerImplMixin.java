@@ -3,7 +3,7 @@ package net.lionarius.skinrestorer.mixin;
 import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinValue;
-import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;

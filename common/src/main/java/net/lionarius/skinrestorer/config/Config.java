@@ -2,10 +2,10 @@ package net.lionarius.skinrestorer.config;
 
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.ProvidersConfig;
-import net.lionarius.skinrestorer.skin.provider.CollectionSkinProvider;
-import net.lionarius.skinrestorer.skin.provider.DraslSkinProvider;
-import net.lionarius.skinrestorer.skin.provider.ElyBySkinProvider;
-import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.CollectionSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.DraslSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.ElyBySkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;

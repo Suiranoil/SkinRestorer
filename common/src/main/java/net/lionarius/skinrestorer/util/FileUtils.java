@@ -3,7 +3,7 @@ package net.lionarius.skinrestorer.util;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.skin.SkinIO;
-import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.translation.Translation;
 
 import java.io.BufferedReader;

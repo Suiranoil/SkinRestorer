@@ -1,4 +1,4 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -9,6 +9,8 @@ import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.response.NameAndId;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.exception.TransparentException;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
+import net.lionarius.skinrestorer.skin.provider.YggdrasilSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.server.players.CachedUserNameToIdResolver;
 import org.jetbrains.annotations.NotNull;

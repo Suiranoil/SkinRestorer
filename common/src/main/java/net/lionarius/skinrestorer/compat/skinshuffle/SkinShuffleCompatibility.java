@@ -3,7 +3,7 @@ package net.lionarius.skinrestorer.compat.skinshuffle;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinValue;
-import net.lionarius.skinrestorer.skin.provider.SkinShuffleSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.SkinShuffleSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;

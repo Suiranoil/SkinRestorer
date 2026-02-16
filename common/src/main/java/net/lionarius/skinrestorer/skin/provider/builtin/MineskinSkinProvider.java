@@ -1,4 +1,4 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.mineskin.Java11RequestHandler;
 import net.lionarius.skinrestorer.skin.SkinVariant;
+import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
@@ -105,7 +106,7 @@ public final class MineskinSkinProvider implements SkinProvider {
         }
     }
     
-    Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
+    public Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
         var mineskinVariant = switch (variant) {
             case CLASSIC -> Variant.CLASSIC;
             case SLIM -> Variant.SLIM;

@@ -9,7 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.translation.Translation;
