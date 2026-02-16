@@ -8,8 +8,8 @@ import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.config.provider.custom.CustomYggdrasilProviderConfig;
+import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.skin.provider.YggdrasilSkinProvider;
-import net.lionarius.skinrestorer.skin.provider.builtin.MineskinSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
     private final String providerName;
-    private final MineskinSkinProvider mineskinProvider;
+    private final SkinSigner skinSigner;
 
     private LoadingCache<String, Optional<Property>> skinCache;
     private Cache<String, Property> signatureCache;
@@ -30,9 +30,9 @@ public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
     private URI baseServicesServerUrl;
     private URI baseSessionServerUrl;
 
-    public CustomYggdrasilSkinProvider(String providerName, MineskinSkinProvider mineskinProvider) {
+    public CustomYggdrasilSkinProvider(String providerName, SkinSigner skinSigner) {
         this.providerName = providerName;
-        this.mineskinProvider = mineskinProvider;
+        this.skinSigner = skinSigner;
         this.useProviderSignature = true;
     }
 
@@ -121,18 +121,21 @@ public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
             return Optional.ofNullable(textures);
         }
 
-        var skin = PlayerUtils.getSkinUrl(profile);
+        var skin = PlayerUtils.getPlayerSkin(profile);
         if (skin == null)
             return Optional.empty();
+
+        var skinUrl = PlayerUtils.getSkinUrl(skin);
+        if (skinUrl == null)
+            return Optional.empty();
         
-        var textureUrl = skin.first();
-        var variant = skin.second();
+        var textureUrl = skinUrl.first();
         
         var cachedSignature = this.signatureCache == null ? null : this.signatureCache.getIfPresent(textureUrl);
         if (cachedSignature != null)
             return Optional.of(cachedSignature);
         
-        var signed = this.mineskinProvider.loadSkin(new URI(textureUrl), variant);
+        var signed = this.skinSigner.signSkin(skin);
         signed.ifPresent(property -> {
             if (this.signatureCache != null)
                 this.signatureCache.put(textureUrl, property);

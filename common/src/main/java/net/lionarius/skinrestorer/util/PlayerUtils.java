@@ -110,11 +110,7 @@ public final class PlayerUtils {
         return Iterables.getFirst(profile.properties().get(TEXTURES_KEY), null);
     }
     
-    public static Pair<String, SkinVariant> getSkinUrl(GameProfile profile) {
-        var skin = getPlayerSkin(profile);
-        if (skin == null)
-            return null;
-        
+    public static Pair<String, SkinVariant> getSkinUrl(Property skin) {
         var textureJson = JsonUtils.skinPropertyToJson(skin);
         if (textureJson == null || !textureJson.has("textures"))
             return null;
@@ -137,7 +133,7 @@ public final class PlayerUtils {
                 variant = model.equals("slim") ? SkinVariant.SLIM : SkinVariant.CLASSIC;
             }
         }
-        
+
         return Pair.of(url, variant);
     }
     

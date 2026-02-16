@@ -10,6 +10,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.mineskin.Java11RequestHandler;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
+import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
@@ -29,7 +30,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public final class MineskinSkinProvider implements SkinProvider {
+public final class MineskinSkinProvider implements SkinProvider, SkinSigner {
     
     public static final String PROVIDER_NAME = "web";
     
@@ -105,8 +106,22 @@ public final class MineskinSkinProvider implements SkinProvider {
             return Result.error(e);
         }
     }
+
+    @Override
+    public Optional<Property> signSkin(URI uri, SkinVariant variant) throws Exception {
+        return this.loadSkin(uri, variant);
+    }
+
+    @Override
+    public Optional<Property> signSkin(Property property) throws Exception {
+        var skin = PlayerUtils.getSkinUrl(property);
+        if (skin == null)
+            return Optional.empty();
+
+        return this.loadSkin(new URI(skin.first()), skin.second());
+    }
     
-    public Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
+    private Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
         var mineskinVariant = switch (variant) {
             case CLASSIC -> Variant.CLASSIC;
             case SLIM -> Variant.SLIM;

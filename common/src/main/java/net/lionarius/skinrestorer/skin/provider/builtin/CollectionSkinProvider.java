@@ -10,6 +10,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.collection.CollectionSkinSource;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
+import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.util.Result;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,14 +24,14 @@ public final class CollectionSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "collection";
     
-    private final MineskinSkinProvider mineskinProvider;
+    private final SkinSigner skinSigner;
     
     private LoadingCache<Integer, Optional<Property>> skinCache;
     
     private List<Pair<URI, SkinVariant>> collectionSkins;
     
-    public CollectionSkinProvider(MineskinSkinProvider mineskinProvider) {
-        this.mineskinProvider = mineskinProvider;
+    public CollectionSkinProvider(SkinSigner skinSigner) {
+        this.skinSigner = skinSigner;
     }
     
     @Override
@@ -64,7 +65,7 @@ public final class CollectionSkinProvider implements SkinProvider {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull Integer key) throws Exception {
                         var skinEntry = CollectionSkinProvider.this.collectionSkins.get(key);
-                        return CollectionSkinProvider.this.mineskinProvider.loadSkin(skinEntry.first(), skinEntry.second());
+                        return CollectionSkinProvider.this.skinSigner.signSkin(skinEntry.first(), skinEntry.second());
                     }
                 });
     }
