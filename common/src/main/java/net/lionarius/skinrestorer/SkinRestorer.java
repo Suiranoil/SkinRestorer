@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
+import net.lionarius.skinrestorer.config.provider.custom.CustomProviderConfig;
 import net.lionarius.skinrestorer.exception.TransparentException;
 import net.lionarius.skinrestorer.mixin.PlayerAccessor;
 import net.lionarius.skinrestorer.platform.Services;
@@ -81,15 +82,18 @@ public final class SkinRestorer {
     public static void onInitialize() {
         SkinRestorer.configDir = Services.PLATFORM.getConfigDirectory().resolve(SkinRestorer.MOD_ID);
         SkinRestorer.reloadConfig();
-        
+
         SkinRestorer.providersRegistry.register(EmptySkinProvider.PROVIDER_NAME, SkinProvider.EMPTY, false);
         SkinRestorer.providersRegistry.register(SkinShuffleSkinProvider.PROVIDER_NAME, SkinProvider.SKIN_SHUFFLE, false);
-        
+
         SkinRestorer.registerDefaultSkinProvider(MojangSkinProvider.PROVIDER_NAME, SkinProvider.MOJANG, SkinRestorer.getConfig().providersConfig().mojang());
         SkinRestorer.registerDefaultSkinProvider(ElyBySkinProvider.PROVIDER_NAME, SkinProvider.ELY_BY, SkinRestorer.getConfig().providersConfig().ely_by());
         SkinRestorer.registerDefaultSkinProvider(MineskinSkinProvider.PROVIDER_NAME, SkinProvider.MINESKIN, SkinRestorer.getConfig().providersConfig().mineskin());
         SkinRestorer.registerDefaultSkinProvider(DraslSkinProvider.PROVIDER_NAME, SkinProvider.DRASL, SkinRestorer.getConfig().providersConfig().drasl());
         SkinRestorer.registerDefaultSkinProvider(CollectionSkinProvider.PROVIDER_NAME, SkinProvider.COLLECTION, SkinRestorer.getConfig().providersConfig().collection());
+        SkinRestorer.registerCustomProviders(SkinRestorer.getConfig().providersConfig().custom());
+
+        SkinRestorer.providersRegistry.reload();
     }
     
     private static void registerDefaultSkinProvider(String defaultName, SkinProvider provider, BuiltInProviderConfig config) {
@@ -98,6 +102,38 @@ public final class SkinRestorer {
         
         if (!isDefaultName && !SkinProvider.BUILTIN_PROVIDER_NAMES.contains(config.name()))
             SkinRestorer.providersRegistry.register(config.name(), provider, config.enabled());
+    }
+
+    private static void registerCustomProviders(Collection<CustomProviderConfig> customProviders) {
+        for (var customProvider : customProviders) {
+            if (!customProvider.enabled())
+                continue;
+
+            var providerName = customProvider.name();
+
+            if (providerName.isEmpty()) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider with empty name");
+                continue;
+            }
+
+            if (SkinProvider.BUILTIN_PROVIDER_NAMES.contains(providerName)) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider '{}' because it conflicts with a built-in provider name", providerName);
+                continue;
+            }
+
+            if (SkinRestorer.providersRegistry.get(providerName) != null) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider '{}' because this name is already registered", providerName);
+                continue;
+            }
+            
+            var providerResult = customProvider.createSkinProvider(SkinProvider.MINESKIN);
+            if (providerResult.isError()) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider '{}' because {}", providerName, providerResult.getErrorValue());
+                continue;
+            }
+            
+            SkinRestorer.providersRegistry.register(providerName, providerResult.getSuccessValue(), customProvider.isPublic());
+        }
     }
     
     public static void reloadConfig() {

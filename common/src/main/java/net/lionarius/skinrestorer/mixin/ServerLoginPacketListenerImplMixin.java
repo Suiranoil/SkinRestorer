@@ -2,8 +2,8 @@ package net.lionarius.skinrestorer.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.config.FirstJoinSkinProvider;
 import net.lionarius.skinrestorer.skin.SkinValue;
+import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
@@ -55,14 +55,14 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 }
                 
                 var config = SkinRestorer.getConfig();
-                var provider = config.firstJoinSkinProvider();
+                var providerName = config.firstJoinSkinProvider();
                 
                 var shouldFetch = (originalSkin == null && config.fetchSkinOnFirstJoin()) ||
-                                      (originalSkin != null && config.forceFirstJoinSkinFetch() && provider != FirstJoinSkinProvider.MOJANG);
+                                      (originalSkin != null && config.forceFirstJoinSkinFetch() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
                 
                 if (shouldFetch) {
                     var context = new SkinProviderContext(
-                            provider.getName(),
+                            providerName,
                             profile.name(),
                             null
                     );
