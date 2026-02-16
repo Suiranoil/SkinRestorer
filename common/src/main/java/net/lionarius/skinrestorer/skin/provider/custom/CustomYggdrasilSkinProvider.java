@@ -24,7 +24,7 @@ public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
     private final SkinSigner skinSigner;
 
     private LoadingCache<String, Optional<Property>> skinCache;
-    private Cache<String, Property> signatureCache;
+    private Cache<Integer, Property> signatureCache;
     
     private boolean useProviderSignature;
     private URI baseServicesServerUrl;
@@ -125,20 +125,18 @@ public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
         if (skin == null)
             return Optional.empty();
 
-        var skinUrl = PlayerUtils.getSkinUrl(skin);
-        if (skinUrl == null)
+        if (PlayerUtils.getSkinUrl(skin) == null)
             return Optional.empty();
-        
-        var textureUrl = skinUrl.first();
-        
-        var cachedSignature = this.signatureCache == null ? null : this.signatureCache.getIfPresent(textureUrl);
+
+        var propertyHash = skin.value().hashCode();
+        var cachedSignature = this.signatureCache == null ? null : this.signatureCache.getIfPresent(propertyHash);
         if (cachedSignature != null)
             return Optional.of(cachedSignature);
         
         var signed = this.skinSigner.signSkin(skin);
         signed.ifPresent(property -> {
             if (this.signatureCache != null)
-                this.signatureCache.put(textureUrl, property);
+                this.signatureCache.put(propertyHash, property);
         });
         
         return signed;
