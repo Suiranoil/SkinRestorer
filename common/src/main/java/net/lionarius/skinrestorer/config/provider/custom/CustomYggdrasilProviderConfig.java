@@ -1,7 +1,7 @@
 package net.lionarius.skinrestorer.config.provider.custom;
 
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.skin.provider.CustomYggdrasilSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.custom.CustomYggdrasilSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.builtin.MineskinSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.util.Result;
