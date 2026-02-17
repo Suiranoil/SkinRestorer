@@ -17,7 +17,6 @@ public final class ProvidersConfig implements GsonPostProcessable {
             new MojangProviderConfig(),
             new ElyByProviderConfig(),
             new MineskinProviderConfig(),
-            new DraslProviderConfig(),
             new CollectionProviderConfig(),
             new ArrayList<>()
     );
@@ -25,7 +24,6 @@ public final class ProvidersConfig implements GsonPostProcessable {
     private MojangProviderConfig mojang;
     private ElyByProviderConfig ely_by;
     private MineskinProviderConfig mineskin;
-    private DraslProviderConfig drasl;
     private CollectionProviderConfig collection;
     
     @JsonAdapter(CustomProviderListDeserializer.class)
@@ -36,14 +34,12 @@ public final class ProvidersConfig implements GsonPostProcessable {
             MojangProviderConfig mojang,
             ElyByProviderConfig ely_by,
             MineskinProviderConfig mineskin,
-            DraslProviderConfig drasl,
             CollectionProviderConfig collection,
             List<CustomProviderConfig> custom
     ) {
         this.mojang = mojang;
         this.ely_by = ely_by;
         this.mineskin = mineskin;
-        this.drasl = drasl;
         this.collection = collection;
         
         this.custom = custom;
@@ -62,10 +58,6 @@ public final class ProvidersConfig implements GsonPostProcessable {
         return this.mineskin;
     }
     
-    public DraslProviderConfig drasl() {
-        return this.drasl;
-    }
-
     public CollectionProviderConfig collection() {
         return this.collection;
     }
@@ -100,11 +92,6 @@ public final class ProvidersConfig implements GsonPostProcessable {
             this.mineskin = ProvidersConfig.DEFAULT.mineskin();
         }
         
-        if (this.drasl == null) {
-            SkinRestorer.LOGGER.warn("Drasl provider config is null, using default");
-            this.drasl = ProvidersConfig.DEFAULT.drasl();
-        }
-
         if (this.collection == null) {
             SkinRestorer.LOGGER.warn("Collection provider config is null, using default");
             this.collection = ProvidersConfig.DEFAULT.collection();

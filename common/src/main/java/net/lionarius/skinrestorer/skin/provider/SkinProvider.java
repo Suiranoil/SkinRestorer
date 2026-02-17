@@ -14,7 +14,6 @@ public interface SkinProvider {
     MojangSkinProvider MOJANG = new MojangSkinProvider();
     ElyBySkinProvider ELY_BY = new ElyBySkinProvider();
     MineskinSkinProvider MINESKIN = new MineskinSkinProvider();
-    DraslSkinProvider DRASL = new DraslSkinProvider(SkinProvider.MINESKIN);
     CollectionSkinProvider COLLECTION = new CollectionSkinProvider(SkinProvider.MINESKIN);
     SkinShuffleSkinProvider SKIN_SHUFFLE = new SkinShuffleSkinProvider();
     
@@ -23,7 +22,6 @@ public interface SkinProvider {
             SkinProvider.MOJANG.getProviderName(),
             SkinProvider.ELY_BY.getProviderName(),
             SkinProvider.MINESKIN.getProviderName(),
-            SkinProvider.DRASL.getProviderName(),
             SkinProvider.COLLECTION.getProviderName(),
             SkinProvider.SKIN_SHUFFLE.getProviderName()
     );

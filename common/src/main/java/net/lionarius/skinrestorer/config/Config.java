@@ -3,7 +3,6 @@ package net.lionarius.skinrestorer.config;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.ProvidersConfig;
 import net.lionarius.skinrestorer.skin.provider.builtin.CollectionSkinProvider;
-import net.lionarius.skinrestorer.skin.provider.builtin.DraslSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.builtin.ElyBySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.FileUtils;
@@ -150,7 +149,6 @@ public final class Config implements GsonPostProcessable {
         return switch (normalized) {
             case "mojang" -> MojangSkinProvider.PROVIDER_NAME;
             case "ely.by", "ely_by" -> ElyBySkinProvider.PROVIDER_NAME;
-            case "drasl" -> DraslSkinProvider.PROVIDER_NAME;
             case "collection" -> CollectionSkinProvider.PROVIDER_NAME;
             default -> value.trim();
         };
