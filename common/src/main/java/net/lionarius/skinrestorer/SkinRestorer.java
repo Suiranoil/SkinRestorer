@@ -1,17 +1,13 @@
 package net.lionarius.skinrestorer;
 
-import com.google.common.base.Throwables;
 import com.mojang.brigadier.CommandDispatcher;
 import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.config.provider.custom.CustomProviderConfig;
-import net.lionarius.skinrestorer.exception.TransparentException;
-import net.lionarius.skinrestorer.mixin.PlayerAccessor;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
-import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.*;
 import net.lionarius.skinrestorer.skin.provider.builtin.*;
 import net.lionarius.skinrestorer.translation.Translation;
@@ -27,9 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public final class SkinRestorer {
     public static final String MOD_ID = "skinrestorer";
@@ -154,70 +148,6 @@ public final class SkinRestorer {
         
         SkinRestorer.providersRegistry.reload();
         SkinRestorer.validateFirstJoinSkinProvider();
-    }
-    
-    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value, boolean save) {
-        var acceptedPlayers = new HashSet<ServerPlayer>();
-        
-        for (var player : targets) {
-            var profile = player.getGameProfile();
-            var skin = PlayerUtils.getPlayerSkin(profile);
-            
-            if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.id()))
-                value = value.setOriginalValue(skin);
-            
-            if (PlayerUtils.areSkinPropertiesEquals(value.value(), skin))
-                continue;
-            
-            if (save)
-                SkinRestorer.getSkinStorage().setSkin(profile.id(), value);
-            
-            var newProfile = PlayerUtils.applyRestoredSkin(profile, value.value());
-            ((PlayerAccessor) player).setGameProfile(newProfile);
-            
-            if (player.connection == null)
-                continue;
-            
-            PlayerUtils.refreshPlayer(player);
-            acceptedPlayers.add(player);
-            
-            SkinRestorer.getTickedScheduler().cancel(player.getUUID());
-        }
-        
-        return acceptedPlayers;
-    }
-    
-    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value) {
-        return SkinRestorer.applySkin(server, targets, value, true);
-    }
-    
-    public static CompletableFuture<Result<Collection<ServerPlayer>, String>> setSkinAsync(
-            MinecraftServer server,
-            Collection<ServerPlayer> targets,
-            SkinProviderContext context,
-            boolean save
-    ) {
-        return CompletableFuture.supplyAsync(
-                        () -> SkinRestorer.getProvider(context.name()).map(provider -> provider.fetchSkin(context.argument(), context.variant()))
-                )
-                .thenApplyAsync(result -> {
-                    if (result.isEmpty())
-                        return Result.<Collection<ServerPlayer>, String>error("provider '" + context.name() + "' is not registered");
-                    
-                    var skinResult = result.get();
-                    if (skinResult.isError())
-                        throw new TransparentException(Throwables.getRootCause(skinResult.getErrorValue()));
-                    
-                    var skinValue = SkinValue.fromProviderContextWithValue(context, skinResult.getSuccessValue().orElse(null));
-                    
-                    var acceptedPlayers = SkinRestorer.applySkin(server, targets, skinValue, save);
-                    
-                    return Result.<Collection<ServerPlayer>, String>success(acceptedPlayers);
-                }, server)
-                .exceptionally(e -> {
-                    SkinRestorer.LOGGER.error("Failed to set skin '{}:{}'", context.name(), context.argument(), e);
-                    return Result.error(e.getMessage());
-                });
     }
     
     public static class Events {
