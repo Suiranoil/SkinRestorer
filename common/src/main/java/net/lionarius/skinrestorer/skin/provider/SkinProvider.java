@@ -30,6 +30,8 @@ public interface SkinProvider {
     
     String getProviderName();
     
+    SkinProviderParameterType getParameterType();
+    
     String getArgumentName();
     
     boolean hasVariantSupport();

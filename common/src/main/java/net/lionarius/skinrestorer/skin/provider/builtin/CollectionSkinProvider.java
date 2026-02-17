@@ -10,6 +10,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.collection.CollectionSkinSource;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.util.Result;
 import org.jetbrains.annotations.NotNull;
@@ -75,6 +76,11 @@ public final class CollectionSkinProvider implements SkinProvider {
         return CollectionSkinProvider.PROVIDER_NAME;
     }
     
+    @Override
+    public SkinProviderParameterType getParameterType() {
+        return SkinProviderParameterType.USERNAME;
+    }
+
     @Override
     public String getArgumentName() {
         return "seed";

@@ -3,8 +3,9 @@ package net.lionarius.skinrestorer.mixin;
 import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinValue;
-import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
@@ -61,12 +62,19 @@ public abstract class ServerLoginPacketListenerImplMixin {
                                       (originalSkin != null && config.forceFirstJoinSkinFetch() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
                 
                 if (shouldFetch) {
-                    var context = new SkinProviderContext(
-                            providerName,
-                            profile.name(),
-                            null
-                    );
-                    skinrestorer$fetchSkin(profile, context);
+                    var provider = SkinRestorer.getProvider(providerName).orElse(null);
+                    
+                    if (provider == null || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
+                        SkinRestorer.LOGGER.warn("Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
+                                profile.name(), providerName);
+                    } else {
+                        var context = new SkinProviderContext(
+                                providerName,
+                                profile.name(),
+                                null
+                        );
+                        skinrestorer$fetchSkin(profile, context);
+                    }
                 }
                 
                 return null;

@@ -95,6 +95,20 @@ public final class SkinRestorer {
         SkinRestorer.registerCustomProviders(SkinRestorer.getConfig().providersConfig().custom());
 
         SkinRestorer.providersRegistry.reload();
+
+        SkinRestorer.validateFirstJoinSkinProvider();
+    }
+    
+    private static void validateFirstJoinSkinProvider() {
+        var providerName = SkinRestorer.config.firstJoinSkinProvider();
+        var provider = SkinRestorer.providersRegistry.get(providerName);
+
+        if (provider == null) {
+            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider '{}' is not registered. First join skin fetching will be skipped.", providerName);
+        } else if (provider.getParameterType() != SkinProviderParameterType.USERNAME) {
+            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider '{}' has parameter type {}, but only USERNAME providers are supported. First join skin fetching will be skipped.",
+                    providerName, provider.getParameterType());
+        }
     }
     
     private static void registerDefaultSkinProvider(String defaultName, SkinProvider provider, BuiltInProviderConfig config) {
@@ -143,6 +157,7 @@ public final class SkinRestorer {
         WebUtils.recreateHttpClient();
         
         SkinRestorer.providersRegistry.reload();
+        SkinRestorer.validateFirstJoinSkinProvider();
     }
     
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value, boolean save) {

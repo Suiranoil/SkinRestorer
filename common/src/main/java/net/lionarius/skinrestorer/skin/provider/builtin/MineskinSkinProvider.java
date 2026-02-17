@@ -10,6 +10,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.mineskin.Java11RequestHandler;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -84,6 +85,11 @@ public final class MineskinSkinProvider implements SkinProvider, SkinSigner {
         return MineskinSkinProvider.PROVIDER_NAME;
     }
     
+    @Override
+    public SkinProviderParameterType getParameterType() {
+        return SkinProviderParameterType.CUSTOM;
+    }
+
     @Override
     public String getArgumentName() {
         return "url";

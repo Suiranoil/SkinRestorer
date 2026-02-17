@@ -27,6 +27,11 @@ public abstract class YggdrasilSkinProvider implements SkinProvider {
     protected abstract Optional<Property> fetchSkinImpl(String username) throws Exception;
     
     @Override
+    public SkinProviderParameterType getParameterType() {
+        return SkinProviderParameterType.USERNAME;
+    }
+
+    @Override
     public boolean hasVariantSupport() {
         return false;
     }
