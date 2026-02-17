@@ -125,7 +125,7 @@ public final class ProvidersConfig implements GsonPostProcessable {
         var validated = new ArrayList<CustomProviderConfig>(this.custom.size());
 
         for (var config : this.custom) {
-            if (config == null || !config.enabled())
+            if (config == null)
                 continue;
 
             if (config.name().isEmpty()) {

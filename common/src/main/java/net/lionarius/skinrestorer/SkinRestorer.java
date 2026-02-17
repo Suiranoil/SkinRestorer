@@ -120,9 +120,6 @@ public final class SkinRestorer {
 
     private static void registerCustomProviders(Collection<CustomProviderConfig> customProviders) {
         for (var customProvider : customProviders) {
-            if (!customProvider.enabled())
-                continue;
-
             var providerName = customProvider.name();
 
             if (providerName.isEmpty()) {
@@ -146,7 +143,7 @@ public final class SkinRestorer {
                 continue;
             }
             
-            SkinRestorer.providersRegistry.register(providerName, providerResult.getSuccessValue(), customProvider.isPublic());
+            SkinRestorer.providersRegistry.register(providerName, providerResult.getSuccessValue(), customProvider.enabled());
         }
     }
     

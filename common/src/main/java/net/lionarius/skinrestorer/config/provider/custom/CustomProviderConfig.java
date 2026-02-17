@@ -10,17 +10,11 @@ import net.lionarius.skinrestorer.util.Result;
 public abstract class CustomProviderConfig extends AbstractProviderConfig {
     protected static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 60);
 
-    protected boolean isPublic;
     protected CustomProviderType type;
 
     protected CustomProviderConfig(CustomProviderType type) {
         super(true, "", DEFAULT_CACHE_VALUE);
-        this.isPublic = true;
         this.type = type;
-    }
-
-    public boolean isPublic() {
-        return this.isPublic;
     }
 
     public CustomProviderType type() {
