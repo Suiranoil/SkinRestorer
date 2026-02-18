@@ -160,7 +160,6 @@ public final class SkinRestorer {
         
         public static void onServerStarted(MinecraftServer server) {
             Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
-            FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
             
             SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
             SkinRestorer.tickedScheduler = new TickedScheduler(server);
