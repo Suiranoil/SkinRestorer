@@ -28,6 +28,7 @@ public final class CustomProviderListDeserializer implements JsonSerializer<List
 
             CustomProviderConfig provider = switch (providerType) {
                 case YGGDRASIL -> context.deserialize(object, CustomYggdrasilProviderConfig.class);
+                case AUTHLIB_INJECTOR -> context.deserialize(object, CustomAuthlibInjectorProviderConfig.class);
                 default -> context.deserialize(object, UnknownCustomProviderConfig.class);
             };
 

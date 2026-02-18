@@ -12,7 +12,6 @@ public final class CustomYggdrasilProviderConfig extends CustomProviderConfig {
     private String baseUrl = "";
     private String servicesUrl = "";
     private String sessionUrl = "";
-    private boolean useProviderSignature = true;
 
     public CustomYggdrasilProviderConfig() {
         super(CustomYggdrasilProviderConfig.TYPE);
@@ -28,10 +27,6 @@ public final class CustomYggdrasilProviderConfig extends CustomProviderConfig {
 
     public boolean hasConfiguredUrls() {
         return !this.servicesUrl.isEmpty() && !this.sessionUrl.isEmpty();
-    }
-
-    public boolean useProviderSignature() {
-        return this.useProviderSignature;
     }
 
     @Override

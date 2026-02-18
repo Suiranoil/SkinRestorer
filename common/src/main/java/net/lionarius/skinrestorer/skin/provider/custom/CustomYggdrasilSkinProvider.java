@@ -11,10 +11,10 @@ import net.lionarius.skinrestorer.config.provider.custom.CustomYggdrasilProvider
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.skin.provider.YggdrasilSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
+import net.lionarius.skinrestorer.util.WebUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +33,7 @@ public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
     public CustomYggdrasilSkinProvider(String providerName, SkinSigner skinSigner) {
         this.providerName = providerName;
         this.skinSigner = skinSigner;
-        this.useProviderSignature = true;
+        this.useProviderSignature = false;
     }
 
     @Override
@@ -63,20 +63,8 @@ public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
     }
 
     private void reloadUrls(CustomYggdrasilProviderConfig config) {
-        this.baseServicesServerUrl = this.parseUri(config.servicesUrl(), "services");
-        this.baseSessionServerUrl = this.parseUri(config.sessionUrl(), "session");
-    }
-
-    private URI parseUri(String uri, String type) {
-        if (uri == null || uri.isEmpty())
-            return null;
-
-        try {
-            return new URI(uri);
-        } catch (URISyntaxException e) {
-            SkinRestorer.LOGGER.warn("Invalid custom {} URL '{}' for provider '{}'", type, uri, this.providerName, e);
-            return null;
-        }
+        this.baseServicesServerUrl = WebUtils.parseUri(config.servicesUrl());
+        this.baseSessionServerUrl = WebUtils.parseUri(config.sessionUrl());
     }
 
     private void createCache(CacheConfig config) {

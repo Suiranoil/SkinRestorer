@@ -5,6 +5,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -61,6 +62,17 @@ public final class WebUtils {
         }
     }
     
+    public static URI parseUri(String uri) {
+        if (uri == null || uri.isEmpty())
+            return null;
+
+        return URI.create(uri);
+    }
+
+    public static String ensureTrailingSlash(String url) {
+        return url.endsWith("/") ? url : url + "/";
+    }
+
     public static void throwOnClientErrors(HttpResponse<?> response) {
         String message = switch (response.statusCode()) {
             case 400 -> "bad request";

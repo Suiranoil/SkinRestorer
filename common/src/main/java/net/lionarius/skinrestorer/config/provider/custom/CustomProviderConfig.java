@@ -11,6 +11,7 @@ public abstract class CustomProviderConfig extends AbstractProviderConfig {
     protected static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 60);
 
     protected CustomProviderType type;
+    protected boolean useProviderSignature = false;
 
     protected CustomProviderConfig(CustomProviderType type) {
         super(true, "", DEFAULT_CACHE_VALUE);
@@ -20,7 +21,11 @@ public abstract class CustomProviderConfig extends AbstractProviderConfig {
     public CustomProviderType type() {
         return this.type;
     }
-
+    
+    public boolean useProviderSignature() {
+        return this.useProviderSignature;
+    }
+    
     public abstract Result<SkinProvider, String> createSkinProvider(SkinSigner skinSigner);
 
     @Override
