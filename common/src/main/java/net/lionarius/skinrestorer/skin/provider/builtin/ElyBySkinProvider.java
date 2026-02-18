@@ -24,7 +24,7 @@ public final class ElyBySkinProvider extends UsernameSkinProvider {
 
     static {
         try {
-            API_URI = new URI("http://skinsystem.ely.by");
+            API_URI = new URI("https://skinsystem.ely.by");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
