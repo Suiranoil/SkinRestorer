@@ -1,6 +1,7 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.base;
 
 import net.lionarius.skinrestorer.skin.SkinVariant;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.minecraft.util.StringUtil;
 
 import java.util.Locale;

@@ -1,4 +1,4 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.base;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;

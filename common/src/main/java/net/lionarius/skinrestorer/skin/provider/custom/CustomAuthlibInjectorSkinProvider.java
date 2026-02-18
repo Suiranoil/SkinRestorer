@@ -9,7 +9,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.config.provider.custom.CustomAuthlibInjectorProviderConfig;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.skin.provider.ProfileSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.base.ProfileSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinResigner;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.util.JsonUtils;

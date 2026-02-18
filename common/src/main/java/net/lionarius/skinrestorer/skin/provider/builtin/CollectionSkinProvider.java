@@ -6,7 +6,7 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.config.provider.collection.CollectionSkinSource;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.skin.provider.AbstractSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.base.AbstractSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 

@@ -1,4 +1,4 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.base;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.skin.SkinVariant;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;

@@ -5,7 +5,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
-import net.lionarius.skinrestorer.skin.provider.UsernameSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.base.UsernameSkinProvider;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.WebUtils;

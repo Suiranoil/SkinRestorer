@@ -1,4 +1,4 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.base;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.skin.SkinVariant;
+import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.util.Result;
 import org.jetbrains.annotations.NotNull;
 

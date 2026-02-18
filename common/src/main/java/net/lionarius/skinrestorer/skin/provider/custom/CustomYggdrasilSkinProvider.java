@@ -8,7 +8,7 @@ import net.lionarius.skinrestorer.config.provider.custom.CustomYggdrasilProvider
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinResigner;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
-import net.lionarius.skinrestorer.skin.provider.YggdrasilSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.base.YggdrasilSkinProvider;
 import net.lionarius.skinrestorer.util.WebUtils;
 
 import java.net.URI;
