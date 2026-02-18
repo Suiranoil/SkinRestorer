@@ -76,7 +76,7 @@ public final class SkinRestorer {
     
     public static void onInitialize() {
         SkinRestorer.configDir = Services.PLATFORM.getConfigDirectory().resolve(SkinRestorer.MOD_ID);
-        SkinRestorer.reloadConfig();
+        SkinRestorer.reloadConfig(true);
 
         SkinRestorer.providersRegistry.register(EmptySkinProvider.PROVIDER_NAME, SkinProvider.EMPTY, false);
         SkinRestorer.providersRegistry.register(SkinShuffleSkinProvider.PROVIDER_NAME, SkinProvider.SKIN_SHUFFLE, false);
@@ -142,12 +142,17 @@ public final class SkinRestorer {
     }
     
     public static void reloadConfig() {
+        SkinRestorer.reloadConfig(false);
+    }
+    
+    public static void reloadConfig(boolean initial) {
         SkinRestorer.config = Config.load(SkinRestorer.getConfigDir());
         Translation.reloadTranslations();
         WebUtils.recreateHttpClient();
         
         SkinRestorer.providersRegistry.reload();
-        SkinRestorer.validateFirstJoinSkinProvider();
+        if (!initial)
+            SkinRestorer.validateFirstJoinSkinProvider();
     }
     
     public static class Events {
