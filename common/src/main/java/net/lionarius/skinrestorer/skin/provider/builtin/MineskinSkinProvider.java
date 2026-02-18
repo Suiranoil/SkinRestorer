@@ -1,22 +1,17 @@
 package net.lionarius.skinrestorer.skin.provider.builtin;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.mojang.authlib.properties.Property;
 import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.mineskin.Java11RequestHandler;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.skin.provider.SkinProvider;
+import net.lionarius.skinrestorer.skin.provider.AbstractSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.WebUtils;
-import org.jetbrains.annotations.NotNull;
 import org.mineskin.MineSkinClient;
 import org.mineskin.data.Variant;
 import org.mineskin.data.Visibility;
@@ -29,26 +24,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-public final class MineskinSkinProvider implements SkinProvider, SkinSigner {
-    
+public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, SkinVariant>> implements SkinSigner {
+
     public static final String PROVIDER_NAME = "web";
-    
+
     private MineSkinClient mineskinClient;
-    
-    private LoadingCache<Pair<URI, SkinVariant>, Optional<Property>> skinCache;
-    
+
     @Override
     public void reload() {
         this.reloadClient();
-        this.createCache();
+        this.createSkinCache();
     }
-    
+
     private void reloadClient() {
         var config = SkinRestorer.getConfig();
         var configApiKey = config.providersConfig().mineskin().apiKey();
-        
+
         this.mineskinClient = MineSkinClient
                 .builder()
                 .userAgent(WebUtils.USER_AGENT)
@@ -65,26 +57,12 @@ public final class MineskinSkinProvider implements SkinProvider, SkinSigner {
                 .apiKey(configApiKey.isEmpty() ? null : configApiKey)
                 .build();
     }
-    
-    private void createCache() {
-        var config = SkinRestorer.getConfig().providersConfig().mineskin();
-        var time = config.cache().enabled() ? config.cache().duration() : 0;
-        
-        this.skinCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(time, TimeUnit.SECONDS)
-                .build(new CacheLoader<>() {
-                    @Override
-                    public @NotNull Optional<Property> load(@NotNull Pair<URI, SkinVariant> key) throws Exception {
-                        return MineskinSkinProvider.this.loadSkin(key.first(), key.second());
-                    }
-                });
-    }
-    
+
     @Override
     public String getProviderName() {
         return MineskinSkinProvider.PROVIDER_NAME;
     }
-    
+
     @Override
     public SkinProviderParameterType getParameterType() {
         return SkinProviderParameterType.CUSTOM;
@@ -94,23 +72,25 @@ public final class MineskinSkinProvider implements SkinProvider, SkinSigner {
     public String getArgumentName() {
         return "url";
     }
-    
+
     @Override
     public boolean hasVariantSupport() {
         return true;
     }
-    
+
     @Override
-    public Result<Optional<Property>, Exception> fetchSkin(String url, SkinVariant variant) {
-        try {
-            var uri = new URI(url);
-            
-            return Result.success(this.skinCache.get(Pair.of(uri, variant)));
-        } catch (UncheckedExecutionException e) {
-            return Result.error((Exception) e.getCause());
-        } catch (Exception e) {
-            return Result.error(e);
-        }
+    protected CacheConfig getCacheConfig() {
+        return SkinRestorer.getConfig().providersConfig().mineskin().cache();
+    }
+
+    @Override
+    protected Pair<URI, SkinVariant> getCacheKey(String argument, SkinVariant variant) throws Exception {
+        return Pair.of(new URI(argument), variant);
+    }
+
+    @Override
+    protected Optional<Property> loadSkin(Pair<URI, SkinVariant> key) throws Exception {
+        return this.loadSkin(key.first(), key.second());
     }
 
     @Override
@@ -126,13 +106,13 @@ public final class MineskinSkinProvider implements SkinProvider, SkinSigner {
 
         return this.loadSkin(new URI(skin.first()), skin.second());
     }
-    
+
     private Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
         var mineskinVariant = switch (variant) {
             case CLASSIC -> Variant.CLASSIC;
             case SLIM -> Variant.SLIM;
         };
-        
+
         var request = "file".equals(uri.getScheme())
                 ? GenerateRequest.upload(Files.newInputStream(Path.of(uri)))
                 .variant(mineskinVariant)
@@ -142,13 +122,13 @@ public final class MineskinSkinProvider implements SkinProvider, SkinSigner {
                 .variant(mineskinVariant)
                 .name("skinrestorer-skin")
                 .visibility(Visibility.UNLISTED);
-        
+
         var skin = this.mineskinClient.queue().submit(request)
                 .thenApply(QueueResponse::getJob)
                 .thenCompose(jobInfo -> jobInfo.waitForCompletion(this.mineskinClient))
                 .thenCompose(jobReference -> jobReference.getOrLoadSkin(this.mineskinClient))
                 .join();
-        
+
         return Optional.of(new Property(
                 PlayerUtils.TEXTURES_KEY,
                 skin.texture().data().value(),
