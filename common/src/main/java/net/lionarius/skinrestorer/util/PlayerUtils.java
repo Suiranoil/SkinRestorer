@@ -125,7 +125,7 @@ public final class PlayerUtils {
         
         String url = skinTexture.get("url").getAsString();
         SkinVariant variant = SkinVariant.CLASSIC;
-
+        
         if (skinTexture.has("metadata")) {
             var metadata = skinTexture.getAsJsonObject("metadata");
             if (metadata.has("model")) {
@@ -133,7 +133,7 @@ public final class PlayerUtils {
                 variant = model.equals("slim") ? SkinVariant.SLIM : SkinVariant.CLASSIC;
             }
         }
-
+        
         return Pair.of(url, variant);
     }
     

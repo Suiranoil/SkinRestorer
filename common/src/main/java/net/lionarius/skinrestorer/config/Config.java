@@ -9,8 +9,8 @@ import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 
-import java.util.Locale;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class Config implements GsonPostProcessable {
@@ -111,7 +111,7 @@ public final class Config implements GsonPostProcessable {
             this.firstJoinSkinProvider = MojangSkinProvider.PROVIDER_NAME;
         } else {
             this.firstJoinSkinProvider = Config.normalizeFirstJoinSkinProvider(this.firstJoinSkinProvider);
-
+            
             if (this.firstJoinSkinProvider.isEmpty()) {
                 SkinRestorer.LOGGER.warn("FirstJoinSkinProvider config is empty after normalization, defaulting to MOJANG");
                 this.firstJoinSkinProvider = MojangSkinProvider.PROVIDER_NAME;
@@ -142,10 +142,10 @@ public final class Config implements GsonPostProcessable {
             this.providers = ProvidersConfig.DEFAULT;
         }
     }
-
+    
     private static String normalizeFirstJoinSkinProvider(String value) {
         var normalized = value.trim().toLowerCase(Locale.ROOT);
-
+        
         return switch (normalized) {
             case "mojang" -> MojangSkinProvider.PROVIDER_NAME;
             case "ely.by", "ely_by" -> ElyBySkinProvider.PROVIDER_NAME;

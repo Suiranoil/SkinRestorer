@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface SkinSigner {
     Optional<Property> signSkin(URI uri, SkinVariant variant) throws Exception;
-
+    
     Optional<Property> signSkin(Property property) throws Exception;
 }

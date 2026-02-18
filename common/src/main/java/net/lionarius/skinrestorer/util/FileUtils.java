@@ -1,10 +1,6 @@
 package net.lionarius.skinrestorer.util;
 
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.config.Config;
-import net.lionarius.skinrestorer.skin.SkinIO;
-import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
-import net.lionarius.skinrestorer.translation.Translation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +8,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 public final class FileUtils {
     

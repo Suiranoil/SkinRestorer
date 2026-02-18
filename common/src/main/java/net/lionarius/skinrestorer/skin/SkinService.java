@@ -18,44 +18,44 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SkinService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SkinService.class);
-
+    
     private SkinService() {}
-
+    
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value, boolean save) {
         var acceptedPlayers = new HashSet<ServerPlayer>();
-
+        
         for (var player : targets) {
             var profile = player.getGameProfile();
             var skin = PlayerUtils.getPlayerSkin(profile);
-
+            
             if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.id()))
                 value = value.setOriginalValue(skin);
-
+            
             if (PlayerUtils.areSkinPropertiesEquals(value.value(), skin))
                 continue;
-
+            
             if (save)
                 SkinRestorer.getSkinStorage().setSkin(profile.id(), value);
-
+            
             var newProfile = PlayerUtils.applyRestoredSkin(profile, value.value());
             ((PlayerAccessor) player).setGameProfile(newProfile);
-
+            
             if (player.connection == null)
                 continue;
-
+            
             PlayerUtils.refreshPlayer(player);
             acceptedPlayers.add(player);
-
+            
             SkinRestorer.getTickedScheduler().cancel(player.getUUID());
         }
-
+        
         return acceptedPlayers;
     }
-
+    
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value) {
         return SkinService.applySkin(server, targets, value, true);
     }
-
+    
     public static CompletableFuture<Result<Collection<ServerPlayer>, String>> setSkinAsync(
             MinecraftServer server,
             Collection<ServerPlayer> targets,
@@ -68,15 +68,15 @@ public final class SkinService {
                 .thenApplyAsync(result -> {
                     if (result.isEmpty())
                         return Result.<Collection<ServerPlayer>, String>error("provider '" + context.name() + "' is not registered");
-
+                    
                     var skinResult = result.get();
                     if (skinResult.isError())
                         throw new TransparentException(Throwables.getRootCause(skinResult.getErrorValue()));
-
+                    
                     var skinValue = SkinValue.fromProviderContextWithValue(context, skinResult.getSuccessValue().orElse(null));
-
+                    
                     var acceptedPlayers = SkinService.applySkin(server, targets, skinValue, save);
-
+                    
                     return Result.<Collection<ServerPlayer>, String>success(acceptedPlayers);
                 }, server)
                 .exceptionally(e -> {

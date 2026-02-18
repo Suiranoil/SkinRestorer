@@ -13,16 +13,16 @@ import java.net.http.HttpRequest;
 import java.util.UUID;
 
 public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
-
+    
     protected abstract URI baseSessionServerUrl();
-
+    
     protected abstract URI baseServicesServerUrl();
-
+    
     @Override
     protected UUID lookupUuid(String username) throws Exception {
         return this.getProfile(username).id();
     }
-
+    
     @Override
     protected GameProfile fetchProfileWithProperties(UUID uuid) throws IOException {
         var request = HttpRequest.newBuilder()
@@ -32,16 +32,16 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
                 )
                 .GET()
                 .build();
-
+        
         var response = WebUtils.executeRequest(request);
         WebUtils.throwOnClientErrors(response);
-
+        
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with uuid " + uuid);
-
+        
         return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).profile();
     }
-
+    
     protected NameAndId getProfile(final String name) throws IOException {
         var request = HttpRequest.newBuilder()
                 .uri(this.baseServicesServerUrl()
@@ -50,13 +50,13 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
                 )
                 .GET()
                 .build();
-
+        
         var response = WebUtils.executeRequest(request);
         WebUtils.throwOnClientErrors(response);
-
+        
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with name " + name);
-
+        
         return JsonUtils.fromJson(response.body(), NameAndId.class);
     }
 }

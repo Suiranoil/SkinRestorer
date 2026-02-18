@@ -17,26 +17,26 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class MojangSkinProvider extends YggdrasilSkinProvider {
-
+    
     public static final String PROVIDER_NAME = "mojang";
     public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
     private static final Environment ENVIRONMENT;
     private static final URI SERVICES_SERVER_URI;
     private static final URI SESSION_SERVER_URI;
-
+    
     private final CachedUserNameToIdResolver profileCache;
-
+    
     static {
         try {
             ENVIRONMENT = EnvironmentParser.getEnvironmentFromProperties().orElse(YggdrasilEnvironment.PROD.getEnvironment());
-
+            
             SERVICES_SERVER_URI = new URI(ENVIRONMENT.servicesHost());
             SESSION_SERVER_URI = new URI(ENVIRONMENT.sessionHost());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
     }
-
+    
     public MojangSkinProvider() {
         this.profileCache = new CachedUserNameToIdResolver(new GameProfileRepository() {
             @Override
@@ -50,7 +50,7 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
                     }
                 }
             }
-
+            
             @Override
             public Optional<NameAndId> findProfileByName(String name) {
                 try {
@@ -62,40 +62,40 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
             }
         }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
     }
-
+    
     @Override
     public String getProviderName() {
         return MojangSkinProvider.PROVIDER_NAME;
     }
-
+    
     @Override
     public void reload() {
         this.createSkinCache();
     }
-
+    
     @Override
     protected CacheConfig getCacheConfig() {
         return SkinRestorer.getConfig().providersConfig().mojang().cache();
     }
-
+    
     public static SkinProviderContext skinProviderContextFromProfile(GameProfile gameProfile) {
         return new SkinProviderContext(MojangSkinProvider.PROVIDER_NAME, gameProfile.name(), null);
     }
-
+    
     @Override
     protected UUID resolveUuid(String username) throws Exception {
         var cachedProfile = this.profileCache.get(username);
         if (cachedProfile.isEmpty())
             throw new IllegalArgumentException("no profile found for " + username);
-
+        
         return cachedProfile.get().id();
     }
-
+    
     @Override
     protected URI baseSessionServerUrl() {
         return MojangSkinProvider.SESSION_SERVER_URI;
     }
-
+    
     @Override
     protected URI baseServicesServerUrl() {
         return MojangSkinProvider.SERVICES_SERVER_URI;

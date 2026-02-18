@@ -65,14 +65,14 @@ public final class WebUtils {
     public static URI parseUri(String uri) {
         if (uri == null || uri.isEmpty())
             return null;
-
+        
         return URI.create(uri);
     }
-
+    
     public static String ensureTrailingSlash(String url) {
         return url.endsWith("/") ? url : url + "/";
     }
-
+    
     public static void throwOnClientErrors(HttpResponse<?> response) {
         String message = switch (response.statusCode()) {
             case 400 -> "bad request";

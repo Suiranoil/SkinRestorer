@@ -15,24 +15,24 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractSkinProvider<K> implements SkinProvider {
-
+    
     private LoadingCache<K, Optional<Property>> skinCache;
-
+    
     protected abstract CacheConfig getCacheConfig();
-
+    
     protected abstract K getCacheKey(String argument, SkinVariant variant) throws Exception;
-
+    
     protected abstract Optional<Property> loadSkin(K key) throws Exception;
-
+    
     protected void validate(String argument, SkinVariant variant) throws Exception {
         if (this.skinCache == null)
             throw new IllegalStateException("Provider not initialized");
     }
-
+    
     protected void createSkinCache() {
         var config = this.getCacheConfig();
         var time = config.enabled() ? config.duration() : 0;
-
+        
         this.skinCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
                 .build(new CacheLoader<>() {
@@ -42,7 +42,7 @@ public abstract class AbstractSkinProvider<K> implements SkinProvider {
                     }
                 });
     }
-
+    
     @Override
     public Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant) {
         try {

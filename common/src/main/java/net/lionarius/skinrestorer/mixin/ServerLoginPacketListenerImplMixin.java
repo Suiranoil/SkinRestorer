@@ -59,7 +59,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 var providerName = config.firstJoinSkinProvider();
                 
                 var shouldFetch = (originalSkin == null && config.fetchSkinOnFirstJoin()) ||
-                                      (originalSkin != null && config.forceFirstJoinSkinFetch() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
+                                  (originalSkin != null && config.forceFirstJoinSkinFetch() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
                 
                 if (shouldFetch) {
                     var provider = SkinRestorer.getProvider(providerName).orElse(null);

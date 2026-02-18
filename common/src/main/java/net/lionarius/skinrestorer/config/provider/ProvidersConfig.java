@@ -61,11 +61,11 @@ public final class ProvidersConfig implements GsonPostProcessable {
     public CollectionProviderConfig collection() {
         return this.collection;
     }
-
+    
     public List<CustomProviderConfig> custom() {
         return this.getValidatedCustom();
     }
-
+    
     public <T extends CustomProviderConfig> Optional<T> findCustomByName(String name, Class<T> type) {
         return this.getValidatedCustom()
                 .stream()
@@ -74,7 +74,7 @@ public final class ProvidersConfig implements GsonPostProcessable {
                 .map(type::cast)
                 .findFirst();
     }
-
+    
     @Override
     public void gsonPostProcess() {
         if (this.mojang == null) {
@@ -96,43 +96,43 @@ public final class ProvidersConfig implements GsonPostProcessable {
             SkinRestorer.LOGGER.warn("Collection provider config is null, using default");
             this.collection = ProvidersConfig.DEFAULT.collection();
         }
-
+        
         if (this.custom == null) {
             SkinRestorer.LOGGER.warn("Custom providers config is null, using an empty list");
             this.custom = new ArrayList<>();
         }
-
+        
         this.rebuildValidatedCustomProviders();
     }
-
+    
     private List<CustomProviderConfig> getValidatedCustom() {
         if (this.validatedCustom == null)
             this.rebuildValidatedCustomProviders();
-
+        
         if (this.validatedCustom == null)
             this.validatedCustom = List.of();
-
+        
         return this.validatedCustom;
     }
-
+    
     private void rebuildValidatedCustomProviders() {
         if (this.custom == null) {
             this.validatedCustom = List.of();
             return;
         }
-
+        
         var seenNames = new HashSet<String>();
         var validated = new ArrayList<CustomProviderConfig>(this.custom.size());
-
+        
         for (var config : this.custom) {
             if (config == null)
                 continue;
-
+            
             if (config.name().isEmpty()) {
                 SkinRestorer.LOGGER.warn("Skipping custom provider with empty name");
                 continue;
             }
-
+            
             if (!seenNames.add(config.name())) {
                 SkinRestorer.LOGGER.warn(
                         "Duplicate enabled custom provider name '{}' found; keeping the first one",
@@ -140,10 +140,10 @@ public final class ProvidersConfig implements GsonPostProcessable {
                 );
                 continue;
             }
-
+            
             validated.add(config);
         }
-
+        
         this.validatedCustom = List.copyOf(validated);
     }
 }

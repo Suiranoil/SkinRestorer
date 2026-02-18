@@ -21,7 +21,7 @@ public final class EmptySkinProvider implements SkinProvider {
     public SkinProviderParameterType getParameterType() {
         return SkinProviderParameterType.CUSTOM;
     }
-
+    
     @Override
     public String getArgumentName() {
         return "placeholder";
