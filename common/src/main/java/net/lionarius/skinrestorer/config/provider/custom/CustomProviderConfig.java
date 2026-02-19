@@ -8,7 +8,7 @@ import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.util.Result;
 
 public abstract class CustomProviderConfig extends AbstractProviderConfig {
-    protected static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 60);
+    protected static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 300);
     
     protected CustomProviderType type;
     protected boolean useProviderSignature = false;
