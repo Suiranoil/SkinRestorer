@@ -12,6 +12,7 @@ import net.lionarius.skinrestorer.skin.provider.base.AbstractSkinProvider;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.WebUtils;
+import org.jetbrains.annotations.Nullable;
 import org.mineskin.MineSkinClient;
 import org.mineskin.data.Variant;
 import org.mineskin.data.Visibility;
@@ -107,10 +108,11 @@ public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, S
         return this.loadSkin(new URI(skin.first()), skin.second());
     }
     
-    private Optional<Property> loadSkin(URI uri, SkinVariant variant) throws Exception {
+    private Optional<Property> loadSkin(URI uri, @Nullable SkinVariant variant) throws Exception {
         var mineskinVariant = switch (variant) {
             case CLASSIC -> Variant.CLASSIC;
             case SLIM -> Variant.SLIM;
+            case null -> Variant.AUTO;
         };
         
         var request = "file".equals(uri.getScheme())
