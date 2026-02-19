@@ -5,6 +5,7 @@ import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.config.provider.custom.CustomProviderConfig;
+import net.lionarius.skinrestorer.mineskin.MineskinService;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
@@ -134,7 +135,7 @@ public final class SkinRestorer {
                 continue;
             }
             
-            var providerResult = customProvider.createSkinProvider(SkinProvider.MINESKIN);
+            var providerResult = customProvider.createSkinProvider(MineskinService.INSTANCE);
             if (providerResult.isError()) {
                 SkinRestorer.LOGGER.warn("Skipping custom provider '{}' because {}", providerName, providerResult.getErrorValue());
                 continue;
@@ -152,6 +153,7 @@ public final class SkinRestorer {
         SkinRestorer.config = Config.load(SkinRestorer.getConfigDir());
         Translation.reloadTranslations();
         WebUtils.recreateHttpClient();
+        MineskinService.INSTANCE.reload();
         
         SkinRestorer.providersRegistry.reload();
         if (!initial)

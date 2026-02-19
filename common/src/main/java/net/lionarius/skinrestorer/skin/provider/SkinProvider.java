@@ -2,6 +2,7 @@ package net.lionarius.skinrestorer.skin.provider;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.properties.Property;
+import net.lionarius.skinrestorer.mineskin.MineskinService;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.builtin.*;
 import net.lionarius.skinrestorer.util.Result;
@@ -13,8 +14,8 @@ public interface SkinProvider {
     EmptySkinProvider EMPTY = new EmptySkinProvider();
     MojangSkinProvider MOJANG = new MojangSkinProvider();
     ElyBySkinProvider ELY_BY = new ElyBySkinProvider();
-    MineskinSkinProvider MINESKIN = new MineskinSkinProvider();
-    CollectionSkinProvider COLLECTION = new CollectionSkinProvider(SkinProvider.MINESKIN);
+    MineskinSkinProvider MINESKIN = new MineskinSkinProvider(MineskinService.INSTANCE);
+    CollectionSkinProvider COLLECTION = new CollectionSkinProvider(MineskinService.INSTANCE);
     SkinShuffleSkinProvider SKIN_SHUFFLE = new SkinShuffleSkinProvider();
     
     Set<String> BUILTIN_PROVIDER_NAMES = ImmutableSet.of(
