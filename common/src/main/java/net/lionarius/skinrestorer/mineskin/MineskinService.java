@@ -14,8 +14,12 @@ import org.mineskin.data.Visibility;
 import org.mineskin.request.GenerateRequest;
 import org.mineskin.response.QueueResponse;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -24,15 +28,19 @@ import java.util.Optional;
 public final class MineskinService implements SkinSigner {
 
     public static final MineskinService INSTANCE = new MineskinService();
+    private static final String SKIN_NAME = "skinrestorer-skin";
 
     private MineSkinClient mineskinClient;
+    private boolean proxyUrlUpload;
 
     private MineskinService() {}
 
     public void reload() {
         var config = SkinRestorer.getConfig();
-        var configApiKey = config.providersConfig().mineskin().apiKey();
+        var mineskinConfig = config.providersConfig().mineskin();
+        var configApiKey = mineskinConfig.apiKey();
 
+        this.proxyUrlUpload = mineskinConfig.proxyUrlUpload();
         this.mineskinClient = MineSkinClient
                 .builder()
                 .userAgent(WebUtils.USER_AGENT)
@@ -71,14 +79,9 @@ public final class MineskinService implements SkinSigner {
             case null -> Variant.AUTO;
         };
 
-        var request = "file".equals(uri.getScheme())
-                ? GenerateRequest.upload(Files.newInputStream(Path.of(uri)))
+        var request = this.createGenerateRequest(uri)
                 .variant(mineskinVariant)
-                .name("skinrestorer-skin")
-                .visibility(Visibility.UNLISTED)
-                : GenerateRequest.url(uri)
-                .variant(mineskinVariant)
-                .name("skinrestorer-skin")
+                .name(MineskinService.SKIN_NAME)
                 .visibility(Visibility.UNLISTED);
 
         var skin = this.mineskinClient.queue().submit(request)
@@ -92,5 +95,34 @@ public final class MineskinService implements SkinSigner {
                 skin.texture().data().value(),
                 skin.texture().data().signature()
         ));
+    }
+
+    private GenerateRequest createGenerateRequest(URI uri) throws Exception {
+        if ("file".equals(uri.getScheme()))
+            return GenerateRequest.upload(Files.newInputStream(Path.of(uri)));
+
+        if (MineskinService.isHttpUrl(uri) && this.proxyUrlUpload)
+            return GenerateRequest.upload(new ByteArrayInputStream(this.downloadImage(uri)));
+
+        return GenerateRequest.url(uri);
+    }
+
+    private byte[] downloadImage(URI uri) throws IOException {
+        var request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .build();
+
+        var response = WebUtils.executeRequest(request, HttpResponse.BodyHandlers.ofByteArray());
+        WebUtils.throwOnClientErrors(response);
+
+        if (response.statusCode() != 200)
+            throw new IOException("unexpected status code " + response.statusCode());
+
+        return response.body();
+    }
+
+    private static boolean isHttpUrl(URI uri) {
+        return "http".equals(uri.getScheme()) || "https".equals(uri.getScheme());
     }
 }

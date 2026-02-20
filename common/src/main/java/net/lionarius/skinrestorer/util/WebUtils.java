@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandler;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
@@ -45,12 +46,16 @@ public final class WebUtils {
     }
     
     public static HttpResponse<String> executeRequest(HttpRequest request) throws IOException {
+        return WebUtils.executeRequest(request, HttpResponse.BodyHandlers.ofString());
+    }
+    
+    public static <T> HttpResponse<T> executeRequest(HttpRequest request, BodyHandler<T> bodyHandler) throws IOException {
         try {
             var modifiedRequest = HttpRequest.newBuilder(request, (name, value) -> true)
                     .header("User-Agent", WebUtils.USER_AGENT)
                     .build();
             
-            final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, HttpResponse.BodyHandlers.ofString());
+            final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, bodyHandler);
             
             if (response.statusCode() >= 500)
                 throw new IOException("server error " + response.statusCode());

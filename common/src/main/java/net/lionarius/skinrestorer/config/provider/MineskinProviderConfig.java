@@ -7,15 +7,21 @@ public final class MineskinProviderConfig extends BuiltInProviderConfig {
     private static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 300);
     
     private String apiKey;
+    private boolean proxyUrlUpload;
     
     public MineskinProviderConfig() {
         super(MineskinSkinProvider.PROVIDER_NAME, DEFAULT_CACHE_VALUE);
         
         this.apiKey = "";
+        this.proxyUrlUpload = false;
     }
     
     public String apiKey() {
         return apiKey;
+    }
+
+    public boolean proxyUrlUpload() {
+        return this.proxyUrlUpload;
     }
     
     @Override
