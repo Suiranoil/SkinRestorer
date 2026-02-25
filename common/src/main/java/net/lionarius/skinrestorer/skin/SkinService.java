@@ -27,17 +27,18 @@ public final class SkinService {
         for (var player : targets) {
             var profile = player.getGameProfile();
             var skin = PlayerUtils.getPlayerSkin(profile);
+            var playerValue = value;
             
             if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.id()))
-                value = value.setOriginalValue(skin);
+                playerValue = playerValue.setOriginalValue(skin);
             
-            if (PlayerUtils.areSkinPropertiesEquals(value.value(), skin))
+            if (PlayerUtils.areSkinPropertiesEquals(playerValue.value(), skin))
                 continue;
             
             if (save)
-                SkinRestorer.getSkinStorage().setSkin(profile.id(), value);
+                SkinRestorer.getSkinStorage().setSkin(profile.id(), playerValue);
             
-            var newProfile = PlayerUtils.applyRestoredSkin(profile, value.value());
+            var newProfile = PlayerUtils.applyRestoredSkin(profile, playerValue.value());
             ((PlayerAccessor) player).setGameProfile(newProfile);
             
             if (player.connection == null)
