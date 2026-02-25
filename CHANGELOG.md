@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-02-25
+### Added
+- Added custom skin providers system for configuring third-party skin sources (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providerscustom))
+    - Custom Yggdrasil provider (for custom authentication servers)
+    - Custom Authlib Injector provider
+    - Custom Username URL provider (fetch skins by URL using player username)
+- Added `proxyUrlUpload` option for MineSkin provider (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providersmineskin))
+### Fixed
+- Fixed ely.by provider using HTTP URL instead of HTTPS
+
 ## [2.5.0] - 2026-01-14
 ### Added
 - Added collection skin provider (allows assigning random skins from a predefined set)
