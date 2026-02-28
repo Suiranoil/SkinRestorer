@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 public final class CollectionSkinFile implements CollectionSkinSource, GsonPostProcessable {
     private String path = "";
