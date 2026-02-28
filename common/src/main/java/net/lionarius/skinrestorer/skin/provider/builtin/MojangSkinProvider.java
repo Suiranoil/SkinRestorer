@@ -37,24 +37,11 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     }
     
     public MojangSkinProvider() {
-        this.profileCache = new GameProfileCache(new GameProfileRepository() {
-            @Override
-            public void findProfilesByNames(String[] names, ProfileLookupCallback callback) {
-                for (var name : names) {
-                    try {
-                        var profile = MojangSkinProvider.this.getProfile(name);
-                        callback.onProfileLookupSucceeded(profile);
-                    } catch (IOException e) {
-                        throw new TransparentException(e);
-                    }
-                }
-            }
-            
-            @Override
-            public Optional<GameProfile> findProfileByName(String name) {
+        this.profileCache = new GameProfileCache((names, callback) -> {
+            for (var name : names) {
                 try {
                     var profile = MojangSkinProvider.this.getProfile(name);
-                    return Optional.of(profile);
+                    callback.onProfileLookupSucceeded(profile);
                 } catch (IOException e) {
                     throw new TransparentException(e);
                 }
