@@ -1,8 +1,8 @@
 package net.lionarius.skinrestorer.skin;
 
 import com.mojang.authlib.properties.Property;
-import net.lionarius.skinrestorer.skin.provider.MineskinSkinProvider;
-import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MineskinSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 
