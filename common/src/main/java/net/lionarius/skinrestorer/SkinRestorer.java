@@ -1,19 +1,21 @@
 package net.lionarius.skinrestorer;
 
-import com.google.common.base.Throwables;
 import com.mojang.brigadier.CommandDispatcher;
 import net.lionarius.skinrestorer.command.SkinCommand;
 import net.lionarius.skinrestorer.config.Config;
 import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
-import net.lionarius.skinrestorer.exception.TransparentException;
-import net.lionarius.skinrestorer.mixin.PlayerAccessor;
+import net.lionarius.skinrestorer.config.provider.custom.CustomProviderConfig;
+import net.lionarius.skinrestorer.mineskin.MineskinService;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinIO;
 import net.lionarius.skinrestorer.skin.SkinStorage;
-import net.lionarius.skinrestorer.skin.SkinValue;
-import net.lionarius.skinrestorer.skin.provider.*;
+import net.lionarius.skinrestorer.skin.provider.SkinProvider;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderRegistry;
+import net.lionarius.skinrestorer.skin.provider.builtin.*;
 import net.lionarius.skinrestorer.translation.Translation;
-import net.lionarius.skinrestorer.util.*;
+import net.lionarius.skinrestorer.util.TickedScheduler;
+import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -25,9 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public final class SkinRestorer {
     public static final String MOD_ID = "skinrestorer";
@@ -80,7 +80,7 @@ public final class SkinRestorer {
     
     public static void onInitialize() {
         SkinRestorer.configDir = Services.PLATFORM.getConfigDirectory().resolve(SkinRestorer.MOD_ID);
-        SkinRestorer.reloadConfig();
+        SkinRestorer.reloadConfig(true);
         
         SkinRestorer.providersRegistry.register(EmptySkinProvider.PROVIDER_NAME, SkinProvider.EMPTY, false);
         SkinRestorer.providersRegistry.register(SkinShuffleSkinProvider.PROVIDER_NAME, SkinProvider.SKIN_SHUFFLE, false);
@@ -89,6 +89,23 @@ public final class SkinRestorer {
         SkinRestorer.registerDefaultSkinProvider(ElyBySkinProvider.PROVIDER_NAME, SkinProvider.ELY_BY, SkinRestorer.getConfig().providersConfig().ely_by());
         SkinRestorer.registerDefaultSkinProvider(MineskinSkinProvider.PROVIDER_NAME, SkinProvider.MINESKIN, SkinRestorer.getConfig().providersConfig().mineskin());
         SkinRestorer.registerDefaultSkinProvider(CollectionSkinProvider.PROVIDER_NAME, SkinProvider.COLLECTION, SkinRestorer.getConfig().providersConfig().collection());
+        SkinRestorer.registerCustomProviders(SkinRestorer.getConfig().providersConfig().custom());
+        
+        SkinRestorer.providersRegistry.reload();
+        
+        SkinRestorer.validateFirstJoinSkinProvider();
+    }
+    
+    private static void validateFirstJoinSkinProvider() {
+        var providerName = SkinRestorer.config.firstJoinSkinProvider();
+        var provider = SkinRestorer.providersRegistry.get(providerName);
+        
+        if (provider == null) {
+            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider '{}' is not registered. First join skin fetching will be skipped.", providerName);
+        } else if (provider.getParameterType() != SkinProviderParameterType.USERNAME) {
+            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider '{}' has parameter type {}, but only USERNAME providers are supported. First join skin fetching will be skipped.",
+                    providerName, provider.getParameterType());
+        }
     }
     
     private static void registerDefaultSkinProvider(String defaultName, SkinProvider provider, BuiltInProviderConfig config) {
@@ -99,79 +116,48 @@ public final class SkinRestorer {
             SkinRestorer.providersRegistry.register(config.name(), provider, config.enabled());
     }
     
+    private static void registerCustomProviders(Collection<CustomProviderConfig> customProviders) {
+        for (var customProvider : customProviders) {
+            var providerName = customProvider.name();
+            
+            if (providerName.isEmpty()) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider with empty name");
+                continue;
+            }
+            
+            if (SkinProvider.BUILTIN_PROVIDER_NAMES.contains(providerName)) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider '{}' because it conflicts with a built-in provider name", providerName);
+                continue;
+            }
+            
+            if (SkinRestorer.providersRegistry.get(providerName) != null) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider '{}' because this name is already registered", providerName);
+                continue;
+            }
+            
+            var providerResult = customProvider.createSkinProvider(MineskinService.INSTANCE);
+            if (providerResult.isError()) {
+                SkinRestorer.LOGGER.warn("Skipping custom provider '{}' because {}", providerName, providerResult.getErrorValue());
+                continue;
+            }
+            
+            SkinRestorer.providersRegistry.register(providerName, providerResult.getSuccessValue(), customProvider.enabled());
+        }
+    }
+    
     public static void reloadConfig() {
+        SkinRestorer.reloadConfig(false);
+    }
+    
+    public static void reloadConfig(boolean initial) {
         SkinRestorer.config = Config.load(SkinRestorer.getConfigDir());
         Translation.reloadTranslations();
         WebUtils.recreateHttpClient();
+        MineskinService.INSTANCE.reload();
         
-        MojangSkinProvider.reload();
-        ElyBySkinProvider.reload();
-        MineskinSkinProvider.reload();
-        CollectionSkinProvider.reload();
-    }
-    
-    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value, boolean save) {
-        var acceptedPlayers = new HashSet<ServerPlayer>();
-        
-        for (var player : targets) {
-            var profile = player.getGameProfile();
-            var skin = PlayerUtils.getPlayerSkin(profile);
-            
-            if (!SkinRestorer.getSkinStorage().hasSavedSkin(profile.id()))
-                value = value.setOriginalValue(skin);
-            
-            if (PlayerUtils.areSkinPropertiesEquals(value.value(), skin))
-                continue;
-            
-            if (save)
-                SkinRestorer.getSkinStorage().setSkin(profile.id(), value);
-            
-            var newProfile = PlayerUtils.applyRestoredSkin(profile, value.value());
-            ((PlayerAccessor) player).setGameProfile(newProfile);
-            
-            if (player.connection == null)
-                continue;
-            
-            PlayerUtils.refreshPlayer(player);
-            acceptedPlayers.add(player);
-            
-            SkinRestorer.getTickedScheduler().cancel(player.getUUID());
-        }
-        
-        return acceptedPlayers;
-    }
-    
-    public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<ServerPlayer> targets, SkinValue value) {
-        return SkinRestorer.applySkin(server, targets, value, true);
-    }
-    
-    public static CompletableFuture<Result<Collection<ServerPlayer>, String>> setSkinAsync(
-            MinecraftServer server,
-            Collection<ServerPlayer> targets,
-            SkinProviderContext context,
-            boolean save
-    ) {
-        return CompletableFuture.supplyAsync(
-                        () -> SkinRestorer.getProvider(context.name()).map(provider -> provider.fetchSkin(context.argument(), context.variant()))
-                )
-                .thenApplyAsync(result -> {
-                    if (result.isEmpty())
-                        return Result.<Collection<ServerPlayer>, String>error("provider '" + context.name() + "' is not registered");
-                    
-                    var skinResult = result.get();
-                    if (skinResult.isError())
-                        throw new TransparentException(Throwables.getRootCause(skinResult.getErrorValue()));
-                    
-                    var skinValue = SkinValue.fromProviderContextWithValue(context, skinResult.getSuccessValue().orElse(null));
-                    
-                    var acceptedPlayers = SkinRestorer.applySkin(server, targets, skinValue, save);
-                    
-                    return Result.<Collection<ServerPlayer>, String>success(acceptedPlayers);
-                }, server)
-                .exceptionally(e -> {
-                    SkinRestorer.LOGGER.error("Failed to set skin '{}:{}'", context.name(), context.argument(), e);
-                    return Result.error(e.getMessage());
-                });
+        SkinRestorer.providersRegistry.reload();
+        if (!initial)
+            SkinRestorer.validateFirstJoinSkinProvider();
     }
     
     public static class Events {
@@ -179,7 +165,6 @@ public final class SkinRestorer {
         
         public static void onServerStarted(MinecraftServer server) {
             Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
-            FileUtils.tryMigrateOldSkinDirectory(SkinRestorer.getConfigDir(), worldSkinDirectory);
             
             SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
             SkinRestorer.tickedScheduler = new TickedScheduler(server);

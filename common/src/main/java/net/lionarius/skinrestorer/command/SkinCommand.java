@@ -7,11 +7,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.lionarius.skinrestorer.SkinRestorer;
+import net.lionarius.skinrestorer.skin.SkinService;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.skin.provider.MojangSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
@@ -106,7 +107,7 @@ public final class SkinCommand {
             if (player == null)
                 continue;
             
-            var updatedPlayer = SkinRestorer.applySkin(src.getServer(), Collections.singleton(player), skin, false);
+            var updatedPlayer = SkinService.applySkin(src.getServer(), Collections.singleton(player), skin, false);
             SkinRestorer.getSkinStorage().deleteSkin(nameAndId.id());
             
             updatedPlayers.addAll(updatedPlayer);
@@ -140,7 +141,7 @@ public final class SkinCommand {
                 .filter(Objects::nonNull)
                 .toList();
         
-        SkinRestorer.setSkinAsync(src.getServer(), profileTargets, context, save).thenAccept(result -> {
+        SkinService.setSkinAsync(src.getServer(), profileTargets, context, save).thenAccept(result -> {
             if (result.isError()) {
                 src.sendFailure(Translation.translatableWithFallback(
                         Translation.COMMAND_SKIN_FAILED_KEY,
