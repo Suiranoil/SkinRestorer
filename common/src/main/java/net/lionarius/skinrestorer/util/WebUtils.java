@@ -5,9 +5,11 @@ import net.lionarius.skinrestorer.SkinRestorer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandler;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
@@ -44,12 +46,16 @@ public final class WebUtils {
     }
     
     public static HttpResponse<String> executeRequest(HttpRequest request) throws IOException {
+        return WebUtils.executeRequest(request, HttpResponse.BodyHandlers.ofString());
+    }
+    
+    public static <T> HttpResponse<T> executeRequest(HttpRequest request, BodyHandler<T> bodyHandler) throws IOException {
         try {
             var modifiedRequest = HttpRequest.newBuilder(request, (name, value) -> true)
                     .header("User-Agent", WebUtils.USER_AGENT)
                     .build();
             
-            final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, HttpResponse.BodyHandlers.ofString());
+            final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, bodyHandler);
             
             if (response.statusCode() >= 500)
                 throw new IOException("server error " + response.statusCode());
@@ -59,6 +65,21 @@ public final class WebUtils {
             Thread.currentThread().interrupt();
             throw new IOException(e);
         }
+    }
+    
+    public static URI parseUri(String uri) {
+        if (uri == null || uri.isEmpty())
+            return null;
+
+        try {
+            return URI.create(uri);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+    
+    public static String ensureTrailingSlash(String url) {
+        return url.endsWith("/") ? url : url + "/";
     }
     
     public static void throwOnClientErrors(HttpResponse<?> response) {
