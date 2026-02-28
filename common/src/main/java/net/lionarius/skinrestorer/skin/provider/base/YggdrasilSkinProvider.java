@@ -2,7 +2,6 @@ package net.lionarius.skinrestorer.skin.provider.base;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
-import com.mojang.authlib.yggdrasil.response.NameAndId;
 import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.WebUtils;
@@ -20,7 +19,7 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
     
     @Override
     protected UUID lookupUuid(String username) throws Exception {
-        return this.getProfile(username).id();
+        return this.getProfile(username).getId();
     }
     
     @Override
@@ -39,10 +38,10 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with uuid " + uuid);
         
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).profile();
+        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
     }
     
-    protected NameAndId getProfile(final String name) throws IOException {
+    protected GameProfile getProfile(final String name) throws IOException {
         var request = HttpRequest.newBuilder()
                 .uri(this.baseServicesServerUrl()
                         .resolve("/minecraft/profile/lookup/name/")
@@ -57,6 +56,6 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with name " + name);
         
-        return JsonUtils.fromJson(response.body(), NameAndId.class);
+        return JsonUtils.fromJson(response.body(), GameProfile.class);
     }
 }

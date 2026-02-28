@@ -66,7 +66,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                     
                     if (provider == null || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
                         SkinRestorer.LOGGER.warn("Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
-                                profile.name(), providerName);
+                                profile.getName(), providerName);
                     } else {
                         var context = new SkinProviderContext(
                                 providerName,

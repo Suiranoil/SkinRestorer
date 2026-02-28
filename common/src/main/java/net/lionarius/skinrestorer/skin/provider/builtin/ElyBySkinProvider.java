@@ -68,6 +68,6 @@ public final class ElyBySkinProvider extends UsernameSkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with name " + username);
         
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).profile();
+        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
     }
 }

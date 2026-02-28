@@ -2,13 +2,12 @@ package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.mojang.authlib.*;
 import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
-import com.mojang.authlib.yggdrasil.response.NameAndId;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.exception.TransparentException;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.skin.provider.base.YggdrasilSkinProvider;
-import net.minecraft.server.players.CachedUserNameToIdResolver;
+import net.minecraft.server.players.GameProfileCache;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,7 +23,7 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     private static final URI SERVICES_SERVER_URI;
     private static final URI SESSION_SERVER_URI;
     
-    private final CachedUserNameToIdResolver profileCache;
+    private final GameProfileCache profileCache;
     
     static {
         try {
@@ -38,13 +37,13 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     }
     
     public MojangSkinProvider() {
-        this.profileCache = new CachedUserNameToIdResolver(new GameProfileRepository() {
+        this.profileCache = new GameProfileCache(new GameProfileRepository() {
             @Override
             public void findProfilesByNames(String[] names, ProfileLookupCallback callback) {
                 for (var name : names) {
                     try {
                         var profile = MojangSkinProvider.this.getProfile(name);
-                        callback.onProfileLookupSucceeded(profile.name(), profile.id());
+                        callback.onProfileLookupSucceeded(profile);
                     } catch (IOException e) {
                         throw new TransparentException(e);
                     }
@@ -52,10 +51,10 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
             }
             
             @Override
-            public Optional<NameAndId> findProfileByName(String name) {
+            public Optional<GameProfile> findProfileByName(String name) {
                 try {
                     var profile = MojangSkinProvider.this.getProfile(name);
-                    return Optional.of(new NameAndId(profile.id(), profile.name()));
+                    return Optional.of(profile);
                 } catch (IOException e) {
                     throw new TransparentException(e);
                 }
@@ -79,7 +78,7 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     }
     
     public static SkinProviderContext skinProviderContextFromProfile(GameProfile gameProfile) {
-        return new SkinProviderContext(MojangSkinProvider.PROVIDER_NAME, gameProfile.name(), null);
+        return new SkinProviderContext(MojangSkinProvider.PROVIDER_NAME, gameProfile.getName(), null);
     }
     
     @Override
@@ -88,7 +87,7 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
         if (cachedProfile.isEmpty())
             throw new IllegalArgumentException("no profile found for " + username);
         
-        return cachedProfile.get().id();
+        return cachedProfile.get().getId();
     }
     
     @Override

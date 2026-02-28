@@ -3,7 +3,6 @@ package net.lionarius.skinrestorer.skin.provider.custom;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
-import com.mojang.authlib.yggdrasil.response.NameAndId;
 import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
@@ -110,11 +109,11 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
         var response = WebUtils.executeRequest(request);
         WebUtils.throwOnClientErrors(response);
         
-        var profiles = JsonUtils.fromJson(response.body(), NameAndId[].class);
+        var profiles = JsonUtils.fromJson(response.body(), GameProfile[].class);
         if (profiles == null || profiles.length == 0)
             throw new IllegalArgumentException("no profile with name " + username);
         
-        return profiles[0].id();
+        return profiles[0].getId();
     }
     
     @Override
@@ -133,7 +132,7 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with uuid " + uuid);
         
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).profile();
+        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
     }
     
     @Override
