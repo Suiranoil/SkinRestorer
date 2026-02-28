@@ -29,15 +29,15 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
         try {
             ENVIRONMENT = EnvironmentParser.getEnvironmentFromProperties().orElse(YggdrasilEnvironment.PROD.getEnvironment());
             
-            SERVICES_SERVER_URI = new URI(ENVIRONMENT.servicesHost());
-            SESSION_SERVER_URI = new URI(ENVIRONMENT.sessionHost());
+            SERVICES_SERVER_URI = new URI(ENVIRONMENT.getServicesHost());
+            SESSION_SERVER_URI = new URI(ENVIRONMENT.getSessionHost());
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
     }
     
     public MojangSkinProvider() {
-        this.profileCache = new GameProfileCache((names, callback) -> {
+        this.profileCache = new GameProfileCache((names, agent, callback) -> {
             for (var name : names) {
                 try {
                     var profile = MojangSkinProvider.this.getProfile(name);

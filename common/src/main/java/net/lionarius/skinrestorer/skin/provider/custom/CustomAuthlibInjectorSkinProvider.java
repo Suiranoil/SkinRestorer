@@ -3,7 +3,6 @@ package net.lionarius.skinrestorer.skin.provider.custom;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
-import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.config.provider.custom.CustomAuthlibInjectorProviderConfig;
@@ -12,6 +11,7 @@ import net.lionarius.skinrestorer.skin.provider.SkinResigner;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.skin.provider.base.ProfileSkinProvider;
 import net.lionarius.skinrestorer.util.JsonUtils;
+import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.WebUtils;
 
 import java.io.IOException;
@@ -121,7 +121,7 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
         var request = HttpRequest.newBuilder()
                 .uri(this.resolvedApiRoot
                         .resolve("sessionserver/session/minecraft/profile/")
-                        .resolve(UndashedUuid.toString(uuid) + "?unsigned=false")
+                        .resolve(uuid.toString() + "?unsigned=false")
                 )
                 .GET()
                 .build();
@@ -132,7 +132,7 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with uuid " + uuid);
         
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
+        return PlayerUtils.toProfile(JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class));
     }
     
     @Override

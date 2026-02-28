@@ -43,7 +43,7 @@ public class SkinResigner {
         if (PlayerUtils.getSkinUrl(skin) == null)
             return Optional.empty();
         
-        var propertyHash = skin.value().hashCode();
+        var propertyHash = skin.getValue().hashCode();
         var cached = this.signatureCache != null
                 ? this.signatureCache.getIfPresent(propertyHash) : null;
         if (cached != null)

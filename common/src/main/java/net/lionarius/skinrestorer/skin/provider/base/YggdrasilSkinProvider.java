@@ -2,8 +2,8 @@ package net.lionarius.skinrestorer.skin.provider.base;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
-import com.mojang.util.UndashedUuid;
 import net.lionarius.skinrestorer.util.JsonUtils;
+import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.WebUtils;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
         var request = HttpRequest.newBuilder()
                 .uri(this.baseSessionServerUrl()
                         .resolve("/session/minecraft/profile/")
-                        .resolve(UndashedUuid.toString(uuid) + "?unsigned=false")
+                        .resolve(uuid.toString() + "?unsigned=false")
                 )
                 .GET()
                 .build();
@@ -38,7 +38,7 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
         if (response.statusCode() != 200)
             throw new IllegalArgumentException("no profile with uuid " + uuid);
         
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
+        return PlayerUtils.toProfile(JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class));
     }
     
     protected GameProfile getProfile(final String name) throws IOException {
