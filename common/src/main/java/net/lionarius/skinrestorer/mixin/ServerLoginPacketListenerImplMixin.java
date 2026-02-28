@@ -2,9 +2,10 @@ package net.lionarius.skinrestorer.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.config.FirstJoinSkinProvider;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
+import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
@@ -55,18 +56,25 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 }
                 
                 var config = SkinRestorer.getConfig();
-                var provider = config.firstJoinSkinProvider();
+                var providerName = config.firstJoinSkinProvider();
                 
                 var shouldFetch = (originalSkin == null && config.fetchSkinOnFirstJoin()) ||
-                                      (originalSkin != null && config.forceFirstJoinSkinFetch() && provider != FirstJoinSkinProvider.MOJANG);
+                                  (originalSkin != null && config.forceFirstJoinSkinFetch() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
                 
                 if (shouldFetch) {
-                    var context = new SkinProviderContext(
-                            provider.getName(),
-                            profile.getName(),
-                            null
-                    );
-                    skinrestorer$fetchSkin(profile, context);
+                    var provider = SkinRestorer.getProvider(providerName).orElse(null);
+                    
+                    if (provider == null || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
+                        SkinRestorer.LOGGER.warn("Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
+                                profile.getName(), providerName);
+                    } else {
+                        var context = new SkinProviderContext(
+                                providerName,
+                                profile.getName(),
+                                null
+                        );
+                        skinrestorer$fetchSkin(profile, context);
+                    }
                 }
                 
                 return null;
