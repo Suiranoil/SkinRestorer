@@ -1,7 +1,9 @@
-package net.lionarius.skinrestorer.skin.provider;
+package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.skin.SkinVariant;
+import net.lionarius.skinrestorer.skin.provider.SkinProvider;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.util.Result;
 
 import java.util.Optional;
@@ -9,6 +11,16 @@ import java.util.Optional;
 public final class SkinShuffleSkinProvider implements SkinProvider {
     
     public static final String PROVIDER_NAME = "skinshuffle";
+    
+    @Override
+    public String getProviderName() {
+        return SkinShuffleSkinProvider.PROVIDER_NAME;
+    }
+    
+    @Override
+    public SkinProviderParameterType getParameterType() {
+        return SkinProviderParameterType.CUSTOM;
+    }
     
     @Override
     public String getArgumentName() {
