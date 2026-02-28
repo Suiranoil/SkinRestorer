@@ -1,21 +1,27 @@
 package net.lionarius.skinrestorer.config.provider;
 
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.lionarius.skinrestorer.skin.provider.MineskinSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.MineskinSkinProvider;
 
 public final class MineskinProviderConfig extends BuiltInProviderConfig {
     private static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 300);
     
     private String apiKey;
+    private boolean proxyUrlUpload;
     
     public MineskinProviderConfig() {
         super(MineskinSkinProvider.PROVIDER_NAME, DEFAULT_CACHE_VALUE);
         
         this.apiKey = "";
+        this.proxyUrlUpload = false;
     }
     
     public String apiKey() {
         return apiKey;
+    }
+
+    public boolean proxyUrlUpload() {
+        return this.proxyUrlUpload;
     }
     
     @Override
