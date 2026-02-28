@@ -2,7 +2,7 @@ package net.lionarius.skinrestorer.skin.provider.base;
 
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
-import net.minecraft.util.StringUtil;
+import net.lionarius.skinrestorer.util.StringUtils;
 
 import java.util.Locale;
 
@@ -26,7 +26,7 @@ public abstract class UsernameSkinProvider extends AbstractSkinProvider<String> 
     @Override
     protected void validate(String argument, SkinVariant variant) throws Exception {
         super.validate(argument, variant);
-        if (!StringUtil.isValidPlayerName(argument))
+        if (!StringUtils.isValidPlayerName(argument))
             throw new IllegalArgumentException("invalid username");
     }
     

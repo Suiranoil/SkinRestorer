@@ -8,7 +8,7 @@ import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.minecraft.util.StringUtil;
+import net.lionarius.skinrestorer.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -38,7 +38,7 @@ public abstract class ProfileSkinProvider extends AbstractSkinProvider<UUID> {
     @Override
     protected void validate(String argument, SkinVariant variant) throws Exception {
         super.validate(argument, variant);
-        if (!StringUtil.isValidPlayerName(argument))
+        if (!StringUtils.isValidPlayerName(argument))
             throw new IllegalArgumentException("invalid username");
     }
     

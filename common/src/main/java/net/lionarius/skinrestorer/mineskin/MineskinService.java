@@ -73,11 +73,14 @@ public final class MineskinService implements SkinSigner {
     }
 
     private Optional<Property> generateSkin(URI uri, @Nullable SkinVariant variant) throws Exception {
-        var mineskinVariant = switch (variant) {
-            case CLASSIC -> Variant.CLASSIC;
-            case SLIM -> Variant.SLIM;
-            case null -> Variant.AUTO;
-        };
+        Variant mineskinVariant = null;
+        
+        if (variant != null) {
+            mineskinVariant = switch (variant) {
+                case CLASSIC -> Variant.CLASSIC;
+                case SLIM -> Variant.SLIM;
+            };
+        }
 
         var request = this.createGenerateRequest(uri)
                 .variant(mineskinVariant)
