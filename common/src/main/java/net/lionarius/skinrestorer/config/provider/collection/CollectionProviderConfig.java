@@ -3,7 +3,7 @@ package net.lionarius.skinrestorer.config.provider.collection;
 import com.google.gson.annotations.JsonAdapter;
 import net.lionarius.skinrestorer.config.provider.BuiltInProviderConfig;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
-import net.lionarius.skinrestorer.skin.provider.CollectionSkinProvider;
+import net.lionarius.skinrestorer.skin.provider.builtin.CollectionSkinProvider;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 
 import java.util.ArrayList;

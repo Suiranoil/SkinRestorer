@@ -47,6 +47,12 @@ public final class SkinProviderRegistry {
         this.registry.put(name, new Entry(provider, isPublic));
     }
     
+    public void reload() {
+        for (var entry : this.registry.entrySet()) {
+            entry.getValue().provider.reload();
+        }
+    }
+    
     private record Entry(SkinProvider provider, boolean isPublic) {
     }
 }
