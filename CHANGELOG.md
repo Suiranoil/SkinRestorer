@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `proxyUrlUpload` option for MineSkin provider (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providersmineskin))
 ### Fixed
 - Fixed ely.by provider using HTTP URL instead of HTTPS
+- Fixed `/skin set` with multiple targets sometimes saving the wrong original skin for reset
 
 ## [2.5.0] - 2026-01-14
 ### Added
