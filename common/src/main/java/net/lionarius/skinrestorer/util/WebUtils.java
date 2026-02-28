@@ -70,8 +70,12 @@ public final class WebUtils {
     public static URI parseUri(String uri) {
         if (uri == null || uri.isEmpty())
             return null;
-        
-        return URI.create(uri);
+
+        try {
+            return URI.create(uri);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
     
     public static String ensureTrailingSlash(String url) {
