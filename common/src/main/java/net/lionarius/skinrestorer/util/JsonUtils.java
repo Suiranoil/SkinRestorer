@@ -41,6 +41,10 @@ public final class JsonUtils {
     public static <T> String toJson(T obj) {
         return GSON.toJson(obj);
     }
+
+    public static JsonObject toJsonObject(Object obj) {
+        return GSON.toJsonTree(obj).getAsJsonObject();
+    }
     
     public static JsonObject parseJson(String json) {
         return GSON.fromJson(json, JsonObject.class);

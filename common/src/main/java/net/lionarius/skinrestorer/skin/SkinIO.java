@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.skin;
 
+import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 
@@ -22,24 +23,27 @@ public class SkinIO {
     }
     
     public SkinValue loadSkin(UUID uuid) {
-        try {
-            return SkinIO.loadSkin(savePath.resolve(SkinIO.uuidToFilename(uuid)));
-        } catch (Exception e) {
-            return SkinValue.EMPTY;
-        }
+        var file = this.savePath.resolve(SkinIO.uuidToFilename(uuid));
+        return SkinIO.loadSkin(file);
     }
     
     private static SkinValue loadSkin(Path file) {
-        var json = FileUtils.readFile(file);
         try {
-            return JsonUtils.fromJson(json, SkinValue.class);
+            var json = FileUtils.readFile(file);
+            var jsonObject = JsonUtils.parseJson(json);
+
+            var migrated = SkinValueMigrator.migrateToLatest(jsonObject);
+            return JsonUtils.fromJson(migrated, SkinValue.class);
         } catch (Exception e) {
+            SkinRestorer.LOGGER.error("Failed to parse or migrate skin data from {}", file, e);
             return SkinValue.EMPTY;
         }
     }
     
     public void saveSkin(UUID uuid, SkinValue skin) {
-        FileUtils.writeFile(savePath.resolve(SkinIO.uuidToFilename(uuid)), JsonUtils.toJson(skin));
+        var jsonObject = JsonUtils.toJsonObject(skin);
+        SkinValueMigrator.stampVersion(jsonObject);
+        FileUtils.writeFile(savePath.resolve(SkinIO.uuidToFilename(uuid)), JsonUtils.toJson(jsonObject));
     }
     
     public void deleteSkin(UUID uuid) {
