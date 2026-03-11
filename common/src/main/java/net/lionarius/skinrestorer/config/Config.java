@@ -75,19 +75,25 @@ public final class Config implements GsonPostProcessable {
     
     public static Config load(Path path) {
         var configFile = path.resolve(Config.CONFIG_FILENAME);
-        
+
         Config config = null;
         try {
-            config = JsonUtils.fromJson(FileUtils.readFile(configFile), Config.class);
+            var json = FileUtils.readFile(configFile);
+            var jsonObject = JsonUtils.parseJson(json);
+
+            var migrated = ConfigMigrator.migrateToLatest(jsonObject);
+            config = JsonUtils.fromJson(migrated, Config.class);
         } catch (Exception e) {
             SkinRestorer.LOGGER.warn("Could not load config", e);
         }
-        
+
         if (config == null)
             config = new Config();
-        
-        FileUtils.writeFile(path.resolve(Config.CONFIG_FILENAME), JsonUtils.toJson(config));
-        
+
+        var jsonObject = JsonUtils.toJsonObject(config);
+        ConfigMigrator.stampVersion(jsonObject);
+        FileUtils.writeFile(configFile, JsonUtils.toJson(jsonObject));
+
         return config;
     }
     
