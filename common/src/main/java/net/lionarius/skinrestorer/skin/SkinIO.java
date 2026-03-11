@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.skin;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
+import net.lionarius.skinrestorer.util.JsonMigrator;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +12,8 @@ import java.util.UUID;
 public class SkinIO {
     
     public static final String FILE_EXTENSION = ".json";
+
+    private static final JsonMigrator MIGRATOR = JsonMigrator.builder("skin data").build();
     
     private final Path savePath;
     
@@ -32,7 +35,7 @@ public class SkinIO {
             var json = FileUtils.readFile(file);
             var jsonObject = JsonUtils.parseJson(json);
 
-            var migrated = SkinValueMigrator.migrateToLatest(jsonObject);
+            var migrated = MIGRATOR.migrateToLatest(jsonObject);
             return JsonUtils.fromJson(migrated, SkinValue.class);
         } catch (Exception e) {
             SkinRestorer.LOGGER.error("Failed to parse or migrate skin data from {}", file, e);
@@ -42,7 +45,7 @@ public class SkinIO {
     
     public void saveSkin(UUID uuid, SkinValue skin) {
         var jsonObject = JsonUtils.toJsonObject(skin);
-        SkinValueMigrator.stampVersion(jsonObject);
+        MIGRATOR.stampVersion(jsonObject);
         FileUtils.writeFile(savePath.resolve(SkinIO.uuidToFilename(uuid)), JsonUtils.toJson(jsonObject));
     }
     

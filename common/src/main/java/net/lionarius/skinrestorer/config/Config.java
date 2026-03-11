@@ -8,6 +8,7 @@ import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
+import net.lionarius.skinrestorer.util.JsonMigrator;
 
 import java.nio.file.Path;
 import java.util.Locale;
@@ -16,6 +17,8 @@ import java.util.Optional;
 public final class Config implements GsonPostProcessable {
     
     public static final String CONFIG_FILENAME = "config.json";
+
+    private static final JsonMigrator MIGRATOR = JsonMigrator.builder("config").build();
     
     
     private String language = "en_us";
@@ -81,7 +84,7 @@ public final class Config implements GsonPostProcessable {
             var json = FileUtils.readFile(configFile);
             var jsonObject = JsonUtils.parseJson(json);
 
-            var migrated = ConfigMigrator.migrateToLatest(jsonObject);
+            var migrated = MIGRATOR.migrateToLatest(jsonObject);
             config = JsonUtils.fromJson(migrated, Config.class);
         } catch (Exception e) {
             SkinRestorer.LOGGER.warn("Could not load config", e);
@@ -91,7 +94,7 @@ public final class Config implements GsonPostProcessable {
             config = new Config();
 
         var jsonObject = JsonUtils.toJsonObject(config);
-        ConfigMigrator.stampVersion(jsonObject);
+        MIGRATOR.stampVersion(jsonObject);
         FileUtils.writeFile(configFile, JsonUtils.toJson(jsonObject));
 
         return config;
