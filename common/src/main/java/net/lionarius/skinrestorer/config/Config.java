@@ -6,9 +6,9 @@ import net.lionarius.skinrestorer.skin.provider.builtin.CollectionSkinProvider;
 import net.lionarius.skinrestorer.skin.provider.builtin.ElyBySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.FileUtils;
+import net.lionarius.skinrestorer.util.JsonMigrator;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
-import net.lionarius.skinrestorer.util.JsonMigrator;
 
 import java.nio.file.Path;
 import java.util.Locale;
@@ -17,7 +17,7 @@ import java.util.Optional;
 public final class Config implements GsonPostProcessable {
     
     public static final String CONFIG_FILENAME = "config.json";
-
+    
     private static final JsonMigrator MIGRATOR = JsonMigrator.builder("config").build();
     
     
@@ -78,25 +78,25 @@ public final class Config implements GsonPostProcessable {
     
     public static Config load(Path path) {
         var configFile = path.resolve(Config.CONFIG_FILENAME);
-
+        
         Config config = null;
         try {
             var json = FileUtils.readFile(configFile);
             var jsonObject = JsonUtils.parseJson(json);
-
+            
             var migrated = MIGRATOR.migrateToLatest(jsonObject);
             config = JsonUtils.fromJson(migrated, Config.class);
         } catch (Exception e) {
             SkinRestorer.LOGGER.warn("Could not load config", e);
         }
-
+        
         if (config == null)
             config = new Config();
-
+        
         var jsonObject = JsonUtils.toJsonObject(config);
         MIGRATOR.stampVersion(jsonObject);
         FileUtils.writeFile(configFile, JsonUtils.toJson(jsonObject));
-
+        
         return config;
     }
     

@@ -26,7 +26,7 @@ public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, S
     public void reload() {
         this.createSkinCache();
     }
-
+    
     @Override
     public String getProviderName() {
         return MineskinSkinProvider.PROVIDER_NAME;

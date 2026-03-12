@@ -2,8 +2,8 @@ package net.lionarius.skinrestorer.skin;
 
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.util.FileUtils;
-import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.JsonMigrator;
+import net.lionarius.skinrestorer.util.JsonUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +12,7 @@ import java.util.UUID;
 public class SkinIO {
     
     public static final String FILE_EXTENSION = ".json";
-
+    
     private static final JsonMigrator MIGRATOR = JsonMigrator.builder("skin data").build();
     
     private final Path savePath;
@@ -34,7 +34,7 @@ public class SkinIO {
         try {
             var json = FileUtils.readFile(file);
             var jsonObject = JsonUtils.parseJson(json);
-
+            
             var migrated = MIGRATOR.migrateToLatest(jsonObject);
             return JsonUtils.fromJson(migrated, SkinValue.class);
         } catch (Exception e) {

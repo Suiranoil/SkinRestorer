@@ -49,7 +49,8 @@ public final class WebUtils {
         return WebUtils.executeRequest(request, HttpResponse.BodyHandlers.ofString());
     }
     
-    public static <T> HttpResponse<T> executeRequest(HttpRequest request, BodyHandler<T> bodyHandler) throws IOException {
+    public static <T> HttpResponse<T> executeRequest(HttpRequest request, BodyHandler<T> bodyHandler)
+            throws IOException {
         try {
             var modifiedRequest = HttpRequest.newBuilder(request, (name, value) -> true)
                     .header("User-Agent", WebUtils.USER_AGENT)
@@ -70,7 +71,7 @@ public final class WebUtils {
     public static URI parseUri(String uri) {
         if (uri == null || uri.isEmpty())
             return null;
-
+        
         try {
             return URI.create(uri);
         } catch (IllegalArgumentException e) {

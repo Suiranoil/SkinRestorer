@@ -41,7 +41,7 @@ public final class JsonUtils {
     public static <T> String toJson(T obj) {
         return GSON.toJson(obj);
     }
-
+    
     public static JsonObject toJsonObject(Object obj) {
         return GSON.toJsonTree(obj).getAsJsonObject();
     }
