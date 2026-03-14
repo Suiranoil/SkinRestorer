@@ -41,7 +41,7 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
     @Override
     public void reload() {
         var config = SkinRestorer.getConfig()
-                .providersConfig()
+                .providers()
                 .findCustomByName(this.providerName, CustomAuthlibInjectorProviderConfig.class)
                 .orElse(null);
         

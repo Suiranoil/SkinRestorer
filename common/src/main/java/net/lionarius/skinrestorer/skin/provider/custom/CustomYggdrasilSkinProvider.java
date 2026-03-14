@@ -35,7 +35,7 @@ public final class CustomYggdrasilSkinProvider extends YggdrasilSkinProvider {
     @Override
     public void reload() {
         var config = SkinRestorer.getConfig()
-                .providersConfig()
+                .providers()
                 .findCustomByName(this.providerName, CustomYggdrasilProviderConfig.class)
                 .orElse(null);
         

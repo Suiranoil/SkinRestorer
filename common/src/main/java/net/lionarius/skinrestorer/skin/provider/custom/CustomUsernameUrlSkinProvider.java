@@ -35,7 +35,7 @@ public final class CustomUsernameUrlSkinProvider extends UsernameSkinProvider {
     @Override
     public void reload() {
         var config = SkinRestorer.getConfig()
-                .providersConfig()
+                .providers()
                 .findCustomByName(this.providerName, CustomUsernameUrlProviderConfig.class)
                 .orElse(null);
         

@@ -36,7 +36,7 @@ public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> 
     private void loadCollectionSkins() {
         List<Pair<URI, SkinVariant>> skins = new ArrayList<>();
         
-        var config = SkinRestorer.getConfig().providersConfig().collection();
+        var config = SkinRestorer.getConfig().providers().collection();
         
         for (CollectionSkinSource source : config.sources()) {
             var uri = source.uri();
@@ -70,7 +70,7 @@ public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> 
     
     @Override
     protected CacheConfig getCacheConfig() {
-        return SkinRestorer.getConfig().providersConfig().collection().cache();
+        return SkinRestorer.getConfig().providers().collection().cache();
     }
     
     @Override

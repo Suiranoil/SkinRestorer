@@ -37,7 +37,7 @@ public final class MineskinService implements SkinSigner {
     
     public void reload() {
         var config = SkinRestorer.getConfig();
-        var mineskinConfig = config.providersConfig().mineskin();
+        var mineskinConfig = config.providers().mineskin();
         var configApiKey = mineskinConfig.apiKey();
         
         this.proxyUrlUpload = mineskinConfig.proxyUrlUpload();

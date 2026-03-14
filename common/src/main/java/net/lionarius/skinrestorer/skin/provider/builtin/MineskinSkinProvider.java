@@ -49,7 +49,7 @@ public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, S
     
     @Override
     protected CacheConfig getCacheConfig() {
-        return SkinRestorer.getConfig().providersConfig().mineskin().cache();
+        return SkinRestorer.getConfig().providers().mineskin().cache();
     }
     
     @Override

@@ -39,7 +39,7 @@ public final class Config implements GsonPostProcessable {
         return this.request;
     }
     
-    public ProvidersConfig providersConfig() {
+    public ProvidersConfig providers() {
         return this.providers;
     }
     

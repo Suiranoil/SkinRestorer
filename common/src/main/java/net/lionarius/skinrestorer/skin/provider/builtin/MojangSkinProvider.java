@@ -75,7 +75,7 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     
     @Override
     protected CacheConfig getCacheConfig() {
-        return SkinRestorer.getConfig().providersConfig().mojang().cache();
+        return SkinRestorer.getConfig().providers().mojang().cache();
     }
     
     public static SkinProviderContext skinProviderContextFromProfile(GameProfile gameProfile) {

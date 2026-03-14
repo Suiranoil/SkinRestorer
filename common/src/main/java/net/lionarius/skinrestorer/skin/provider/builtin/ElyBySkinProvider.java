@@ -42,7 +42,7 @@ public final class ElyBySkinProvider extends UsernameSkinProvider {
     
     @Override
     protected CacheConfig getCacheConfig() {
-        return SkinRestorer.getConfig().providersConfig().ely_by().cache();
+        return SkinRestorer.getConfig().providers().ely_by().cache();
     }
     
     @Override
