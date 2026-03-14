@@ -45,7 +45,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                         SkinRestorer.getSkinStorage().setSkin(profile.id(), value.setOriginalValue(originalSkin));
                     }
                     
-                    if (SkinRestorer.getConfig().refreshSkinOnJoin()) {
+                    if (SkinRestorer.getConfig().join().refreshSkin()) {
                         var currentSkin = SkinRestorer.getSkinStorage().getSkin(profile.id());
                         var context = currentSkin.toProviderContext();
                         
@@ -55,11 +55,11 @@ public abstract class ServerLoginPacketListenerImplMixin {
                     return null;
                 }
                 
-                var config = SkinRestorer.getConfig();
-                var providerName = config.firstJoinSkinProvider();
+                var autoFetchConfig = SkinRestorer.getConfig().join().autoFetchConfig();
+                var providerName = autoFetchConfig.provider();
                 
-                var shouldFetch = (originalSkin == null && config.fetchSkinOnFirstJoin()) ||
-                                  (originalSkin != null && config.forceFirstJoinSkinFetch() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
+                var shouldFetch = (originalSkin == null && autoFetchConfig.enabled()) ||
+                                  (originalSkin != null && autoFetchConfig.overrideExisting() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
                 
                 if (shouldFetch) {
                     var provider = SkinRestorer.getProvider(providerName).orElse(null);

@@ -93,17 +93,17 @@ public final class SkinRestorer {
         
         SkinRestorer.providersRegistry.reload();
         
-        SkinRestorer.validateFirstJoinSkinProvider();
+        SkinRestorer.validateAutoFetchProvider();
     }
     
-    private static void validateFirstJoinSkinProvider() {
-        var providerName = SkinRestorer.config.firstJoinSkinProvider();
+    private static void validateAutoFetchProvider() {
+        var providerName = SkinRestorer.config.join().autoFetchConfig().provider();
         var provider = SkinRestorer.providersRegistry.get(providerName);
         
         if (provider == null) {
-            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider '{}' is not registered. First join skin fetching will be skipped.", providerName);
+            SkinRestorer.LOGGER.warn("AutoFetch provider '{}' is not registered. Auto fetch skin fetching will be skipped.", providerName);
         } else if (provider.getParameterType() != SkinProviderParameterType.USERNAME) {
-            SkinRestorer.LOGGER.warn("FirstJoinSkinProvider '{}' has parameter type {}, but only USERNAME providers are supported. First join skin fetching will be skipped.",
+            SkinRestorer.LOGGER.warn("AutoFetch provider '{}' has parameter type {}, but only USERNAME providers are supported. Auto fetch skin fetching will be skipped.",
                     providerName, provider.getParameterType());
         }
     }
@@ -157,7 +157,7 @@ public final class SkinRestorer {
         
         SkinRestorer.providersRegistry.reload();
         if (!initial)
-            SkinRestorer.validateFirstJoinSkinProvider();
+            SkinRestorer.validateAutoFetchProvider();
     }
     
     public static class Events {

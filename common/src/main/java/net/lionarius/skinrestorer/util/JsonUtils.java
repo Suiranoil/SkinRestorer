@@ -50,6 +50,16 @@ public final class JsonUtils {
         return GSON.fromJson(json, JsonObject.class);
     }
     
+    public static void moveProperty(JsonObject from, JsonObject to, String key) {
+        JsonUtils.moveProperty(from, to, key, key);
+    }
+    
+    public static void moveProperty(JsonObject from, JsonObject to, String fromKey, String toKey) {
+        if (from.has(fromKey)) {
+            to.add(toKey, from.remove(fromKey));
+        }
+    }
+    
     public static JsonObject skinPropertyToJson(Property property) {
         try {
             JsonObject json = GSON.fromJson(new String(Base64.getDecoder().decode(property.value()), StandardCharsets.UTF_8), JsonObject.class);

@@ -45,14 +45,14 @@ public final class MineskinService implements SkinSigner {
                 .builder()
                 .userAgent(WebUtils.USER_AGENT)
                 .gson(JsonUtils.GSON)
-                .timeout((int) Duration.ofSeconds(config.requestTimeout()).toMillis())
+                .timeout((int) Duration.ofSeconds(config.request().timeout()).toMillis())
                 .requestHandler((baseUrl, userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
                         baseUrl,
                         userAgent,
                         apiKey,
                         timeout,
                         gson,
-                        SkinRestorer.getConfig().proxy().map(proxy -> new InetSocketAddress(proxy.host(), proxy.port())).orElse(null)
+                        SkinRestorer.getConfig().request().proxy().map(proxy -> new InetSocketAddress(proxy.host(), proxy.port())).orElse(null)
                 ))
                 .apiKey(configApiKey.isEmpty() ? null : configApiKey)
                 .build();
