@@ -6,9 +6,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 public final class SkinShuffleGameEventHandler {
-    
+
     private SkinShuffleGameEventHandler() {}
-    
+
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         SkinShuffleCompatibility.onPlayerJoin((ServerPlayer) event.getEntity());

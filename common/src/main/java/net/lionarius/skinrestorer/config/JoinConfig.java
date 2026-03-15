@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class JoinConfig implements GsonPostProcessable {
-    
+
     private boolean refreshSkin = true;
 
     private List<String> skipRefreshProviders = new ArrayList<>();
-    
+
     private int applyDelay = 0;
 
     private AutoFetchConfig autoFetch = new AutoFetchConfig();
@@ -23,7 +23,7 @@ public final class JoinConfig implements GsonPostProcessable {
     public List<String> skipRefreshProviders() {
         return this.skipRefreshProviders;
     }
-    
+
     public int applyDelay() {
         return this.applyDelay;
     }

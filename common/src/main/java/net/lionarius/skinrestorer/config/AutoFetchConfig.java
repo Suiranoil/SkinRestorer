@@ -40,7 +40,8 @@ public final class AutoFetchConfig implements GsonPostProcessable {
             this.provider = AutoFetchConfig.normalizeProvider(this.provider);
 
             if (this.provider.isEmpty()) {
-                SkinRestorer.LOGGER.warn("AutoFetch provider config is empty after normalization, defaulting to MOJANG");
+                SkinRestorer.LOGGER.warn(
+                        "AutoFetch provider config is empty after normalization, defaulting to MOJANG");
                 this.provider = MojangSkinProvider.PROVIDER_NAME;
             }
         }

@@ -17,25 +17,24 @@ public interface SkinProvider {
     MineskinSkinProvider MINESKIN = new MineskinSkinProvider(MineskinService.INSTANCE);
     CollectionSkinProvider COLLECTION = new CollectionSkinProvider(MineskinService.INSTANCE);
     SkinShuffleSkinProvider SKIN_SHUFFLE = new SkinShuffleSkinProvider();
-    
+
     Set<String> BUILTIN_PROVIDER_NAMES = ImmutableSet.of(
             SkinProvider.EMPTY.getProviderName(),
             SkinProvider.MOJANG.getProviderName(),
             SkinProvider.ELY_BY.getProviderName(),
             SkinProvider.MINESKIN.getProviderName(),
             SkinProvider.COLLECTION.getProviderName(),
-            SkinProvider.SKIN_SHUFFLE.getProviderName()
-    );
-    
+            SkinProvider.SKIN_SHUFFLE.getProviderName());
+
     String getProviderName();
-    
+
     SkinProviderParameterType getParameterType();
-    
+
     String getArgumentName();
-    
+
     boolean hasVariantSupport();
-    
+
     Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant);
-    
+
     default void reload() {}
 }
