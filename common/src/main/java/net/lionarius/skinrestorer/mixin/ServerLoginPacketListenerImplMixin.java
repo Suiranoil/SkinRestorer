@@ -47,9 +47,11 @@ public abstract class ServerLoginPacketListenerImplMixin {
                     
                     if (SkinRestorer.getConfig().join().refreshSkin()) {
                         var currentSkin = SkinRestorer.getSkinStorage().getSkin(profile.id());
-                        var context = currentSkin.toProviderContext();
                         
-                        skinrestorer$fetchSkin(profile, context);
+                        if (!SkinRestorer.getConfig().join().skipRefreshProviders().contains(currentSkin.provider())) {
+                            var context = currentSkin.toProviderContext();
+                            skinrestorer$fetchSkin(profile, context);
+                        }
                     }
                     
                     return null;
