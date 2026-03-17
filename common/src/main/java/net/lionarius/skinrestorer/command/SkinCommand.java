@@ -32,7 +32,6 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public final class SkinCommand {
-    
 
     private SkinCommand() {}
 
@@ -46,15 +45,15 @@ public final class SkinCommand {
                 .then(literal("refresh").executes(context -> refreshSubcommand(context.getSource())));
 
         var set = literal("set");
-        
+
         var providers = SkinRestorer.getProvidersRegistry().getPublicProviders();
         for (var entry : providers) set.then(buildSetSubcommand(entry.first(), entry.second()));
         if (!providers.isEmpty()) base.then(set);
-        
+
         base.then(literal("config")
                 .requires(commandSourceStack -> commandSourceStack.hasPermission(4))
                 .then(literal("reload").executes(SkinCommand::configReloadSubcommand)));
-        
+
         dispatcher.register(base);
     }
 
