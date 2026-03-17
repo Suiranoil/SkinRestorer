@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 
 public final class SkinService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SkinService.class);
-    
+
     private SkinService() {}
     
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<GameProfile> targets, SkinValue value, boolean save) {
@@ -45,17 +45,17 @@ public final class SkinService {
             
             PlayerUtils.refreshPlayer(player);
             acceptedPlayers.add(player);
-            
+
             SkinRestorer.getTickedScheduler().cancel(player.getUUID());
         }
-        
+
         return acceptedPlayers;
     }
     
     public static Collection<ServerPlayer> applySkin(MinecraftServer server, Iterable<GameProfile> targets, SkinValue value) {
         return SkinService.applySkin(server, targets, value, true);
     }
-    
+
     public static CompletableFuture<Result<Collection<ServerPlayer>, String>> setSkinAsync(
             MinecraftServer server,
             Collection<GameProfile> targets,

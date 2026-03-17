@@ -35,7 +35,7 @@ public final class CustomUsernameUrlSkinProvider extends UsernameSkinProvider {
     @Override
     public void reload() {
         var config = SkinRestorer.getConfig()
-                .providersConfig()
+                .providers()
                 .findCustomByName(this.providerName, CustomUsernameUrlProviderConfig.class)
                 .orElse(null);
 
@@ -52,25 +52,21 @@ public final class CustomUsernameUrlSkinProvider extends UsernameSkinProvider {
     }
 
     private String resolveUrlTemplate(String template) {
-        if (CustomUsernameUrlSkinProvider.isValidUrlTemplate(template))
-            return template;
+        if (CustomUsernameUrlSkinProvider.isValidUrlTemplate(template)) return template;
 
         SkinRestorer.LOGGER.warn("Custom provider '{}' has invalid urlTemplate '{}'", this.providerName, template);
         return null;
     }
 
     public static boolean isValidUrlTemplate(String urlTemplate) {
-        if (urlTemplate == null || urlTemplate.isEmpty())
-            return false;
+        if (urlTemplate == null || urlTemplate.isEmpty()) return false;
 
-        if (!urlTemplate.contains(CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER))
-            return false;
+        if (!urlTemplate.contains(CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER)) return false;
 
         try {
             URI uri = new URI(urlTemplate.replace(
                     CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER,
-                    CustomUsernameUrlSkinProvider.VALIDATION_USERNAME
-            ));
+                    CustomUsernameUrlSkinProvider.VALIDATION_USERNAME));
             return uri.isAbsolute();
         } catch (Exception ignored) {
             return false;

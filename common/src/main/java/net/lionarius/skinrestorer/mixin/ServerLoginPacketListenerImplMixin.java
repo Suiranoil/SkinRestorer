@@ -21,10 +21,11 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin {
-    
-    @Shadow @Nullable
+
+    @Shadow
+    @Nullable
     private GameProfile authenticatedProfile;
-    
+
     @Unique
     private CompletableFuture<Void> skinrestorer$pendingSkin;
     
@@ -35,7 +36,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
         if (skinrestorer$pendingSkin == null) {
             skinrestorer$pendingSkin = CompletableFuture.supplyAsync(() -> {
                 final var profile = authenticatedProfile;
-                
+
                 assert profile != null;
                 var originalSkin = PlayerUtils.getPlayerSkin(profile);
                 
@@ -51,19 +52,21 @@ public abstract class ServerLoginPacketListenerImplMixin {
                         
                         skinrestorer$fetchSkin(profile, context);
                     }
-                    
+
                     return null;
                 }
-                
-                var config = SkinRestorer.getConfig();
-                var providerName = config.firstJoinSkinProvider();
-                
-                var shouldFetch = (originalSkin == null && config.fetchSkinOnFirstJoin()) ||
-                                  (originalSkin != null && config.forceFirstJoinSkinFetch() && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
-                
+
+                var autoFetchConfig = SkinRestorer.getConfig().join().autoFetchConfig();
+                var providerName = autoFetchConfig.provider();
+
+                var shouldFetch = (originalSkin == null && autoFetchConfig.enabled())
+                        || (originalSkin != null
+                                && autoFetchConfig.overrideExisting()
+                                && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
+
                 if (shouldFetch) {
                     var provider = SkinRestorer.getProvider(providerName).orElse(null);
-                    
+
                     if (provider == null || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
                         SkinRestorer.LOGGER.warn("Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
                                 profile.getName(), providerName);
@@ -76,15 +79,14 @@ public abstract class ServerLoginPacketListenerImplMixin {
                         skinrestorer$fetchSkin(profile, context);
                     }
                 }
-                
+
                 return null;
             });
         }
-        
-        if (!skinrestorer$pendingSkin.isDone())
-            ci.cancel();
+
+        if (!skinrestorer$pendingSkin.isDone()) ci.cancel();
     }
-    
+
     @Unique
     private static void skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
         SkinRestorer.LOGGER.debug("Fetching {}'s skin", profile.getName());
@@ -97,7 +99,8 @@ public abstract class ServerLoginPacketListenerImplMixin {
             var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
             SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
         } else {
-            SkinRestorer.LOGGER.warn("Failed to fetch skin '{}:{}'", context.name(), context.argument(), result.getErrorValue());
+            SkinRestorer.LOGGER.warn(
+                    "Failed to fetch skin '{}:{}'", context.name(), context.argument(), result.getErrorValue());
         }
     }
 }
