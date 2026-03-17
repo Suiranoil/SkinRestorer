@@ -20,44 +20,52 @@ import java.util.List;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
-    
+
     @Shadow
     public abstract List<ServerPlayer> getPlayers();
-    
-    @Shadow @Final
+
+    @Shadow
+    @Final
     private MinecraftServer server;
-    
+
     @Inject(method = "remove", at = @At("TAIL"))
     private void remove(ServerPlayer player, CallbackInfo ci) {
         SkinRestorer.Events.onPlayerDisconnect(player);
     }
-    
+
     @Inject(method = "removeAll", at = @At("HEAD"))
     private void removeAll(CallbackInfo ci) {
         for (var player : getPlayers()) {
             SkinRestorer.Events.onPlayerDisconnect(player);
         }
     }
-    
+
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
-    private void placeNewPlayer(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
-        var delay = SkinRestorer.getConfig().skinApplyDelayOnJoin();
-        
+    private void placeNewPlayer(
+            Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
+        var delay = SkinRestorer.getConfig().join().applyDelay();
+
         if (delay <= 0) {
             skinrestorer$tryApplySkin(server, player);
         } else {
             var uuid = player.getUUID();
-            SkinRestorer.getTickedScheduler().schedule(() -> {
-                var actualPlayer = server.getPlayerList().getPlayer(uuid);
-                if (actualPlayer != null)
-                    skinrestorer$tryApplySkin(server, actualPlayer);
-            }, delay, uuid);
+            SkinRestorer.getTickedScheduler()
+                    .schedule(
+                            () -> {
+                                var actualPlayer = server.getPlayerList().getPlayer(uuid);
+                                if (actualPlayer != null) skinrestorer$tryApplySkin(server, actualPlayer);
+                            },
+                            delay,
+                            uuid);
         }
     }
-    
+
     @Unique
     private static void skinrestorer$tryApplySkin(MinecraftServer server, ServerPlayer player) {
         if (SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID()))
-            SkinService.applySkin(server, Collections.singleton(player), SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
+            SkinService.applySkin(
+                    server,
+                    Collections.singleton(player),
+                    SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
     }
 }

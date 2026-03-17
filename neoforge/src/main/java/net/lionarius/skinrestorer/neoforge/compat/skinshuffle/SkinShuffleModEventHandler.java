@@ -11,20 +11,26 @@ import net.neoforged.neoforge.network.registration.HandlerThread;
 
 public final class SkinShuffleModEventHandler {
     private SkinShuffleModEventHandler() {}
-    
+
     @SubscribeEvent
     public static void onRegisterPayloadHandlers(RegisterPayloadHandlersEvent event) {
         final var registrar = event.registrar("1").optional().executesOn(HandlerThread.NETWORK);
-        
+
         registrar
-                .playToClient(SkinShuffleHandshakePayload.PACKET_ID, SkinShuffleHandshakePayload.PACKET_CODEC,
+                .playToClient(
+                        SkinShuffleHandshakePayload.PACKET_ID,
+                        SkinShuffleHandshakePayload.PACKET_CODEC,
                         (payload, context) -> {})
-                .playToServer(SkinShuffleSkinRefreshV1Payload.PACKET_ID, SkinShuffleSkinRefreshV1Payload.PACKET_CODEC,
+                .playToServer(
+                        SkinShuffleSkinRefreshV1Payload.PACKET_ID,
+                        SkinShuffleSkinRefreshV1Payload.PACKET_CODEC,
                         SkinShuffleModEventHandler::handleSkinRefreshPacket)
-                .playToServer(SkinShuffleSkinRefreshV2Payload.PACKET_ID, SkinShuffleSkinRefreshV2Payload.PACKET_CODEC,
+                .playToServer(
+                        SkinShuffleSkinRefreshV2Payload.PACKET_ID,
+                        SkinShuffleSkinRefreshV2Payload.PACKET_CODEC,
                         SkinShuffleModEventHandler::handleSkinRefreshPacket);
     }
-    
+
     private static void handleSkinRefreshPacket(SkinShuffleSkinRefreshPayload payload, IPayloadContext context) {
         var player = (ServerPlayer) context.player();
         SkinShuffleCompatibility.handleSkinRefresh(SkinRestorer.getMinecraftServer(), player, payload);
