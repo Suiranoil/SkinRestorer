@@ -143,34 +143,29 @@ public final class SkinCommand {
 
     private static int configReloadSubcommand(CommandContext<CommandSourceStack> context) {
         SkinRestorer.reloadConfig();
-        
-        context.getSource().sendSuccess(Translation.translatableWithFallback(
-                Translation.COMMAND_SKIN_CONFIG_RELOADED_KEY
-        ), true);
-        
+
+        context.getSource()
+                .sendSuccess(Translation.translatableWithFallback(Translation.COMMAND_SKIN_CONFIG_RELOADED_KEY), true);
+
         return 0;
     }
 
     private static void sendResponse(
             CommandSourceStack src, Collection<ServerPlayer> updatedPlayers, boolean setByOperator) {
         if (updatedPlayers.isEmpty()) {
-            src.sendSuccess(Translation.translatableWithFallback(
-                    Translation.COMMAND_SKIN_NO_CHANGES_KEY
-            ), true);
+            src.sendSuccess(Translation.translatableWithFallback(Translation.COMMAND_SKIN_NO_CHANGES_KEY), true);
             return;
         }
 
         if (setByOperator) {
             var playersComponent = PlayerUtils.createPlayerListComponent(updatedPlayers);
-            
-            src.sendSuccess(Translation.translatableWithFallback(
-                    Translation.COMMAND_SKIN_AFFECTED_PLAYERS_KEY,
-                    playersComponent
-            ), true);
+
+            src.sendSuccess(
+                    Translation.translatableWithFallback(
+                            Translation.COMMAND_SKIN_AFFECTED_PLAYERS_KEY, playersComponent),
+                    true);
         } else {
-            src.sendSuccess(Translation.translatableWithFallback(
-                    Translation.COMMAND_SKIN_OK_KEY
-            ), true);
+            src.sendSuccess(Translation.translatableWithFallback(Translation.COMMAND_SKIN_OK_KEY), true);
         }
     }
 

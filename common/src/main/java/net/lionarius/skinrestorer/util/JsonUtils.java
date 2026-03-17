@@ -72,18 +72,22 @@ public final class JsonUtils {
             return null;
         }
     }
-    
+
     private static class GameProfileSerializer implements JsonSerializer<GameProfile>, JsonDeserializer<GameProfile> {
         @Override
-        public GameProfile deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context) throws JsonParseException {
+        public GameProfile deserialize(
+                final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+                throws JsonParseException {
             final JsonObject object = (JsonObject) json;
             final UUID id = object.has("id") ? context.deserialize(object.get("id"), UUID.class) : null;
-            final String name = object.has("name") ? object.getAsJsonPrimitive("name").getAsString() : null;
+            final String name =
+                    object.has("name") ? object.getAsJsonPrimitive("name").getAsString() : null;
             return new GameProfile(id, name);
         }
-        
+
         @Override
-        public JsonElement serialize(final GameProfile src, final Type typeOfSrc, final JsonSerializationContext context) {
+        public JsonElement serialize(
+                final GameProfile src, final Type typeOfSrc, final JsonSerializationContext context) {
             final JsonObject result = new JsonObject();
             if (src.getId() != null) {
                 result.add("id", context.serialize(src.getId()));

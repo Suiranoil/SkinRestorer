@@ -67,19 +67,16 @@ public final class PlayerUtils {
         }
 
         if (!player.isDeadOrDying()) {
-            player.connection.send(
-                    new ClientboundRespawnPacket(
-                            player.getLevel().dimensionTypeId(),
-                            player.getLevel().dimension(),
-                            BiomeManager.obfuscateSeed(player.getLevel().getSeed()),
-                            player.gameMode.getGameModeForPlayer(),
-                            player.gameMode.getPreviousGameModeForPlayer(),
-                            player.getLevel().isDebug(),
-                            player.getLevel().isFlat(),
-                            (byte) 3,
-                            player.getLastDeathLocation()
-                    )
-            );
+            player.connection.send(new ClientboundRespawnPacket(
+                    player.getLevel().dimensionTypeId(),
+                    player.getLevel().dimension(),
+                    BiomeManager.obfuscateSeed(player.getLevel().getSeed()),
+                    player.gameMode.getGameModeForPlayer(),
+                    player.gameMode.getPreviousGameModeForPlayer(),
+                    player.getLevel().isDebug(),
+                    player.getLevel().isFlat(),
+                    (byte) 3,
+                    player.getLastDeathLocation()));
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
             var vehicle = player.getVehicle();
