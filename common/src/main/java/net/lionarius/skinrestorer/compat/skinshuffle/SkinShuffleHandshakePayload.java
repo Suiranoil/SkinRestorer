@@ -15,7 +15,7 @@ public record SkinShuffleHandshakePayload() implements CustomPacketPayload {
     public void write(@NotNull FriendlyByteBuf buf) {
         // NO-OP
     }
-    
+
     @Override
     public @NotNull ResourceLocation id() {
         return PACKET_ID;

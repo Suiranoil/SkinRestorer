@@ -11,12 +11,12 @@ public final class ForgePlatformHelper implements PlatformHelper {
     public String getPlatformName() {
         return "forge";
     }
-    
+
     @Override
     public boolean isModLoaded(String modId) {
         return ModList.get().isLoaded(modId);
     }
-    
+
     @Override
     public Path getConfigDirectory() {
         return FMLPaths.CONFIGDIR.get();

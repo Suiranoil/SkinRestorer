@@ -8,7 +8,7 @@ public final class UnknownCustomProviderConfig extends CustomProviderConfig {
     public UnknownCustomProviderConfig() {
         super(CustomProviderType.UNKNOWN);
     }
-    
+
     @Override
     public Result<SkinProvider, String> createSkinProvider(SkinSigner skinSigner) {
         return Result.error("type '" + this.type + "' is not supported");

@@ -20,39 +20,38 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(SkullBlockEntity.class)
 public abstract class SkullBlockEntityMixin {
-    
+
     @Inject(method = "loadProfile", at = @At("HEAD"),
             cancellable = true)
     private static void fetchProfileByName(String name, Services services, BooleanSupplier hasCache, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
-        if (name == null)
-            return;
-        
+        if (name == null) return;
+
         var profileOpt = Optional.<GameProfile>empty();
         var gameProfileInfo = ((GameProfileCacheAccessor) services.profileCache()).getProfilesByName().get(name.toLowerCase(Locale.ROOT));
-        
-        if (gameProfileInfo != null)
-            profileOpt = Optional.of(gameProfileInfo.getProfile());
-        
+
+        if (gameProfileInfo != null) profileOpt = Optional.of(gameProfileInfo.getProfile());
+
         skinrestorer$replaceSkin(profileOpt, cir);
     }
-    
+
     @Unique
-    private static void skinrestorer$replaceSkin(Optional<GameProfile> profileOpt, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
-        if (SkinRestorer.getMinecraftServer() == null)
-            return;
-        
-        if (profileOpt.isEmpty())
-            return;
-        
+    private static void skinrestorer$replaceSkin(
+            Optional<GameProfile> profileOpt, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir) {
+        if (SkinRestorer.getMinecraftServer() == null) return;
+
+        if (profileOpt.isEmpty()) return;
+
         var profile = PlayerUtils.cloneGameProfile(profileOpt.get());
-        
+
         if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
-            cir.setReturnValue(CompletableFuture.supplyAsync(() -> {
-                var skin = SkinRestorer.getSkinStorage().getSkin(profile.getId(), false);
-                PlayerUtils.applyRestoredSkin(profile, skin.value());
-                
-                return Optional.of(profile);
-            }, Util.backgroundExecutor()));
+            cir.setReturnValue(CompletableFuture.supplyAsync(
+                    () -> {
+                        var skin = SkinRestorer.getSkinStorage().getSkin(profile.getId(), false);
+                        PlayerUtils.applyRestoredSkin(profile, skin.value());
+
+                        return Optional.of(profile);
+                    },
+                    Util.backgroundExecutor()));
         }
     }
 }
