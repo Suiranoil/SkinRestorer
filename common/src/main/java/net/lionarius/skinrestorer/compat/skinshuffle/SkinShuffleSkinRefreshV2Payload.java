@@ -6,8 +6,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-public record SkinShuffleSkinRefreshV2Payload(
-        Property textureProperty) implements CustomPacketPayload, SkinShuffleSkinRefreshPayload {
+public record SkinShuffleSkinRefreshV2Payload(Property textureProperty)
+        implements CustomPacketPayload, SkinShuffleSkinRefreshPayload {
 
     public static final ResourceLocation PACKET_ID = SkinShuffleCompatibility.resourceLocation("skin_refresh");
 
@@ -35,7 +35,7 @@ public record SkinShuffleSkinRefreshV2Payload(
     public void write(@NotNull FriendlyByteBuf buf) {
         encode(buf, this);
     }
-    
+
     @Override
     public @NotNull ResourceLocation id() {
         return PACKET_ID;

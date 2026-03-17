@@ -11,19 +11,19 @@ import net.minecraftforge.network.EventNetworkChannel;
 
 public class SkinShufflePacketHandler {
 
-    private static final EventNetworkChannel HANDSHAKE_INSTANCE = ChannelBuilder
-            .named(SkinShuffleHandshakePayload.PACKET_ID)
+    private static final EventNetworkChannel HANDSHAKE_INSTANCE = ChannelBuilder.named(
+                    SkinShuffleHandshakePayload.PACKET_ID)
             .optional()
             .eventNetworkChannel();
 
-    private static final EventNetworkChannel SKIN_REFRESH_V1_INSTANCE = ChannelBuilder
-            .named(SkinShuffleSkinRefreshV1Payload.PACKET_ID)
+    private static final EventNetworkChannel SKIN_REFRESH_V1_INSTANCE = ChannelBuilder.named(
+                    SkinShuffleSkinRefreshV1Payload.PACKET_ID)
             .optional()
             .eventNetworkChannel()
             .addListener(SkinShufflePacketHandler::skinRefreshV1Listener);
 
-    private static final EventNetworkChannel SKIN_REFRESH_V2_INSTANCE = ChannelBuilder
-            .named(SkinShuffleSkinRefreshV2Payload.PACKET_ID)
+    private static final EventNetworkChannel SKIN_REFRESH_V2_INSTANCE = ChannelBuilder.named(
+                    SkinShuffleSkinRefreshV2Payload.PACKET_ID)
             .optional()
             .eventNetworkChannel()
             .addListener(SkinShufflePacketHandler::skinRefreshV2Listener);
