@@ -28,9 +28,14 @@ public abstract class ServerLoginPacketListenerImplMixin {
 
     @Unique
     private CompletableFuture<Void> skinrestorer$pendingSkin;
-    
-    @Inject(method = "verifyLoginAndFinishConnectionSetup", at = @At(value = "INVOKE",
-                                                                     target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"),
+
+    @Inject(
+            method = "verifyLoginAndFinishConnectionSetup",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"),
             cancellable = true)
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
@@ -39,17 +44,17 @@ public abstract class ServerLoginPacketListenerImplMixin {
 
                 assert profile != null;
                 var originalSkin = PlayerUtils.getPlayerSkin(profile);
-                
+
                 if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
                     if (originalSkin != null) { // update to the latest official skin
                         var value = SkinRestorer.getSkinStorage().getSkin(profile.getId());
                         SkinRestorer.getSkinStorage().setSkin(profile.getId(), value.setOriginalValue(originalSkin));
                     }
-                    
-                    if (SkinRestorer.getConfig().refreshSkinOnJoin()) {
+
+                    if (SkinRestorer.getConfig().join().refreshSkin()) {
                         var currentSkin = SkinRestorer.getSkinStorage().getSkin(profile.getId());
                         var context = currentSkin.toProviderContext();
-                        
+
                         skinrestorer$fetchSkin(profile, context);
                     }
 
@@ -68,14 +73,12 @@ public abstract class ServerLoginPacketListenerImplMixin {
                     var provider = SkinRestorer.getProvider(providerName).orElse(null);
 
                     if (provider == null || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
-                        SkinRestorer.LOGGER.warn("Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
-                                profile.getName(), providerName);
-                    } else {
-                        var context = new SkinProviderContext(
-                                providerName,
+                        SkinRestorer.LOGGER.warn(
+                                "Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
                                 profile.getName(),
-                                null
-                        );
+                                providerName);
+                    } else {
+                        var context = new SkinProviderContext(providerName, profile.getName(), null);
                         skinrestorer$fetchSkin(profile, context);
                     }
                 }
@@ -90,13 +93,15 @@ public abstract class ServerLoginPacketListenerImplMixin {
     @Unique
     private static void skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
         SkinRestorer.LOGGER.debug("Fetching {}'s skin", profile.getName());
-        
-        var result = SkinRestorer.getProvider(context.name()).map(
-                provider -> provider.fetchSkin(context.argument(), context.variant())
-        ).orElseGet(() -> Result.error(new IllegalArgumentException("Skin provider is not registered: " + context.name())));
-        
+
+        var result = SkinRestorer.getProvider(context.name())
+                .map(provider -> provider.fetchSkin(context.argument(), context.variant()))
+                .orElseGet(() -> Result.error(
+                        new IllegalArgumentException("Skin provider is not registered: " + context.name())));
+
         if (!result.isError()) {
-            var value = SkinValue.fromProviderContextWithValue(context, result.getSuccessValue().orElse(null));
+            var value = SkinValue.fromProviderContextWithValue(
+                    context, result.getSuccessValue().orElse(null));
             SkinRestorer.getSkinStorage().setSkin(profile.getId(), value);
         } else {
             SkinRestorer.LOGGER.warn(

@@ -36,7 +36,8 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
 
         if (response.statusCode() != 200) throw new IllegalArgumentException("no profile with uuid " + uuid);
 
-        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class).toProfile();
+        return JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class)
+                .toProfile();
     }
 
     protected GameProfile getProfile(final String name) throws IOException {

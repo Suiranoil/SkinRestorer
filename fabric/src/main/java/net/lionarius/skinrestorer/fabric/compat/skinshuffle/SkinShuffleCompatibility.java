@@ -37,8 +37,10 @@ public final class SkinShuffleCompatibility {
         ServerPlayNetworking.registerGlobalReceiver(
                 SkinShuffleSkinRefreshV2Payload.PACKET_ID, SkinShuffleCompatibility::handleSkinRefreshPacket);
     }
-    
-    private static void handleSkinRefreshPacket(SkinShuffleSkinRefreshPayload payload, ServerPlayNetworking.Context context) {
-        net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility.handleSkinRefresh(context.player().getServer(), context.player(), payload);
+
+    private static void handleSkinRefreshPacket(
+            SkinShuffleSkinRefreshPayload payload, ServerPlayNetworking.Context context) {
+        net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleCompatibility.handleSkinRefresh(
+                context.player().getServer(), context.player(), payload);
     }
 }

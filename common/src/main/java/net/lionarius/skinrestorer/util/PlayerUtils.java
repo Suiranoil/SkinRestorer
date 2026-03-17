@@ -6,9 +6,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
-import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
@@ -127,12 +125,11 @@ public final class PlayerUtils {
 
         return Pair.of(url, variant);
     }
-    
+
     public static void applyRestoredSkin(GameProfile profile, Property skin) {
         profile.getProperties().removeAll(TEXTURES_KEY);
 
-        if (skin != null)
-            profile.getProperties().put(TEXTURES_KEY, skin);
+        if (skin != null) profile.getProperties().put(TEXTURES_KEY, skin);
     }
 
     public static boolean areSkinPropertiesEquals(Property x, Property y) {

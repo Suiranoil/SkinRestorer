@@ -72,30 +72,24 @@ public final class SkinCommand {
         } else {
             context = SkinRestorer.getSkinStorage().getSkin(profile.getId()).toProviderContext();
         }
-        
-        if (context == null)
-            return 0;
-        
+
+        if (context == null) return 0;
+
         return SkinCommand.setSubcommand(src, Collections.singleton(profile), context, save, false);
     }
-    
-    private static int resetSubcommand(
-            CommandSourceStack src,
-            Collection<GameProfile> targets,
-            boolean setByOperator
-    ) {
+
+    private static int resetSubcommand(CommandSourceStack src, Collection<GameProfile> targets, boolean setByOperator) {
         var updatedPlayers = new HashSet<ServerPlayer>();
         for (var profile : targets) {
             SkinValue skin = null;
             if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId()))
                 skin = SkinRestorer.getSkinStorage().getSkin(profile.getId()).replaceValueWithOriginal();
-            
-            if (skin == null)
-                continue;
-            
+
+            if (skin == null) continue;
+
             var updatedPlayer = SkinService.applySkin(src.getServer(), Collections.singleton(profile), skin, false);
             SkinRestorer.getSkinStorage().deleteSkin(profile.getId());
-            
+
             updatedPlayers.addAll(updatedPlayer);
         }
 
@@ -103,13 +97,10 @@ public final class SkinCommand {
 
         return targets.size();
     }
-    
-    private static int resetSubcommand(
-            CommandSourceStack src
-    ) {
-        if (src.getPlayer() == null)
-            return 0;
-        
+
+    private static int resetSubcommand(CommandSourceStack src) {
+        if (src.getPlayer() == null) return 0;
+
         return resetSubcommand(src, Collections.singleton(src.getPlayer().getGameProfile()), false);
     }
 
@@ -120,7 +111,7 @@ public final class SkinCommand {
             boolean save,
             boolean setByOperator) {
         src.sendSystemMessage(Translation.translatableWithFallback(Translation.COMMAND_SKIN_LOADING_KEY));
-        
+
         SkinService.setSkinAsync(src.getServer(), targets, context, save).thenAccept(result -> {
             if (result.isError()) {
                 src.sendFailure(Translation.translatableWithFallback(
@@ -140,18 +131,13 @@ public final class SkinCommand {
             CommandSourceStack src,
             Collection<GameProfile> targets,
             SkinProviderContext context,
-            boolean setByOperator
-    ) {
+            boolean setByOperator) {
         return SkinCommand.setSubcommand(src, targets, context, true, setByOperator);
     }
-    
-    private static int setSubcommand(
-            CommandSourceStack src,
-            SkinProviderContext context
-    ) {
-        if (src.getPlayer() == null)
-            return 0;
-        
+
+    private static int setSubcommand(CommandSourceStack src, SkinProviderContext context) {
+        if (src.getPlayer() == null) return 0;
+
         return setSubcommand(src, Collections.singleton(src.getPlayer().getGameProfile()), context, false);
     }
 
@@ -222,8 +208,7 @@ public final class SkinCommand {
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, GameProfileArgument.Result> makeTargetsArgument(
-            BiFunction<CommandContext<CommandSourceStack>, Collection<GameProfile>, Integer> consumer
-    ) {
+            BiFunction<CommandContext<CommandSourceStack>, Collection<GameProfile>, Integer> consumer) {
         return argument("targets", GameProfileArgument.gameProfile())
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> consumer.apply(context, GameProfileArgument.getGameProfiles(context, "targets")));

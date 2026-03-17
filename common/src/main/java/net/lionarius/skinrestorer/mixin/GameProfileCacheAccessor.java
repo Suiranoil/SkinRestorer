@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Mixin(GameProfileCache.class)
 public interface GameProfileCacheAccessor {
-    
+
     @Accessor
     Map<String, GameProfileCache.GameProfileInfo> getProfilesByName();
 }
