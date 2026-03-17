@@ -6,9 +6,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
-import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
@@ -20,47 +18,45 @@ import net.minecraft.server.players.PlayerList;
 import java.util.*;
 
 public final class PlayerUtils {
-    
+
     public static final String TEXTURES_KEY = "textures";
-    
+
     private PlayerUtils() {}
-    
+
     public static Component createPlayerListComponent(Collection<ServerPlayer> players) {
         var component = Component.empty();
         int index = 0;
         for (var player : players) {
             component.append(Objects.requireNonNull(player.getDisplayName()));
             index++;
-            if (index < players.size())
-                component.append(", ");
+            if (index < players.size()) component.append(", ");
         }
         return component;
     }
-    
+
     public static boolean isFakePlayer(ServerPlayer player) {
-        return player.getClass() != ServerPlayer.class; // if the player isn't a server player entity, it must be someone's fake player
+        return player.getClass()
+                != ServerPlayer.class; // if the player isn't a server player entity, it must be someone's fake player
     }
-    
+
     public static void refreshPlayer(ServerPlayer player) {
         ServerLevel serverLevel = player.serverLevel();
         PlayerList playerList = serverLevel.getServer().getPlayerList();
         ChunkMap chunkMap = serverLevel.getChunkSource().chunkMap;
-        
-        playerList.broadcastAll(new ClientboundBundlePacket(
-                List.of(
-                        new ClientboundPlayerInfoRemovePacket(List.of(player.getUUID())),
-                        ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singleton(player))
-                )
-        ));
-        
+
+        playerList.broadcastAll(new ClientboundBundlePacket(List.of(
+                new ClientboundPlayerInfoRemovePacket(List.of(player.getUUID())),
+                ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singleton(player)))));
+
         var trackedEntity = ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
         if (trackedEntity != null) {
             var seenBy = Set.copyOf(trackedEntity.getSeenBy());
             for (var observerConnection : seenBy) {
                 var observer = observerConnection.getPlayer();
                 trackedEntity.invokeRemovePlayer(observer);
-                
-                var trackedObserverEntity = ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
+
+                var trackedObserverEntity =
+                        ((ChunkMapAccessor) chunkMap).getEntityMap().get(observer.getId());
                 if (trackedObserverEntity != null) {
                     trackedObserverEntity.invokeRemovePlayer(player);
                     trackedObserverEntity.invokeUpdatePlayer(player);
@@ -68,22 +64,18 @@ public final class PlayerUtils {
                 trackedEntity.invokeUpdatePlayer(observer);
             }
         }
-        
+
         if (!player.isDeadOrDying()) {
-            player.connection.send(new ClientboundBundlePacket(
-                    List.of(
-                            new ClientboundRespawnPacket(player.createCommonSpawnInfo(serverLevel), ClientboundRespawnPacket.KEEP_ALL_DATA),
-                            new ClientboundGameEventPacket(ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START, 0)
-                    )
-            ));
+            player.connection.send(new ClientboundBundlePacket(List.of(
+                    new ClientboundRespawnPacket(
+                            player.createCommonSpawnInfo(serverLevel), ClientboundRespawnPacket.KEEP_ALL_DATA),
+                    new ClientboundGameEventPacket(ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START, 0))));
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
             var vehicle = player.getVehicle();
-            if (vehicle != null)
-                player.connection.send(new ClientboundSetPassengersPacket(vehicle));
-            if (!player.getPassengers().isEmpty())
-                player.connection.send(new ClientboundSetPassengersPacket(player));
-            
+            if (vehicle != null) player.connection.send(new ClientboundSetPassengersPacket(vehicle));
+            if (!player.getPassengers().isEmpty()) player.connection.send(new ClientboundSetPassengersPacket(player));
+
             player.onUpdateAbilities();
             player.giveExperiencePoints(0);
             playerList.sendPlayerPermissionLevel(player);
@@ -92,40 +84,37 @@ public final class PlayerUtils {
             playerList.sendActivePlayerEffects(player);
         }
     }
-    
+
     private static void sendActivePlayerEffects(ServerPlayer player) {
         for (var effect : player.getActiveEffects()) {
             player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effect, false));
         }
     }
-    
+
     public static GameProfile cloneGameProfile(GameProfile profile) {
         var newProfile = new GameProfile(profile.getId(), profile.getName());
         newProfile.getProperties().putAll(profile.getProperties());
-        
+
         return newProfile;
     }
-    
+
     public static Property getPlayerSkin(GameProfile profile) {
         return Iterables.getFirst(profile.getProperties().get(TEXTURES_KEY), null);
     }
-    
+
     public static Pair<String, SkinVariant> getSkinUrl(Property skin) {
         var textureJson = JsonUtils.skinPropertyToJson(skin);
-        if (textureJson == null || !textureJson.has("textures"))
-            return null;
-        
+        if (textureJson == null || !textureJson.has("textures")) return null;
+
         var textures = textureJson.getAsJsonObject("textures");
-        if (!textures.has("SKIN"))
-            return null;
-        
+        if (!textures.has("SKIN")) return null;
+
         var skinTexture = textures.getAsJsonObject("SKIN");
-        if (!skinTexture.has("url"))
-            return null;
-        
+        if (!skinTexture.has("url")) return null;
+
         String url = skinTexture.get("url").getAsString();
         SkinVariant variant = SkinVariant.CLASSIC;
-        
+
         if (skinTexture.has("metadata")) {
             var metadata = skinTexture.getAsJsonObject("metadata");
             if (metadata.has("model")) {
@@ -133,36 +122,31 @@ public final class PlayerUtils {
                 variant = model.equals("slim") ? SkinVariant.SLIM : SkinVariant.CLASSIC;
             }
         }
-        
+
         return Pair.of(url, variant);
     }
-    
+
     public static void applyRestoredSkin(GameProfile profile, Property skin) {
         profile.getProperties().removeAll(TEXTURES_KEY);
-        
-        if (skin != null)
-            profile.getProperties().put(TEXTURES_KEY, skin);
+
+        if (skin != null) profile.getProperties().put(TEXTURES_KEY, skin);
     }
-    
+
     public static boolean areSkinPropertiesEquals(Property x, Property y) {
-        if (x == y)
-            return true;
-        
-        if (x == null || y == null)
-            return false;
-        
-        if (x.equals(y))
-            return true;
-        
+        if (x == y) return true;
+
+        if (x == null || y == null) return false;
+
+        if (x.equals(y)) return true;
+
         JsonObject xJson = JsonUtils.skinPropertyToJson(x);
         JsonObject yJson = JsonUtils.skinPropertyToJson(y);
-        
-        if (xJson == null || yJson == null)
-            return false;
-        
+
+        if (xJson == null || yJson == null) return false;
+
         return xJson.equals(yJson);
     }
-    
+
     public static GameProfile toProfile(MinecraftProfilePropertiesResponse response) {
         final GameProfile profile = new GameProfile(response.id(), response.name());
         profile.getProperties().putAll(response.properties());

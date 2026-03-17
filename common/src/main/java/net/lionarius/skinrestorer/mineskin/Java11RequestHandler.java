@@ -25,48 +25,44 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-// copy-pasted from https://github.com/InventivetalentDev/MineskinClient/blob/master/java11/src/main/java/org/mineskin/Java11RequestHandler.java
+// copy-pasted from
+// https://github.com/InventivetalentDev/MineskinClient/blob/master/java11/src/main/java/org/mineskin/Java11RequestHandler.java
 // with some modifications to support proxy
 public class Java11RequestHandler extends RequestHandler {
-    
+
     private final Gson gson;
     private final HttpClient httpClient;
-    
-    public Java11RequestHandler(String baseUrl, String userAgent, String apiKey, int timeout, Gson gson, InetSocketAddress proxy) {
+
+    public Java11RequestHandler(
+            String baseUrl, String userAgent, String apiKey, int timeout, Gson gson, InetSocketAddress proxy) {
         super(baseUrl, userAgent, apiKey, timeout, gson);
         this.gson = gson;
-        
-        HttpClient.Builder clientBuilder = HttpClient.newBuilder()
-                .connectTimeout(java.time.Duration.ofMillis(timeout));
-        
+
+        HttpClient.Builder clientBuilder = HttpClient.newBuilder().connectTimeout(java.time.Duration.ofMillis(timeout));
+
         if (userAgent != null) {
             clientBuilder.followRedirects(HttpClient.Redirect.NORMAL);
         }
-        
+
         if (proxy != null) {
             clientBuilder.proxy(ProxySelector.of(proxy));
         }
-        
+
         this.httpClient = clientBuilder.build();
     }
-    
-    private <T, R extends MineSkinResponse<T>> R wrapResponse(HttpResponse<String> response, Class<T> clazz, ResponseConstructor<T, R> constructor)
-            throws IOException {
+
+    private <T, R extends MineSkinResponse<T>> R wrapResponse(
+            HttpResponse<String> response, Class<T> clazz, ResponseConstructor<T, R> constructor) throws IOException {
         String rawBody = response.body();
         try {
             JsonObject jsonBody = gson.fromJson(rawBody, JsonObject.class);
             R wrapped = constructor.construct(
-                    response.statusCode(),
-                    lowercaseHeaders(response.headers().map()),
-                    jsonBody,
-                    gson, clazz
-            );
+                    response.statusCode(), lowercaseHeaders(response.headers().map()), jsonBody, gson, clazz);
             if (!wrapped.isSuccess()) {
                 throw new MineSkinRequestException(
                         wrapped.getFirstError().map(CodeAndMessage::code).orElse("request_failed"),
                         wrapped.getFirstError().map(CodeAndMessage::message).orElse("Request Failed"),
-                        wrapped
-                );
+                        wrapped);
             }
             return wrapped;
         } catch (JsonParseException e) {
@@ -74,29 +70,26 @@ public class Java11RequestHandler extends RequestHandler {
             throw new MineskinException("Failed to parse response", e);
         }
     }
-    
+
     private Map<String, String> lowercaseHeaders(Map<String, java.util.List<String>> headers) {
         return headers.entrySet().stream()
                 .collect(Collectors.toMap(
-                        entry -> entry.getKey().toLowerCase(),
-                        entry -> String.join(", ", entry.getValue())
-                ));
+                        entry -> entry.getKey().toLowerCase(), entry -> String.join(", ", entry.getValue())));
     }
-    
-    public <T, R extends MineSkinResponse<T>> R getJson(String url, Class<T> clazz, ResponseConstructor<T, R> constructor)
-            throws IOException {
+
+    public <T, R extends MineSkinResponse<T>> R getJson(
+            String url, Class<T> clazz, ResponseConstructor<T, R> constructor) throws IOException {
         url = this.baseUrl + url;
         MineSkinClientImpl.LOGGER.fine("GET " + url);
-        
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .header("User-Agent", this.userAgent);
+
+        HttpRequest.Builder requestBuilder =
+                HttpRequest.newBuilder().uri(URI.create(url)).GET().header("User-Agent", this.userAgent);
         HttpRequest request;
         if (apiKey != null) {
             request = requestBuilder
                     .header("Authorization", "Bearer " + apiKey)
-                    .header("Accept", "application/json").build();
+                    .header("Accept", "application/json")
+                    .build();
         } else {
             request = requestBuilder.build();
         }
@@ -108,12 +101,12 @@ public class Java11RequestHandler extends RequestHandler {
         }
         return wrapResponse(response, clazz, constructor);
     }
-    
-    public <T, R extends MineSkinResponse<T>> R postJson(String url, JsonObject data, Class<T> clazz, ResponseConstructor<T, R> constructor)
-            throws IOException {
+
+    public <T, R extends MineSkinResponse<T>> R postJson(
+            String url, JsonObject data, Class<T> clazz, ResponseConstructor<T, R> constructor) throws IOException {
         url = this.baseUrl + url;
         MineSkinClientImpl.LOGGER.fine("POST " + url);
-        
+
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .POST(BodyPublishers.ofString(gson.toJson(data)))
@@ -123,11 +116,12 @@ public class Java11RequestHandler extends RequestHandler {
         if (apiKey != null) {
             request = requestBuilder
                     .header("Authorization", "Bearer " + apiKey)
-                    .header("Accept", "application/json").build();
+                    .header("Accept", "application/json")
+                    .build();
         } else {
             request = requestBuilder.build();
         }
-        
+
         HttpResponse<String> response;
         try {
             response = this.httpClient.send(request, BodyHandlers.ofString());
@@ -136,27 +130,46 @@ public class Java11RequestHandler extends RequestHandler {
         }
         return wrapResponse(response, clazz, constructor);
     }
-    
-    public <T, R extends MineSkinResponse<T>> R postFormDataFile(String url, String key, String filename, InputStream in, Map<String, String> data, Class<T> clazz, ResponseConstructor<T, R> constructor)
+
+    public <T, R extends MineSkinResponse<T>> R postFormDataFile(
+            String url,
+            String key,
+            String filename,
+            InputStream in,
+            Map<String, String> data,
+            Class<T> clazz,
+            ResponseConstructor<T, R> constructor)
             throws IOException {
         url = this.baseUrl + url;
         MineSkinClientImpl.LOGGER.fine("POST " + url);
-        
+
         String boundary = "mineskin-" + System.currentTimeMillis();
         StringBuilder bodyBuilder = new StringBuilder();
-        
+
         // add form fields
         for (Map.Entry<String, String> entry : data.entrySet()) {
-            bodyBuilder.append("--").append(boundary).append("\r\n")
-                    .append("Content-Disposition: form-data; name=\"").append(entry.getKey()).append("\"\r\n\r\n")
-                    .append(entry.getValue()).append("\r\n");
+            bodyBuilder
+                    .append("--")
+                    .append(boundary)
+                    .append("\r\n")
+                    .append("Content-Disposition: form-data; name=\"")
+                    .append(entry.getKey())
+                    .append("\"\r\n\r\n")
+                    .append(entry.getValue())
+                    .append("\r\n");
         }
-        
+
         // add file
         byte[] fileContent = in.readAllBytes();
-        bodyBuilder.append("--").append(boundary).append("\r\n")
-                .append("Content-Disposition: form-data; name=\"").append(key)
-                .append("\"; filename=\"").append(filename).append("\"\r\n")
+        bodyBuilder
+                .append("--")
+                .append(boundary)
+                .append("\r\n")
+                .append("Content-Disposition: form-data; name=\"")
+                .append(key)
+                .append("\"; filename=\"")
+                .append(filename)
+                .append("\"\r\n")
                 .append("Content-Type: image/png\r\n\r\n");
         byte[] bodyStart = bodyBuilder.toString().getBytes();
         byte[] boundaryEnd = ("\r\n--" + boundary + "--\r\n").getBytes();
@@ -164,7 +177,7 @@ public class Java11RequestHandler extends RequestHandler {
         System.arraycopy(bodyStart, 0, bodyString, 0, bodyStart.length);
         System.arraycopy(fileContent, 0, bodyString, bodyStart.length, fileContent.length);
         System.arraycopy(boundaryEnd, 0, bodyString, bodyStart.length + fileContent.length, boundaryEnd.length);
-        
+
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .POST(HttpRequest.BodyPublishers.ofByteArray(bodyString))
@@ -174,11 +187,12 @@ public class Java11RequestHandler extends RequestHandler {
         if (apiKey != null) {
             request = requestBuilder
                     .header("Authorization", "Bearer " + apiKey)
-                    .header("Accept", "application/json").build();
+                    .header("Accept", "application/json")
+                    .build();
         } else {
             request = requestBuilder.build();
         }
-        
+
         HttpResponse<String> response;
         try {
             response = this.httpClient.send(request, BodyHandlers.ofString());

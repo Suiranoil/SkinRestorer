@@ -6,7 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import java.net.URI;
 
 public interface CollectionSkinSource {
-    @Nullable URI uri();
-    
+    @Nullable
+    URI uri();
+
     SkinVariant variant();
 }
