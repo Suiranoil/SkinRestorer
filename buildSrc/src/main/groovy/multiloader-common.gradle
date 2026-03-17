@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'com.diffplug.spotless'
 }
 
 base {
@@ -10,6 +11,16 @@ base {
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version)
     withSourcesJar()
+}
+
+spotless {
+    java {
+        palantirJavaFormat()
+        importOrder('', 'javax', 'java', '\\#')
+        trimTrailingWhitespace()
+        endWithNewline()
+        toggleOffOn()
+    }
 }
 
 repositories {

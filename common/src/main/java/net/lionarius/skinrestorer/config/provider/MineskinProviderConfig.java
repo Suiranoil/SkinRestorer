@@ -5,17 +5,17 @@ import net.lionarius.skinrestorer.skin.provider.builtin.MineskinSkinProvider;
 
 public final class MineskinProviderConfig extends BuiltInProviderConfig {
     private static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 300);
-    
+
     private String apiKey;
     private boolean proxyUrlUpload;
-    
+
     public MineskinProviderConfig() {
         super(MineskinSkinProvider.PROVIDER_NAME, DEFAULT_CACHE_VALUE);
-        
+
         this.apiKey = "";
         this.proxyUrlUpload = false;
     }
-    
+
     public String apiKey() {
         return apiKey;
     }
@@ -23,11 +23,11 @@ public final class MineskinProviderConfig extends BuiltInProviderConfig {
     public boolean proxyUrlUpload() {
         return this.proxyUrlUpload;
     }
-    
+
     @Override
     public void gsonPostProcess() {
         super.validate(MineskinSkinProvider.PROVIDER_NAME, DEFAULT_CACHE_VALUE);
-        
+
         if (this.apiKey == null) {
             SkinRestorer.LOGGER.warn("Mineskin API key is null, defaulting to an empty string");
             this.apiKey = "";
