@@ -21,11 +21,11 @@ public final class CustomUsernameUrlProviderConfig extends CustomProviderConfig 
 
     @Override
     public Result<SkinProvider, String> createSkinProvider(SkinSigner skinSigner) {
-        if (this.urlTemplate.isEmpty())
-            return Result.error("urlTemplate is not configured");
+        if (this.urlTemplate.isEmpty()) return Result.error("urlTemplate is not configured");
 
         if (!this.urlTemplate.contains(CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER))
-            return Result.error("urlTemplate must contain '" + CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER + "'");
+            return Result.error(
+                    "urlTemplate must contain '" + CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER + "'");
 
         if (!CustomUsernameUrlSkinProvider.isValidUrlTemplate(this.urlTemplate))
             return Result.error("urlTemplate is invalid or not an absolute URI");

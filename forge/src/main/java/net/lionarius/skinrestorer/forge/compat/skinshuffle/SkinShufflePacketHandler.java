@@ -37,9 +37,8 @@ public class SkinShufflePacketHandler {
         SKIN_REFRESH_V1_INSTANCE.addListener(SkinShufflePacketHandler::skinRefreshV1Listener);
         SKIN_REFRESH_V2_INSTANCE.addListener(SkinShufflePacketHandler::skinRefreshV2Listener);
     }
-    
-    private SkinShufflePacketHandler() {
-    }
+
+    private SkinShufflePacketHandler() {}
 
     public static void sendHandshake(Connection connection) {
         connection.send(new ClientboundCustomPayloadPacket(SkinShuffleHandshakePayload.PACKET_ID, new FriendlyByteBuf(Unpooled.buffer(0, 0))));

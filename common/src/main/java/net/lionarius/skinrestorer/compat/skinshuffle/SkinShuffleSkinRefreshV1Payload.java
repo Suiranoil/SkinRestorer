@@ -8,7 +8,7 @@ public record SkinShuffleSkinRefreshV1Payload(
         Property textureProperty) implements SkinShuffleSkinRefreshPayload {
     
     public static final ResourceLocation PACKET_ID = SkinShuffleCompatibility.resourceLocation("refresh");
-    
+
     public static void encode(FriendlyByteBuf buf, SkinShuffleSkinRefreshV1Payload value) {
         var textureProperty = value.textureProperty();
         
@@ -16,8 +16,9 @@ public record SkinShuffleSkinRefreshV1Payload(
         buf.writeUtf(textureProperty.getValue());
         buf.writeNullable(textureProperty.getSignature(), FriendlyByteBuf::writeUtf);
     }
-    
+
     public static SkinShuffleSkinRefreshV1Payload decode(FriendlyByteBuf buf) {
-        return new SkinShuffleSkinRefreshV1Payload(new Property(buf.readUtf(), buf.readUtf(), buf.readNullable(FriendlyByteBuf::readUtf)));
+        return new SkinShuffleSkinRefreshV1Payload(
+                new Property(buf.readUtf(), buf.readUtf(), buf.readNullable(FriendlyByteBuf::readUtf)));
     }
 }

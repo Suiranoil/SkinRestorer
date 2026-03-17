@@ -11,7 +11,7 @@ public record SkinShuffleSkinRefreshV2Payload(
 
     public static void encode(FriendlyByteBuf buf, SkinShuffleSkinRefreshV2Payload value) {
         var textureProperty = value.textureProperty();
-        
+
         buf.writeBoolean(textureProperty.hasSignature());
         buf.writeUtf(textureProperty.getName());
         buf.writeUtf(textureProperty.getValue());

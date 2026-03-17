@@ -10,18 +10,18 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class SkinResigner {
-    
+
     private final SkinSigner skinSigner;
     private boolean useProviderSignature;
     private Cache<Integer, Property> signatureCache;
-    
+
     public SkinResigner(SkinSigner skinSigner) {
         this.skinSigner = skinSigner;
     }
-    
+
     public void reload(boolean useProviderSignature) {
         this.useProviderSignature = useProviderSignature;
-        
+
         if (useProviderSignature) {
             this.signatureCache = null;
         } else {
@@ -31,11 +31,10 @@ public class SkinResigner {
                     .build();
         }
     }
-    
+
     public Optional<Property> extractSkin(GameProfile profile) throws Exception {
-        if (this.useProviderSignature)
-            return Optional.ofNullable(PlayerUtils.getPlayerSkin(profile));
-        
+        if (this.useProviderSignature) return Optional.ofNullable(PlayerUtils.getPlayerSkin(profile));
+
         var skin = PlayerUtils.getPlayerSkin(profile);
         if (skin == null)
             return Optional.empty();
@@ -51,10 +50,9 @@ public class SkinResigner {
         
         var signed = this.skinSigner.signSkin(skin);
         signed.ifPresent(property -> {
-            if (this.signatureCache != null)
-                this.signatureCache.put(propertyHash, property);
+            if (this.signatureCache != null) this.signatureCache.put(propertyHash, property);
         });
-        
+
         return signed;
     }
 }

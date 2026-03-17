@@ -11,18 +11,18 @@ import java.util.List;
 
 public final class CollectionProviderConfig extends BuiltInProviderConfig implements GsonPostProcessable {
     private static final CacheConfig DEFAULT_CACHE_VALUE = new CacheConfig(true, 604800);
-    
+
     @JsonAdapter(CollectionSkinSourceListDeserializer.class)
     private List<CollectionSkinSource> sources = new ArrayList<>();
-    
+
     public CollectionProviderConfig() {
         super(CollectionSkinProvider.PROVIDER_NAME, DEFAULT_CACHE_VALUE, false);
     }
-    
+
     public List<CollectionSkinSource> sources() {
         return this.sources;
     }
-    
+
     @Override
     public void gsonPostProcess() {
         if (this.sources == null) {
