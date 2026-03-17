@@ -36,18 +36,14 @@ public class SkinResigner {
         if (this.useProviderSignature) return Optional.ofNullable(PlayerUtils.getPlayerSkin(profile));
 
         var skin = PlayerUtils.getPlayerSkin(profile);
-        if (skin == null)
-            return Optional.empty();
-        
-        if (PlayerUtils.getSkinUrl(skin) == null)
-            return Optional.empty();
-        
+        if (skin == null) return Optional.empty();
+
+        if (PlayerUtils.getSkinUrl(skin) == null) return Optional.empty();
+
         var propertyHash = skin.getValue().hashCode();
-        var cached = this.signatureCache != null
-                ? this.signatureCache.getIfPresent(propertyHash) : null;
-        if (cached != null)
-            return Optional.of(cached);
-        
+        var cached = this.signatureCache != null ? this.signatureCache.getIfPresent(propertyHash) : null;
+        if (cached != null) return Optional.of(cached);
+
         var signed = this.skinSigner.signSkin(skin);
         signed.ifPresent(property -> {
             if (this.signatureCache != null) this.signatureCache.put(propertyHash, property);

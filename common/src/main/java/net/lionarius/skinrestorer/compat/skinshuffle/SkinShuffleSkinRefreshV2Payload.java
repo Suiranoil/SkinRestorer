@@ -4,9 +4,8 @@ import com.mojang.authlib.properties.Property;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
-public record SkinShuffleSkinRefreshV2Payload(
-        Property textureProperty) implements SkinShuffleSkinRefreshPayload {
-    
+public record SkinShuffleSkinRefreshV2Payload(Property textureProperty) implements SkinShuffleSkinRefreshPayload {
+
     public static final ResourceLocation PACKET_ID = SkinShuffleCompatibility.resourceLocation("skin_refresh");
 
     public static void encode(FriendlyByteBuf buf, SkinShuffleSkinRefreshV2Payload value) {
@@ -17,7 +16,7 @@ public record SkinShuffleSkinRefreshV2Payload(
         buf.writeUtf(textureProperty.getValue());
         if (textureProperty.hasSignature()) {
             assert textureProperty.getSignature() != null;
-            
+
             buf.writeUtf(textureProperty.getSignature());
         }
     }

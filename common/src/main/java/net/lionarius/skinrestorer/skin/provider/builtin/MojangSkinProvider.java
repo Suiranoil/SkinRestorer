@@ -26,8 +26,9 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
 
     static {
         try {
-            ENVIRONMENT = EnvironmentParser.getEnvironmentFromProperties().orElse(YggdrasilEnvironment.PROD.getEnvironment());
-            
+            ENVIRONMENT =
+                    EnvironmentParser.getEnvironmentFromProperties().orElse(YggdrasilEnvironment.PROD.getEnvironment());
+
             SERVICES_SERVER_URI = new URI(ENVIRONMENT.getServicesHost());
             SESSION_SERVER_URI = new URI(ENVIRONMENT.getSessionHost());
         } catch (URISyntaxException e) {
@@ -36,16 +37,18 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     }
 
     public MojangSkinProvider() {
-        this.profileCache = new GameProfileCache((names, agent, callback) -> {
-            for (var name : names) {
-                try {
-                    var profile = MojangSkinProvider.this.getProfile(name);
-                    callback.onProfileLookupSucceeded(profile);
-                } catch (IOException e) {
-                    throw new TransparentException(e);
-                }
-            }
-        }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
+        this.profileCache = new GameProfileCache(
+                (names, agent, callback) -> {
+                    for (var name : names) {
+                        try {
+                            var profile = MojangSkinProvider.this.getProfile(name);
+                            callback.onProfileLookupSucceeded(profile);
+                        } catch (IOException e) {
+                            throw new TransparentException(e);
+                        }
+                    }
+                },
+                SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
     }
 
     @Override

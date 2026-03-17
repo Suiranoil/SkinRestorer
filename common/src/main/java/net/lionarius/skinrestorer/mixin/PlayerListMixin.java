@@ -42,7 +42,7 @@ public abstract class PlayerListMixin {
     @Inject(method = "placeNewPlayer", at = @At("HEAD"))
     private void placeNewPlayer(Connection connection, ServerPlayer player, CallbackInfo ci) {
         var delay = SkinRestorer.getConfig().join().applyDelay();
-        
+
         if (delay <= 0) {
             skinrestorer$tryApplySkin(server, player);
         } else {

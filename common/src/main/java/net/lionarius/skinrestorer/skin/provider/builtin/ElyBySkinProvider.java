@@ -61,10 +61,9 @@ public final class ElyBySkinProvider extends UsernameSkinProvider {
 
         var response = WebUtils.executeRequest(request);
         WebUtils.throwOnClientErrors(response);
-        
-        if (response.statusCode() != 200)
-            throw new IllegalArgumentException("no profile with name " + username);
-        
+
+        if (response.statusCode() != 200) throw new IllegalArgumentException("no profile with name " + username);
+
         return PlayerUtils.toProfile(JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class));
     }
 }

@@ -122,17 +122,15 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
         var request = HttpRequest.newBuilder()
                 .uri(this.resolvedApiRoot
                         .resolve("sessionserver/session/minecraft/profile/")
-                        .resolve(uuid.toString() + "?unsigned=false")
-                )
+                        .resolve(uuid.toString() + "?unsigned=false"))
                 .GET()
                 .build();
 
         var response = WebUtils.executeRequest(request);
         WebUtils.throwOnClientErrors(response);
-        
-        if (response.statusCode() != 200)
-            throw new IllegalArgumentException("no profile with uuid " + uuid);
-        
+
+        if (response.statusCode() != 200) throw new IllegalArgumentException("no profile with uuid " + uuid);
+
         return PlayerUtils.toProfile(JsonUtils.fromJson(response.body(), MinecraftProfilePropertiesResponse.class));
     }
 

@@ -64,10 +64,11 @@ public final class JsonUtils {
 
     public static JsonObject skinPropertyToJson(Property property) {
         try {
-            JsonObject json = GSON.fromJson(new String(Base64.getDecoder().decode(property.getValue()), StandardCharsets.UTF_8), JsonObject.class);
-            if (json != null)
-                json.remove("timestamp");
-            
+            JsonObject json = GSON.fromJson(
+                    new String(Base64.getDecoder().decode(property.getValue()), StandardCharsets.UTF_8),
+                    JsonObject.class);
+            if (json != null) json.remove("timestamp");
+
             return json;
         } catch (Exception e) {
             SkinRestorer.LOGGER.error("Could not parse skin property", e);
