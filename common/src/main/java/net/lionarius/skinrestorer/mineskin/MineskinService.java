@@ -37,23 +37,25 @@ public final class MineskinService implements SkinSigner {
 
     public void reload() {
         var config = SkinRestorer.getConfig();
-        var mineskinConfig = config.providersConfig().mineskin();
+        var mineskinConfig = config.providers().mineskin();
         var configApiKey = mineskinConfig.apiKey();
 
         this.proxyUrlUpload = mineskinConfig.proxyUrlUpload();
-        this.mineskinClient = MineSkinClient
-                .builder()
+        this.mineskinClient = MineSkinClient.builder()
                 .userAgent(WebUtils.USER_AGENT)
                 .gson(JsonUtils.GSON)
-                .timeout((int) Duration.ofSeconds(config.requestTimeout()).toMillis())
+                .timeout((int) Duration.ofSeconds(config.request().timeout()).toMillis())
                 .requestHandler((baseUrl, userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
                         baseUrl,
                         userAgent,
                         apiKey,
                         timeout,
                         gson,
-                        SkinRestorer.getConfig().proxy().map(proxy -> new InetSocketAddress(proxy.host(), proxy.port())).orElse(null)
-                ))
+                        SkinRestorer.getConfig()
+                                .request()
+                                .proxy()
+                                .map(proxy -> new InetSocketAddress(proxy.host(), proxy.port()))
+                                .orElse(null)))
                 .apiKey(configApiKey.isEmpty() ? null : configApiKey)
                 .build();
     }
@@ -66,25 +68,27 @@ public final class MineskinService implements SkinSigner {
     @Override
     public Optional<Property> signSkin(Property property) throws Exception {
         var skin = PlayerUtils.getSkinUrl(property);
-        if (skin == null)
-            return Optional.empty();
+        if (skin == null) return Optional.empty();
 
         return this.generateSkin(new URI(skin.first()), skin.second());
     }
 
     private Optional<Property> generateSkin(URI uri, @Nullable SkinVariant variant) throws Exception {
-        var mineskinVariant = switch (variant) {
-            case CLASSIC -> Variant.CLASSIC;
-            case SLIM -> Variant.SLIM;
-            case null -> Variant.AUTO;
-        };
+        var mineskinVariant =
+                switch (variant) {
+                    case CLASSIC -> Variant.CLASSIC;
+                    case SLIM -> Variant.SLIM;
+                    case null -> Variant.AUTO;
+                };
 
         var request = this.createGenerateRequest(uri)
                 .variant(mineskinVariant)
                 .name(MineskinService.SKIN_NAME)
                 .visibility(Visibility.UNLISTED);
 
-        var skin = this.mineskinClient.queue().submit(request)
+        var skin = this.mineskinClient
+                .queue()
+                .submit(request)
                 .thenApply(QueueResponse::getJob)
                 .thenCompose(jobInfo -> jobInfo.waitForCompletion(this.mineskinClient))
                 .thenCompose(jobReference -> jobReference.getOrLoadSkin(this.mineskinClient))
@@ -93,13 +97,11 @@ public final class MineskinService implements SkinSigner {
         return Optional.of(new Property(
                 PlayerUtils.TEXTURES_KEY,
                 skin.texture().data().value(),
-                skin.texture().data().signature()
-        ));
+                skin.texture().data().signature()));
     }
 
     private GenerateRequest createGenerateRequest(URI uri) throws Exception {
-        if ("file".equals(uri.getScheme()))
-            return GenerateRequest.upload(Files.newInputStream(Path.of(uri)));
+        if ("file".equals(uri.getScheme())) return GenerateRequest.upload(Files.newInputStream(Path.of(uri)));
 
         if (MineskinService.isHttpUrl(uri) && this.proxyUrlUpload)
             return GenerateRequest.upload(new ByteArrayInputStream(this.downloadImage(uri)));
@@ -108,16 +110,12 @@ public final class MineskinService implements SkinSigner {
     }
 
     private byte[] downloadImage(URI uri) throws IOException {
-        var request = HttpRequest.newBuilder()
-                .uri(uri)
-                .GET()
-                .build();
+        var request = HttpRequest.newBuilder().uri(uri).GET().build();
 
         var response = WebUtils.executeRequest(request, HttpResponse.BodyHandlers.ofByteArray());
         WebUtils.throwOnClientErrors(response);
 
-        if (response.statusCode() != 200)
-            throw new IOException("unexpected status code " + response.statusCode());
+        if (response.statusCode() != 200) throw new IOException("unexpected status code " + response.statusCode());
 
         return response.body();
     }

@@ -15,13 +15,13 @@ public class SkinShufflePacketHandler {
             .named(SkinShuffleHandshakePayload.PACKET_ID.id())
             .optional()
             .eventNetworkChannel();
-    
+
     private static final EventNetworkChannel SKIN_REFRESH_V1_INSTANCE = ChannelBuilder
             .named(SkinShuffleSkinRefreshV1Payload.PACKET_ID.id())
             .optional()
             .eventNetworkChannel()
             .addListener(SkinShufflePacketHandler::skinRefreshV1Listener);
-    
+
     private static final EventNetworkChannel SKIN_REFRESH_V2_INSTANCE = ChannelBuilder
             .named(SkinShuffleSkinRefreshV2Payload.PACKET_ID.id())
             .optional()
@@ -31,14 +31,14 @@ public class SkinShufflePacketHandler {
     protected static void initialize() {
         // NO-OP
     }
-    
+
     private SkinShufflePacketHandler() {
     }
 
     public static void sendHandshake(Connection connection) {
         HANDSHAKE_INSTANCE.send(new FriendlyByteBuf(Unpooled.buffer(0, 0)), connection);
     }
-    
+
     private static void skinRefreshV1Listener(CustomPayloadEvent event) {
         var payload = SkinShuffleSkinRefreshV1Payload.PACKET_CODEC.decode(event.getPayload());
         handleSkinRefreshPacket(payload, event.getSource());
@@ -51,10 +51,9 @@ public class SkinShufflePacketHandler {
 
     private static void handleSkinRefreshPacket(SkinShuffleSkinRefreshPayload payload, CustomPayloadEvent.Context context) {
         var sender = context.getSender();
-        
-        if (!context.isServerSide() || sender == null)
-            return;
-        
+
+        if (!context.isServerSide() || sender == null) return;
+
         SkinShuffleCompatibility.handleSkinRefresh(sender.getServer(), sender, payload);
     }
 }
