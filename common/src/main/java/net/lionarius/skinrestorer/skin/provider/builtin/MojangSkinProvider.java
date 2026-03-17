@@ -12,7 +12,6 @@ import net.minecraft.server.players.GameProfileCache;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 import java.util.UUID;
 
 public final class MojangSkinProvider extends YggdrasilSkinProvider {
@@ -38,16 +37,18 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     }
 
     public MojangSkinProvider() {
-        this.profileCache = new GameProfileCache((names, callback) -> {
-            for (var name : names) {
-                try {
-                    var profile = MojangSkinProvider.this.getProfile(name);
-                    callback.onProfileLookupSucceeded(profile);
-                } catch (IOException e) {
-                    throw new TransparentException(e);
-                }
-            }
-        }, SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
+        this.profileCache = new GameProfileCache(
+                (names, callback) -> {
+                    for (var name : names) {
+                        try {
+                            var profile = MojangSkinProvider.this.getProfile(name);
+                            callback.onProfileLookupSucceeded(profile);
+                        } catch (IOException e) {
+                            throw new TransparentException(e);
+                        }
+                    }
+                },
+                SkinRestorer.getConfigDir().resolve(PROFILE_CACHE_FILENAME).toFile());
     }
 
     @Override

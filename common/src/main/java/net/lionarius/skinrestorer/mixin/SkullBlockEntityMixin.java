@@ -59,12 +59,14 @@ public abstract class SkullBlockEntityMixin {
         var profile = PlayerUtils.cloneGameProfile(profileOpt.get());
 
         if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
-            cir.setReturnValue(CompletableFuture.supplyAsync(() -> {
-                var skin = SkinRestorer.getSkinStorage().getSkin(profile.getId(), false);
-                PlayerUtils.applyRestoredSkin(profile, skin.value());
+            cir.setReturnValue(CompletableFuture.supplyAsync(
+                    () -> {
+                        var skin = SkinRestorer.getSkinStorage().getSkin(profile.getId(), false);
+                        PlayerUtils.applyRestoredSkin(profile, skin.value());
 
-                return Optional.of(profile);
-            }, Util.backgroundExecutor()));
+                        return Optional.of(profile);
+                    },
+                    Util.backgroundExecutor()));
         }
     }
 }
