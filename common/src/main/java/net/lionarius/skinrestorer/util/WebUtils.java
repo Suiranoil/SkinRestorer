@@ -15,17 +15,22 @@ import java.time.temporal.ChronoUnit;
 
 public final class WebUtils {
 
-    public static final String USER_AGENT;
+    public static final String DEFAULT_USER_AGENT =
+            String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
 
+    private static String USER_AGENT = WebUtils.DEFAULT_USER_AGENT;
     private static HttpClient HTTP_CLIENT = null;
-
-    static {
-        USER_AGENT = String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
-    }
 
     private WebUtils() {}
 
+    public static String getUserAgent() {
+        return WebUtils.USER_AGENT;
+    }
+
     public static void recreateHttpClient() {
+        var configUserAgent = SkinRestorer.getConfig().request().userAgent();
+        WebUtils.USER_AGENT = configUserAgent.isEmpty() ? WebUtils.DEFAULT_USER_AGENT : configUserAgent;
+
         HTTP_CLIENT = WebUtils.buildClient();
     }
 
@@ -55,7 +60,7 @@ public final class WebUtils {
             throws IOException {
         try {
             var modifiedRequest = HttpRequest.newBuilder(request, (name, value) -> true)
-                    .header("User-Agent", WebUtils.USER_AGENT)
+                    .header("User-Agent", WebUtils.getUserAgent())
                     .build();
 
             final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, bodyHandler);
