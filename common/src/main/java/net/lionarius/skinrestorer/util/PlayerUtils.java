@@ -45,9 +45,9 @@ public final class PlayerUtils {
         PlayerList playerList = serverLevel.getServer().getPlayerList();
         ChunkMap chunkMap = serverLevel.getChunkSource().chunkMap;
 
-        playerList.broadcastAll(new ClientboundBundlePacket(List.of(
-                new ClientboundPlayerInfoRemovePacket(List.of(player.getUUID())),
-                ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singleton(player)))));
+        playerList.broadcastAll(new ClientboundPlayerInfoRemovePacket(List.of(player.getUUID())));
+        playerList.broadcastAll(
+                ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(Collections.singleton(player)));
 
         var trackedEntity = ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
         if (trackedEntity != null) {
