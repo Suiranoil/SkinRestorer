@@ -42,7 +42,7 @@ public final class MineskinService implements SkinSigner {
 
         this.proxyUrlUpload = mineskinConfig.proxyUrlUpload();
         this.mineskinClient = MineSkinClient.builder()
-                .userAgent(WebUtils.USER_AGENT)
+                .userAgent(WebUtils.getUserAgent())
                 .gson(JsonUtils.GSON)
                 .timeout((int) Duration.ofSeconds(config.request().timeout()).toMillis())
                 .requestHandler((baseUrl, userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
