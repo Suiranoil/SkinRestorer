@@ -10,14 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class FileUtils {
-    
+
     private FileUtils() {}
-    
+
     public static String readResource(String name) {
         try (var stream = SkinRestorer.class.getResourceAsStream(name)) {
-            if (stream == null)
-                return null;
-            
+            if (stream == null) return null;
+
             try (var reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
                 return StringUtils.readString(reader);
             }
@@ -26,38 +25,34 @@ public final class FileUtils {
             return null;
         }
     }
-    
+
     public static String readFile(Path file) {
         try {
-            if (!Files.exists(file))
-                return null;
-            
+            if (!Files.exists(file)) return null;
+
             return Files.readString(file);
         } catch (Exception e) {
             SkinRestorer.LOGGER.error("Failed to read file", e);
             return null;
         }
     }
-    
+
     public static void writeFile(Path file, String content) {
         try {
             var parent = file.getParent();
-            if (parent != null)
-                Files.createDirectories(parent);
-            
-            if (!Files.exists(file))
-                Files.createFile(file);
-            
+            if (parent != null) Files.createDirectories(parent);
+
+            if (!Files.exists(file)) Files.createFile(file);
+
             Files.writeString(file, content);
         } catch (IOException e) {
             SkinRestorer.LOGGER.error("Failed to write file", e);
         }
     }
-    
+
     public static void deleteFile(Path file) {
         try {
-            if (Files.exists(file))
-                Files.delete(file);
+            if (Files.exists(file)) Files.delete(file);
         } catch (IOException e) {
             SkinRestorer.LOGGER.error("Failed to delete file", e);
         }

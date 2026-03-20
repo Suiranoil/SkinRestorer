@@ -14,62 +14,68 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 public final class WebUtils {
-    
-    public static final String USER_AGENT;
-    
+
+    public static final String DEFAULT_USER_AGENT =
+            String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
+
+    private static String USER_AGENT = WebUtils.DEFAULT_USER_AGENT;
     private static HttpClient HTTP_CLIENT = null;
-    
-    static {
-        USER_AGENT = String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
-    }
-    
+
     private WebUtils() {}
-    
+
+    public static String getUserAgent() {
+        return WebUtils.USER_AGENT;
+    }
+
     public static void recreateHttpClient() {
+        var configUserAgent = SkinRestorer.getConfig().request().userAgent();
+        WebUtils.USER_AGENT = configUserAgent.isEmpty() ? WebUtils.DEFAULT_USER_AGENT : configUserAgent;
+
         HTTP_CLIENT = WebUtils.buildClient();
     }
-    
+
     private static HttpClient buildClient() {
         var builder = HttpClient.newBuilder();
-        
-        var proxy = SkinRestorer.getConfig().proxy();
-        proxy.ifPresent(value -> builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(value.host(), value.port()))));
-        
+
+        var proxy = SkinRestorer.getConfig().request().proxy();
+        proxy.ifPresent(value ->
+                builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(value.host(), value.port()))));
+
         try {
-            builder.connectTimeout(Duration.of(SkinRestorer.getConfig().requestTimeout(), ChronoUnit.SECONDS));
+            builder.connectTimeout(
+                    Duration.of(SkinRestorer.getConfig().request().timeout(), ChronoUnit.SECONDS));
         } catch (IllegalArgumentException e) {
             SkinRestorer.LOGGER.error("Failed to set request timeout", e);
             builder.connectTimeout(Duration.of(10, ChronoUnit.SECONDS));
         }
-        
+
         return builder.build();
     }
-    
+
     public static HttpResponse<String> executeRequest(HttpRequest request) throws IOException {
         return WebUtils.executeRequest(request, HttpResponse.BodyHandlers.ofString());
     }
-    
-    public static <T> HttpResponse<T> executeRequest(HttpRequest request, BodyHandler<T> bodyHandler) throws IOException {
+
+    public static <T> HttpResponse<T> executeRequest(HttpRequest request, BodyHandler<T> bodyHandler)
+            throws IOException {
         try {
             var modifiedRequest = HttpRequest.newBuilder(request, (name, value) -> true)
-                    .header("User-Agent", WebUtils.USER_AGENT)
+                    .header("User-Agent", WebUtils.getUserAgent())
                     .build();
-            
+
             final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, bodyHandler);
-            
-            if (response.statusCode() >= 500)
-                throw new IOException("server error " + response.statusCode());
-            
+
+            if (response.statusCode() >= 500) throw new IOException("server error " + response.statusCode());
+
             return response;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IOException(e);
         }
     }
-    
+
     public static URI parseUri(String uri) {
-        if (uri == null || uri.isEmpty())
-            return null;
+        if (uri == null || uri.isEmpty()) return null;
 
         try {
             return URI.create(uri);
@@ -77,24 +83,24 @@ public final class WebUtils {
             return null;
         }
     }
-    
+
     public static String ensureTrailingSlash(String url) {
         return url.endsWith("/") ? url : url + "/";
     }
-    
+
     public static void throwOnClientErrors(HttpResponse<?> response) {
-        String message = switch (response.statusCode()) {
-            case 400 -> "bad request";
-            case 401 -> "unauthorized";
-            case 403 -> "forbidden";
-            case 404 -> "not found";
-            case 405 -> "method not allowed";
-            case 408 -> "request timeout";
-            case 429 -> "too many requests";
-            default -> null;
-        };
-        
-        if (message != null)
-            throw new IllegalStateException(message);
+        String message =
+                switch (response.statusCode()) {
+                    case 400 -> "bad request";
+                    case 401 -> "unauthorized";
+                    case 403 -> "forbidden";
+                    case 404 -> "not found";
+                    case 405 -> "method not allowed";
+                    case 408 -> "request timeout";
+                    case 429 -> "too many requests";
+                    default -> null;
+                };
+
+        if (message != null) throw new IllegalStateException(message);
     }
 }

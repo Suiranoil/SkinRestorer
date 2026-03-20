@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-03-19
+### Added
+- Added versioning and migration system for config and skin data files
+- Added `join.skipRefreshProviders` config option to skip skin refresh on join for specific providers (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#joinskiprefreshproviders))
+- Added `request.userAgent` config option for customizing the HTTP user agent (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#requestuseragent))
+### Changed
+- Reorganized config structure into `join`, `request`, and `autoFetch` sections (automatically migrated from old format)
+### Fixed
+- Fixed bundled player info remove and update packets causing skin update issues (fixes [#96](https://github.com/Suiranoil/SkinRestorer/issues/96))
+
 ## [2.6.0] - 2026-02-25
 ### Added
 - Added custom skin providers system for configuring third-party skin sources (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providerscustom))

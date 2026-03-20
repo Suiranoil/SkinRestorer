@@ -10,12 +10,12 @@ public final class FabricPlatformHelper implements PlatformHelper {
     public String getPlatformName() {
         return "fabric";
     }
-    
+
     @Override
     public boolean isModLoaded(String modId) {
         return FabricLoader.getInstance().isModLoaded(modId);
     }
-    
+
     @Override
     public Path getConfigDirectory() {
         return FabricLoader.getInstance().getConfigDir();
