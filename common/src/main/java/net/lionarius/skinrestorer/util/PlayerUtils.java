@@ -44,10 +44,11 @@ public final class PlayerUtils {
         ServerLevel serverLevel = player.getLevel();
         PlayerList playerList = serverLevel.getServer().getPlayerList();
         ChunkMap chunkMap = serverLevel.getChunkSource().chunkMap;
-        
-        playerList.broadcastAll(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, player));
+
+        playerList.broadcastAll(
+                new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, player));
         playerList.broadcastAll(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, player));
-        
+
         var trackedEntity = ((ChunkMapAccessor) chunkMap).getEntityMap().get(player.getId());
         if (trackedEntity != null) {
             var seenBy = Set.copyOf(trackedEntity.getSeenBy());

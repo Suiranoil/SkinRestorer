@@ -19,8 +19,12 @@ public final class SkinValue implements GsonPostProcessable {
     private @Nullable Property value;
     private @Nullable Property originalValue;
 
-    public SkinValue(@NotNull String provider, @Nullable String argument, @Nullable SkinVariant variant,
-            @Nullable Property value, @Nullable Property originalValue) {
+    public SkinValue(
+            @NotNull String provider,
+            @Nullable String argument,
+            @Nullable SkinVariant variant,
+            @Nullable Property value,
+            @Nullable Property originalValue) {
         this.provider = provider;
         this.argument = argument;
         this.variant = variant;
@@ -62,7 +66,8 @@ public final class SkinValue implements GsonPostProcessable {
     }
 
     public @Nullable SkinVariant variant() {
-        return variant;}
+        return variant;
+    }
 
     public @Nullable Property value() {
         return value;
