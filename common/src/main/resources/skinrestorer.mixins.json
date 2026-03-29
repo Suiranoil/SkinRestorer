@@ -2,7 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "net.lionarius.skinrestorer.mixin",
-    "compatibilityLevel": "JAVA_17",
+    "compatibilityLevel": "JAVA_25",
     "priority": 1100,
     "refmap": "${mod_id}.refmap.json",
     "mixins": [

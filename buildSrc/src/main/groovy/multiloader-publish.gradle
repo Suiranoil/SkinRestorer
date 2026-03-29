@@ -3,7 +3,7 @@ plugins {
 }
 
 publishMods {
-    file = project.layout.buildDirectory.file("libs/${project.archivesBaseName}-${project.version}.jar").map { it.asFile }.getOrNull()
+    file = project.layout.buildDirectory.file("libs/${base.archivesName.get()}-${project.version}.jar").map { it.asFile }.getOrNull()
 
     modLoaders.add(project.name)
 
