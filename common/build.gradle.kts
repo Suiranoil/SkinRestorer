@@ -1,17 +1,10 @@
 plugins {
     id("multiloader-common")
-    id("fabric-loom")
+    id("net.fabricmc.fabric-loom")
 }
 
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
-
-    mappings(
-        loom.layered {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${property("parchment_minecraft")}:${property("parchment_version")}@zip")
-        },
-    )
 
     compileOnly("org.spongepowered:mixin:0.8.5")
 
