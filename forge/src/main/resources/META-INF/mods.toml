@@ -15,7 +15,7 @@ description = '''${description}'''
 [[dependencies.${mod_id}]]
 modId = "forge"
 mandatory = true
-versionRange = "[${forge_version},)"
+versionRange = "${forge_loader_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
