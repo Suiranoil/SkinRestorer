@@ -11,7 +11,6 @@ import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 import java.nio.file.Path;
 
 public final class Config implements GsonPostProcessable {
-
     public static final String CONFIG_FILENAME = "config.json";
 
     private static final JsonMigrator MIGRATOR =

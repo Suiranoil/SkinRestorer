@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SkinStorage {
-
     private final Map<UUID, SkinValue> skinMap = new ConcurrentHashMap<>();
     private final SkinIO skinIO;
 

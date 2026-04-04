@@ -17,7 +17,6 @@ import java.net.http.HttpRequest;
 import java.util.Optional;
 
 public final class ElyBySkinProvider extends UsernameSkinProvider {
-
     public static final String PROVIDER_NAME = "ely.by";
 
     private static final URI API_URI;

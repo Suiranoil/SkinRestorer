@@ -14,7 +14,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 public final class WebUtils {
-
     public static final String DEFAULT_USER_AGENT =
             String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
 

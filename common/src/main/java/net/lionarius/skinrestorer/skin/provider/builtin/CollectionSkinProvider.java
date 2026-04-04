@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> {
-
     public static final String PROVIDER_NAME = "collection";
 
     private final SkinSigner skinSigner;

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 
 public final class AutoFetchConfig implements GsonPostProcessable {
-
     private boolean enabled = true;
 
     private boolean overrideExisting = false;

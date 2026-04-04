@@ -33,7 +33,6 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public final class SkinCommand {
-
     private SkinCommand() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {

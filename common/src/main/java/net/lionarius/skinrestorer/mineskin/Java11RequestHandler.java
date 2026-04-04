@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 // https://github.com/InventivetalentDev/MineskinClient/blob/master/java11/src/main/java/org/mineskin/Java11RequestHandler.java
 // with some modifications to support proxy
 public class Java11RequestHandler extends RequestHandler {
-
     private final Gson gson;
     private final HttpClient httpClient;
 

@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 public class SkinIO {
-
     public static final String FILE_EXTENSION = ".json";
 
     private static final JsonMigrator MIGRATOR =

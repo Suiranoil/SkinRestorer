@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class FileUtils {
-
     private FileUtils() {}
 
     public static String readResource(String name) {

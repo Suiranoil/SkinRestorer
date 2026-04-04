@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractSkinProvider<K> implements SkinProvider {
-
     private LoadingCache<K, Optional<Property>> skinCache;
 
     protected abstract CacheConfig getCacheConfig();

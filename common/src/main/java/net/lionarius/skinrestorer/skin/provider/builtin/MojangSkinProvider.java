@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class MojangSkinProvider extends YggdrasilSkinProvider {
-
     public static final String PROVIDER_NAME = "mojang";
     public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
     private static final Environment ENVIRONMENT;

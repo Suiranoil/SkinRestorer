@@ -13,7 +13,6 @@ import java.net.http.HttpRequest;
 import java.util.UUID;
 
 public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
-
     protected abstract URI baseSessionServerUrl();
 
     protected abstract URI baseServicesServerUrl();

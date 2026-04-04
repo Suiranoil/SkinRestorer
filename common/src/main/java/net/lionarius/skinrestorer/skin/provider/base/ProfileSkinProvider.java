@@ -17,7 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public abstract class ProfileSkinProvider extends AbstractSkinProvider<UUID> {
-
     private LoadingCache<String, UUID> uuidCache;
 
     @Override

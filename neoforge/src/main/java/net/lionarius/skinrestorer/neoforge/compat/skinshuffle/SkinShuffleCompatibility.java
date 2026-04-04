@@ -5,7 +5,6 @@ import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
 
 public final class SkinShuffleCompatibility {
-
     private SkinShuffleCompatibility() {}
 
     public static void initialize() {

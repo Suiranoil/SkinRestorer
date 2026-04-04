@@ -26,7 +26,6 @@ import java.time.Duration;
 import java.util.Optional;
 
 public final class MineskinService implements SkinSigner {
-
     public static final MineskinService INSTANCE = new MineskinService();
     private static final String SKIN_NAME = "skinrestorer-skin";
 

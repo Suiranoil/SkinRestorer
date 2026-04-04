@@ -11,7 +11,6 @@ import net.lionarius.skinrestorer.compat.skinshuffle.SkinShuffleSkinRefreshV2Pay
 import net.lionarius.skinrestorer.fabric.SkinRestorerFabric;
 
 public final class SkinShuffleCompatibility {
-
     private SkinShuffleCompatibility() {}
 
     public static void initialize() {

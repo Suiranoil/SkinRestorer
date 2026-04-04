@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class JoinConfig implements GsonPostProcessable {
-
     private boolean refreshSkin = true;
 
     private List<String> skipRefreshProviders = new ArrayList<>();
