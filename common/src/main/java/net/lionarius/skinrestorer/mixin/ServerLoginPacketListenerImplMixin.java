@@ -67,14 +67,16 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 }
 
                 var autoFetchConfig = SkinRestorer.getConfig().join().autoFetchConfig();
-                var providerName = autoFetchConfig.provider();
+                var providersName = autoFetchConfig.providers();
 
                 var shouldFetch = (originalSkin == null && autoFetchConfig.enabled())
                         || (originalSkin != null
-                                && autoFetchConfig.overrideExisting()
-                                && !providerName.equals(MojangSkinProvider.PROVIDER_NAME));
+                                && autoFetchConfig.overrideExisting());
 
-                if (shouldFetch) {
+                if (!shouldFetch)
+                    return null;
+
+                for (String providerName : providersName) {
                     var provider = SkinRestorer.getProvider(providerName).orElse(null);
 
                     if (provider == null || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
@@ -82,10 +84,29 @@ public abstract class ServerLoginPacketListenerImplMixin {
                                 "Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
                                 profile.name(),
                                 providerName);
-                    } else {
-                        var context = new SkinProviderContext(providerName, profile.name(), null);
-                        skinrestorer$fetchSkin(profile, context);
+
+                        continue;
                     }
+
+                    var context = new SkinProviderContext(providerName, profile.name(), null);
+                    var result = skinrestorer$fetchSkin(profile, context);
+
+                    if (result.isError()) {
+                        SkinRestorer.LOGGER.warn(
+                                "Skin fetch failed for '{}' using provider '{}': {}",
+                                profile.name(),
+                                providerName,
+                                result.getErrorValue());
+
+                        continue;
+                    }
+
+                    SkinRestorer.LOGGER.info(
+                            "Skin fetch success for '{}' using provider '{}'",
+                            profile.name(),
+                            providerName);
+
+                    break;
                 }
 
                 return null;
@@ -96,7 +117,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
     }
 
     @Unique
-    private static void skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
+    private static Result<?, ?> skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
         SkinRestorer.LOGGER.debug("Fetching {}'s skin", profile.name());
 
         var result = SkinRestorer.getProvider(context.name())
@@ -109,8 +130,10 @@ public abstract class ServerLoginPacketListenerImplMixin {
                     context, result.getSuccessValue().orElse(null));
             SkinRestorer.getSkinStorage().setSkin(profile.id(), value);
         } else {
-            SkinRestorer.LOGGER.warn(
+            SkinRestorer.LOGGER.debug(
                     "Failed to fetch skin '{}:{}'", context.name(), context.argument(), result.getErrorValue());
         }
+
+        return result;
     }
 }
