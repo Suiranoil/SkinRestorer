@@ -6,7 +6,6 @@ import net.lionarius.skinrestorer.skin.provider.builtin.ElyBySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,8 +15,7 @@ public final class AutoFetchConfig implements GsonPostProcessable {
 
     private boolean overrideExisting = false;
 
-    private List<String> providers = new ArrayList<>(
-            List.of(MojangSkinProvider.PROVIDER_NAME, ElyBySkinProvider.PROVIDER_NAME));
+    private List<String> providers = List.of(MojangSkinProvider.PROVIDER_NAME);
 
     public boolean enabled() {
         return this.enabled;

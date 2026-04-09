@@ -111,9 +111,9 @@ public final class SkinRestorer {
     }
 
     private static void validateAutoFetchProvider() {
-        var providersName = SkinRestorer.config.join().autoFetchConfig().providers();
+        var providerNames = SkinRestorer.config.join().autoFetchConfig().providers();
 
-        for (String providerName : providersName) {
+        for (String providerName : providerNames) {
             var provider = SkinRestorer.providersRegistry.get(providerName);
 
             if (provider == null) {
