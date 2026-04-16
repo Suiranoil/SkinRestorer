@@ -103,11 +103,8 @@ public abstract class ServerLoginPacketListenerImplMixin {
         if (!skinrestorer$pendingSkin.isDone()) ci.cancel();
     }
 
-    /**
-     * @return true if fetch succeeded, false if there was an error
-     */
     @Unique
-    private static Boolean skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
+    private static boolean skinrestorer$fetchSkin(GameProfile profile, SkinProviderContext context) {
         SkinRestorer.LOGGER.debug("Fetching {}'s skin", profile.name());
 
         var result = SkinRestorer.getProvider(context.name())
