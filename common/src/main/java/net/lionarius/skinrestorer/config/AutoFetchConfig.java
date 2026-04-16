@@ -6,6 +6,7 @@ import net.lionarius.skinrestorer.skin.provider.builtin.ElyBySkinProvider;
 import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 
+import java.util.List;
 import java.util.Locale;
 
 public final class AutoFetchConfig implements GsonPostProcessable {
@@ -14,7 +15,7 @@ public final class AutoFetchConfig implements GsonPostProcessable {
 
     private boolean overrideExisting = false;
 
-    private String provider = MojangSkinProvider.PROVIDER_NAME;
+    private List<String> providers = List.of(MojangSkinProvider.PROVIDER_NAME);
 
     public boolean enabled() {
         return this.enabled;
@@ -24,26 +25,29 @@ public final class AutoFetchConfig implements GsonPostProcessable {
         return this.overrideExisting;
     }
 
-    public String provider() {
-        return this.provider;
+    public List<String> providers() {
+        return this.providers;
     }
 
     @Override
     public void gsonPostProcess() {
-        if (this.provider == null) {
-            SkinRestorer.LOGGER.warn("AutoFetch provider config is null, defaulting to MOJANG");
-            this.provider = MojangSkinProvider.PROVIDER_NAME;
-        } else if (this.provider.isBlank()) {
-            SkinRestorer.LOGGER.warn("AutoFetch provider config is empty, defaulting to MOJANG");
-            this.provider = MojangSkinProvider.PROVIDER_NAME;
-        } else {
-            this.provider = AutoFetchConfig.normalizeProvider(this.provider);
+        if (this.providers == null || this.providers.isEmpty()) {
+            SkinRestorer.LOGGER.warn("AutoFetch providers config is null/empty, defaulting to MOJANG");
+            this.providers = List.of(MojangSkinProvider.PROVIDER_NAME);
+            return;
+        }
 
-            if (this.provider.isEmpty()) {
-                SkinRestorer.LOGGER.warn(
-                        "AutoFetch provider config is empty after normalization, defaulting to MOJANG");
-                this.provider = MojangSkinProvider.PROVIDER_NAME;
-            }
+        var normalized = this.providers.stream()
+                .map(AutoFetchConfig::normalizeProvider)
+                .filter(p -> p != null && !p.isBlank())
+                .toList();
+
+        if (normalized.isEmpty()) {
+            SkinRestorer.LOGGER.warn(
+                    "AutoFetch providers config is empty after normalization, defaulting to MOJANG");
+            this.providers = List.of(MojangSkinProvider.PROVIDER_NAME);
+        } else {
+            this.providers = normalized;
         }
     }
 
