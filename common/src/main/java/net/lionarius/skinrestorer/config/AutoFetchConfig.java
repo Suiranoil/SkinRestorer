@@ -37,8 +37,9 @@ public final class AutoFetchConfig implements GsonPostProcessable {
         }
 
         var normalized = this.providers.stream()
-                .map(AutoFetchConfig::normalizeProvider)
                 .filter(p -> p != null && !p.isBlank())
+                .map(AutoFetchConfig::normalizeProvider)
+                .filter(p -> !p.isEmpty())
                 .toList();
 
         if (normalized.isEmpty()) {
