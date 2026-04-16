@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.config;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.ProvidersConfig;
@@ -13,8 +14,10 @@ import java.nio.file.Path;
 public final class Config implements GsonPostProcessable {
     public static final String CONFIG_FILENAME = "config.json";
 
-    private static final JsonMigrator MIGRATOR =
-            JsonMigrator.builder("config").migration(1, Config::migrateV1ToV2).build();
+    private static final JsonMigrator MIGRATOR = JsonMigrator.builder("config")
+            .migration(1, Config::migrateV1ToV2)
+            .migration(2, Config::migrateV2ToV3)
+            .build();
 
     private String language = "en_us";
 
@@ -102,6 +105,23 @@ public final class Config implements GsonPostProcessable {
         JsonUtils.moveProperty(json, requestObject, "proxy");
         JsonUtils.moveProperty(json, requestObject, "requestTimeout", "timeout");
         json.add("request", requestObject);
+
+        return json;
+    }
+
+    private static JsonObject migrateV2ToV3(JsonObject json) {
+        if (!json.has("join") || !json.get("join").isJsonObject()) return json;
+        var joinObject = json.getAsJsonObject("join");
+
+        if (!joinObject.has("autoFetch") || !joinObject.get("autoFetch").isJsonObject()) return json;
+        var autoFetchObject = joinObject.getAsJsonObject("autoFetch");
+
+        if (!autoFetchObject.has("provider")) return json;
+
+        var provider = autoFetchObject.remove("provider");
+        var providers = new JsonArray();
+        providers.add(provider);
+        autoFetchObject.add("providers", providers);
 
         return json;
     }
