@@ -68,11 +68,9 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 var providerNames = autoFetchConfig.providers();
 
                 var shouldFetch = (originalSkin == null && autoFetchConfig.enabled())
-                        || (originalSkin != null
-                                && autoFetchConfig.overrideExisting());
+                        || (originalSkin != null && autoFetchConfig.overrideExisting());
 
-                if (!shouldFetch)
-                    return null;
+                if (!shouldFetch) return null;
 
                 for (String providerName : providerNames) {
                     var provider = SkinRestorer.getProvider(providerName).orElse(null);

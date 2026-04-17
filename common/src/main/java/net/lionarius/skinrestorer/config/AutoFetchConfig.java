@@ -43,8 +43,7 @@ public final class AutoFetchConfig implements GsonPostProcessable {
                 .toList();
 
         if (normalized.isEmpty()) {
-            SkinRestorer.LOGGER.warn(
-                    "AutoFetch providers config is empty after normalization, defaulting to MOJANG");
+            SkinRestorer.LOGGER.warn("AutoFetch providers config is empty after normalization, defaulting to MOJANG");
             this.providers = List.of(MojangSkinProvider.PROVIDER_NAME);
         } else {
             this.providers = normalized;
