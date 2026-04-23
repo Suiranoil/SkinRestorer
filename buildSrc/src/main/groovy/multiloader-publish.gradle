@@ -1,0 +1,46 @@
+plugins {
+    id "me.modmuss50.mod-publish-plugin"
+}
+
+publishMods {
+    file = project.layout.buildDirectory.file("libs/${project.base.archivesName}-${project.version}.jar").map { it.asFile }.getOrNull()
+
+    modLoaders.add(project.name)
+
+    if (project.hasProperty('additional_modloaders') && !additional_modloaders.isEmpty())
+    {
+        def loaders = additional_modloaders.split(',')
+        for (loader in loaders)
+            modLoaders.add(loader)
+    }
+    
+    type = STABLE
+    version = project.version
+    displayName = "[${project.name.capitalize()}] ${mod_name} ${mod_version}"
+    changelog = rootProject.file('CHANGELOG_LATEST.md').text
+
+    curseforge {
+        projectId = curseforge_id
+
+        dryRun = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
+        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+
+        minecraftVersions.addAll(minecraft_version_list.split(','))
+        serverRequired = true
+
+        if (project.hasProperty('optional_dependencies') && !optional_dependencies.isEmpty())
+            optional(optional_dependencies.split(','))
+    }
+
+    modrinth {
+        projectId = modrinth_id
+
+        dryRun = providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+
+        minecraftVersions.addAll(minecraft_version_list.split(','))
+
+        if (project.hasProperty('optional_dependencies') && !optional_dependencies.isEmpty())
+            optional(optional_dependencies.split(','))
+    }
+}
