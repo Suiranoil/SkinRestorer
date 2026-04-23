@@ -64,17 +64,15 @@ repositories {
     }
 }
 
-def modName = mod_name
-
 sourcesJar {
     from(rootProject.file('LICENSE')) {
-        rename { "${it}_${modName}" }
+        rename { "${it}_${mod_name}" }
     }
 }
 
 jar {
     from(rootProject.file('LICENSE')) {
-        rename { "${it}_${modName}" }
+        rename { "${it}_${mod_name}" }
     }
 
     manifest {
