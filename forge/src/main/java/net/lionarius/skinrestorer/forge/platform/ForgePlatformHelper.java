@@ -14,7 +14,7 @@ public final class ForgePlatformHelper implements PlatformHelper {
 
     @Override
     public boolean isModLoaded(String modId) {
-        return ModList.isLoaded(modId);
+        return ModList.get().isLoaded(modId);
     }
 
     @Override

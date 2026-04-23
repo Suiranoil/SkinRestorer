@@ -18,6 +18,11 @@ neoForge {
         validateAccessTransformers = true
     }
 
+    parchment {
+        minecraftVersion = property("parchment_minecraft").toString()
+        mappingsVersion = property("parchment_version").toString()
+    }
+
     runs {
         configureEach {
             ideName = "NeoForge ${name.replaceFirstChar { it.uppercase() }} (${project.path})"

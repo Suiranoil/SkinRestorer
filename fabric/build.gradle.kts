@@ -1,5 +1,5 @@
 plugins {
-    id("net.fabricmc.fabric-loom")
+    id("fabric-loom")
     id("multiloader-loader")
     id("multiloader-publish")
 }
@@ -7,8 +7,15 @@ plugins {
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
 
-    implementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
-    compileOnly("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
+    mappings(
+        loom.layered {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-${property("parchment_minecraft")}:${property("parchment_version")}@zip")
+        },
+    )
+
+    modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+    modCompileOnly("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
     include(implementation("org.mineskin:java-client:${property("mineskin_client_version")}")!!)
 }

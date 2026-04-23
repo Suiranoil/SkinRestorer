@@ -20,11 +20,11 @@ public final class SkinShuffleCompatibility {
             return;
         }
 
-        PayloadTypeRegistry.clientboundPlay()
+        PayloadTypeRegistry.playS2C()
                 .register(SkinShuffleHandshakePayload.PACKET_ID, SkinShuffleHandshakePayload.PACKET_CODEC);
-        PayloadTypeRegistry.clientboundPlay()
+        PayloadTypeRegistry.playC2S()
                 .register(SkinShuffleSkinRefreshV1Payload.PACKET_ID, SkinShuffleSkinRefreshV1Payload.PACKET_CODEC);
-        PayloadTypeRegistry.clientboundPlay()
+        PayloadTypeRegistry.playC2S()
                 .register(SkinShuffleSkinRefreshV2Payload.PACKET_ID, SkinShuffleSkinRefreshV2Payload.PACKET_CODEC);
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
