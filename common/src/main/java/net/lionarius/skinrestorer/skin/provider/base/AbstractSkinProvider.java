@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractSkinProvider<K> implements SkinProvider {
+    protected static final long MAX_CACHE_SIZE = 1000;
+
     private LoadingCache<K, Optional<Property>> skinCache;
 
     protected abstract CacheConfig getCacheConfig();
@@ -33,6 +35,7 @@ public abstract class AbstractSkinProvider<K> implements SkinProvider {
 
         this.skinCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
+                .maximumSize(AbstractSkinProvider.MAX_CACHE_SIZE)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull Optional<Property> load(@NotNull K key) throws Exception {
