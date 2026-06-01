@@ -80,7 +80,7 @@ public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> 
 
     @Override
     protected Integer getCacheKey(String argument, SkinVariant variant) {
-        return Math.abs(argument.hashCode()) % this.collectionSkins.size();
+        return Math.floorMod(argument.hashCode(), this.collectionSkins.size());
     }
 
     @Override
