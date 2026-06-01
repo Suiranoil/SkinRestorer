@@ -33,6 +33,19 @@ public final class WebUtils {
         HTTP_CLIENT = WebUtils.buildClient();
     }
 
+    private static Duration getTimeoutDuration() {
+        try {
+            var timeout = Duration.of(SkinRestorer.getConfig().request().timeout(), ChronoUnit.SECONDS);
+            if (timeout.isZero() || timeout.isNegative())
+                throw new IllegalArgumentException("timeout must be positive");
+
+            return timeout;
+        } catch (IllegalArgumentException e) {
+            SkinRestorer.LOGGER.error("Failed to set request timeout", e);
+            return Duration.of(10, ChronoUnit.SECONDS);
+        }
+    }
+
     private static HttpClient buildClient() {
         var builder = HttpClient.newBuilder();
 
@@ -40,13 +53,7 @@ public final class WebUtils {
         proxy.ifPresent(value ->
                 builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(value.host(), value.port()))));
 
-        try {
-            builder.connectTimeout(
-                    Duration.of(SkinRestorer.getConfig().request().timeout(), ChronoUnit.SECONDS));
-        } catch (IllegalArgumentException e) {
-            SkinRestorer.LOGGER.error("Failed to set request timeout", e);
-            builder.connectTimeout(Duration.of(10, ChronoUnit.SECONDS));
-        }
+        builder.connectTimeout(WebUtils.getTimeoutDuration());
 
         return builder.build();
     }
@@ -60,6 +67,7 @@ public final class WebUtils {
         try {
             var modifiedRequest = HttpRequest.newBuilder(request, (name, value) -> true)
                     .header("User-Agent", WebUtils.getUserAgent())
+                    .timeout(WebUtils.getTimeoutDuration())
                     .build();
 
             final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, bodyHandler);
