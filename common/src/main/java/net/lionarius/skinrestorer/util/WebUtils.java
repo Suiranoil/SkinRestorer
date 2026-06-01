@@ -18,7 +18,7 @@ public final class WebUtils {
             String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
 
     private static String USER_AGENT = WebUtils.DEFAULT_USER_AGENT;
-    private static HttpClient HTTP_CLIENT = null;
+    private static volatile HttpClient HTTP_CLIENT = null;
 
     private WebUtils() {}
 
@@ -30,7 +30,29 @@ public final class WebUtils {
         var configUserAgent = SkinRestorer.getConfig().request().userAgent();
         WebUtils.USER_AGENT = configUserAgent.isEmpty() ? WebUtils.DEFAULT_USER_AGENT : configUserAgent;
 
-        HTTP_CLIENT = WebUtils.buildClient();
+        var oldClient = WebUtils.HTTP_CLIENT;
+        WebUtils.HTTP_CLIENT = WebUtils.buildClient();
+        WebUtils.closeClient(oldClient);
+    }
+
+    private static void closeClient(HttpClient client) {
+        // HttpClient is AutoCloseable on Java 21+ (it owns a selector + thread pool); closing the
+        // replaced instance avoids leaking one per /skin config reload. On Java 17 this instanceof is
+        // simply false and the method is a no-op. close() blocks until in-flight requests finish, so
+        // run it off the reload thread.
+        if (!(client instanceof AutoCloseable closeable)) return;
+
+        var thread = new Thread(
+                () -> {
+                    try {
+                        closeable.close();
+                    } catch (Exception e) {
+                        SkinRestorer.LOGGER.debug("Failed to close previous HTTP client", e);
+                    }
+                },
+                "SkinRestorer-HttpClient-Close");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private static Duration getTimeoutDuration() {
