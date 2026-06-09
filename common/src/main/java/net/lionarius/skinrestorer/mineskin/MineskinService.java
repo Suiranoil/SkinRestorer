@@ -8,9 +8,12 @@ import net.lionarius.skinrestorer.util.JsonUtils;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.WebUtils;
 import org.jetbrains.annotations.Nullable;
+import org.mineskin.JobCheckOptions;
 import org.mineskin.MineSkinClient;
 import org.mineskin.data.Variant;
 import org.mineskin.data.Visibility;
+import org.mineskin.options.GenerateQueueOptions;
+import org.mineskin.options.GetQueueOptions;
 import org.mineskin.request.GenerateRequest;
 import org.mineskin.response.QueueResponse;
 
@@ -24,39 +27,71 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 public final class MineskinService implements SkinSigner {
     public static final MineskinService INSTANCE = new MineskinService();
     private static final String SKIN_NAME = "skinrestorer-skin";
 
-    private MineSkinClient mineskinClient;
-    private boolean proxyUrlUpload;
+    // by default MineSkinClient.builder().build() creates three new single-thread executors per
+    // client, which would leak on every config reload; share them across rebuilds instead
+    private static final ScheduledExecutorService SCHEDULER =
+            Executors.newSingleThreadScheduledExecutor(daemonThreadFactory("SkinRestorer-MineSkin-Scheduler"));
+    private static final Executor GET_EXECUTOR =
+            Executors.newSingleThreadExecutor(daemonThreadFactory("SkinRestorer-MineSkin-Get"));
+    private static final Executor GENERATE_EXECUTOR =
+            Executors.newSingleThreadExecutor(daemonThreadFactory("SkinRestorer-MineSkin-Generate"));
+
+    private volatile MineSkinClient mineskinClient;
+    private volatile boolean proxyUrlUpload;
+    private volatile Java11RequestHandler requestHandler;
 
     private MineskinService() {}
+
+    private static ThreadFactory daemonThreadFactory(String name) {
+        return runnable -> {
+            var thread = new Thread(runnable, name);
+            thread.setDaemon(true);
+            return thread;
+        };
+    }
 
     public void reload() {
         var config = SkinRestorer.getConfig();
         var mineskinConfig = config.providers().mineskin();
         var configApiKey = mineskinConfig.apiKey();
 
+        var proxy = config.request()
+                .proxy()
+                .map(value -> new InetSocketAddress(value.host(), value.port()))
+                .orElse(null);
+
+        var oldRequestHandler = this.requestHandler;
+
         this.proxyUrlUpload = mineskinConfig.proxyUrlUpload();
         this.mineskinClient = MineSkinClient.builder()
                 .userAgent(WebUtils.getUserAgent())
                 .gson(JsonUtils.GSON)
                 .timeout((int) Duration.ofSeconds(config.request().timeout()).toMillis())
-                .requestHandler((baseUrl, userAgent, apiKey, timeout, gson) -> new Java11RequestHandler(
-                        baseUrl,
-                        userAgent,
-                        apiKey,
-                        timeout,
-                        gson,
-                        SkinRestorer.getConfig()
-                                .request()
-                                .proxy()
-                                .map(proxy -> new InetSocketAddress(proxy.host(), proxy.port()))
-                                .orElse(null)))
+                .getExecutor(MineskinService.GET_EXECUTOR)
+                .generateExecutor(MineskinService.GENERATE_EXECUTOR)
+                .generateQueueOptions(GenerateQueueOptions.create(MineskinService.SCHEDULER))
+                .getQueueOptions(GetQueueOptions.create(MineskinService.SCHEDULER))
+                .jobCheckOptions(JobCheckOptions.create(MineskinService.SCHEDULER))
+                .requestHandler((baseUrl, userAgent, apiKey, timeout, gson) -> {
+                    // build() invokes this constructor exactly once, so the new client's handler
+                    // is captured here; only the replaced handler's HTTP client gets closed below
+                    var handler = new Java11RequestHandler(baseUrl, userAgent, apiKey, timeout, gson, proxy);
+                    this.requestHandler = handler;
+                    return handler;
+                })
                 .apiKey(configApiKey.isEmpty() ? null : configApiKey)
                 .build();
+
+        if (oldRequestHandler != null) oldRequestHandler.close();
     }
 
     @Override

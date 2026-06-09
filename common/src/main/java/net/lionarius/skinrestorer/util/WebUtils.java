@@ -37,7 +37,7 @@ public final class WebUtils {
         WebUtils.closeClient(oldClient);
     }
 
-    private static void closeClient(HttpClient client) {
+    public static void closeClient(HttpClient client) {
         // HttpClient is AutoCloseable on Java 21+ (it owns a selector + thread pool); closing the
         // replaced instance avoids leaking one per /skin config reload. On Java 17 this instanceof is
         // simply false and the method is a no-op. close() blocks until in-flight requests finish, so
