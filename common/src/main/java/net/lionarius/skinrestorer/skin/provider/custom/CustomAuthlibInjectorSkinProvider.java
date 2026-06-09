@@ -26,7 +26,8 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
     private final SkinResigner skinResigner;
 
     private CacheConfig cacheConfig;
-    private URI resolvedApiRoot;
+    private volatile URI baseUri;
+    private volatile URI resolvedApiRoot;
 
     public CustomAuthlibInjectorSkinProvider(String providerName, SkinSigner skinSigner) {
         this.providerName = providerName;
@@ -47,21 +48,40 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
 
         if (config == null) {
             SkinRestorer.LOGGER.warn("Could not find config for custom provider '{}'", this.providerName);
+            this.baseUri = null;
             this.resolvedApiRoot = null;
             this.cacheConfig = null;
             return;
         }
 
         this.skinResigner.reload(config.useProviderSignature());
-        this.resolveApiRoot(config.baseUrl());
+        this.baseUri = WebUtils.parseUri(WebUtils.ensureTrailingSlash(config.baseUrl()));
+        this.resolvedApiRoot = null;
         this.cacheConfig = config.cache();
         this.createSkinCache();
     }
 
-    private void resolveApiRoot(String baseUrl) {
-        var baseUri = WebUtils.parseUri(WebUtils.ensureTrailingSlash(baseUrl));
-        if (baseUri == null) return;
+    // resolving the API root requires a network round trip, so it happens lazily on the first
+    // fetch (on the fetch executor) instead of in reload(), which runs on the server thread
+    private URI apiRoot() {
+        var apiRoot = this.resolvedApiRoot;
+        if (apiRoot != null) return apiRoot;
 
+        synchronized (this) {
+            if (this.resolvedApiRoot == null) {
+                var baseUri = this.baseUri;
+                if (baseUri == null)
+                    throw new IllegalStateException("Custom provider '" + this.providerName + "' has invalid baseUrl");
+
+                this.resolvedApiRoot = this.resolveApiRoot(baseUri);
+            }
+
+            return this.resolvedApiRoot;
+        }
+    }
+
+    private URI resolveApiRoot(URI baseUri) {
+        var apiRoot = baseUri;
         try {
             var request = HttpRequest.newBuilder()
                     .uri(baseUri)
@@ -74,18 +94,16 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
             var locationHeader = response.headers().firstValue("x-authlib-injector-api-location");
             if (locationHeader.isPresent()) {
                 var redirected = WebUtils.parseUri(WebUtils.ensureTrailingSlash(locationHeader.get()));
-                this.resolvedApiRoot = redirected != null ? redirected : baseUri;
-            } else {
-                this.resolvedApiRoot = baseUri;
+                if (redirected != null) apiRoot = redirected;
             }
 
-            SkinRestorer.LOGGER.info(
-                    "Resolved authlib-injector API root for '{}': {}", this.providerName, this.resolvedApiRoot);
+            SkinRestorer.LOGGER.info("Resolved authlib-injector API root for '{}': {}", this.providerName, apiRoot);
         } catch (Exception e) {
             SkinRestorer.LOGGER.warn(
                     "Failed to resolve authlib-injector API root for '{}', using baseUrl as-is", this.providerName, e);
-            this.resolvedApiRoot = baseUri;
         }
+
+        return apiRoot;
     }
 
     @Override
@@ -96,14 +114,14 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
     @Override
     protected void validate(String argument, SkinVariant variant) throws Exception {
         super.validate(argument, variant);
-        if (this.resolvedApiRoot == null)
-            throw new IllegalStateException("Custom provider '" + this.providerName + "' has no resolved API root");
+        if (this.baseUri == null)
+            throw new IllegalStateException("Custom provider '" + this.providerName + "' has invalid baseUrl");
     }
 
     @Override
     protected UUID lookupUuid(String username) throws IOException {
         var request = HttpRequest.newBuilder()
-                .uri(this.resolvedApiRoot.resolve("api/profiles/minecraft"))
+                .uri(this.apiRoot().resolve("api/profiles/minecraft"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(new String[] {username})))
                 .build();
@@ -121,7 +139,7 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
     @Override
     protected GameProfile fetchProfileWithProperties(UUID uuid) throws IOException {
         var request = HttpRequest.newBuilder()
-                .uri(this.resolvedApiRoot
+                .uri(this.apiRoot()
                         .resolve("sessionserver/session/minecraft/profile/")
                         .resolve(UndashedUuid.toString(uuid) + "?unsigned=false"))
                 .GET()
