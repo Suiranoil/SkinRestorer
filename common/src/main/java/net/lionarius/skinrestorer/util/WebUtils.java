@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
@@ -115,6 +117,12 @@ public final class WebUtils {
 
     public static String ensureTrailingSlash(String url) {
         return url.endsWith("/") ? url : url + "/";
+    }
+
+    // username validation allows characters like '/', '?', '#' and '"', so anything
+    // player-provided must be encoded before being embedded into a URI
+    public static String urlEncode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     public static void throwOnClientErrors(HttpResponse<?> response) {

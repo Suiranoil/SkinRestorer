@@ -54,7 +54,7 @@ public final class ElyBySkinProvider extends UsernameSkinProvider {
 
     private static GameProfile getElyByProfile(String username) throws IOException {
         var request = HttpRequest.newBuilder()
-                .uri(API_URI.resolve("/textures/signed/").resolve(username + "?unsigned=false"))
+                .uri(API_URI.resolve("/textures/signed/").resolve(WebUtils.urlEncode(username) + "?unsigned=false"))
                 .GET()
                 .build();
 

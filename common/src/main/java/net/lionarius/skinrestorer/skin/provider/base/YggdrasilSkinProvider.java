@@ -44,7 +44,7 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
         var request = HttpRequest.newBuilder()
                 .uri(this.baseServicesServerUrl()
                         .resolve("/minecraft/profile/lookup/name/")
-                        .resolve(name))
+                        .resolve(WebUtils.urlEncode(name)))
                 .GET()
                 .build();
 

@@ -105,7 +105,7 @@ public final class CustomAuthlibInjectorSkinProvider extends ProfileSkinProvider
         var request = HttpRequest.newBuilder()
                 .uri(this.resolvedApiRoot.resolve("api/profiles/minecraft"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("[\"" + username + "\"]"))
+                .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(new String[] {username})))
                 .build();
 
         var response = WebUtils.executeRequest(request);
