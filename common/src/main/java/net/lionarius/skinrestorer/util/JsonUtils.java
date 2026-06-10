@@ -16,7 +16,6 @@ import java.util.Base64;
 import java.util.UUID;
 
 public final class JsonUtils {
-
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapterFactory(new PostProcessingEnabler())
             .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())

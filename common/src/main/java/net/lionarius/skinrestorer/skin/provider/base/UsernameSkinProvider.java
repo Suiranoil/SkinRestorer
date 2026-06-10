@@ -7,7 +7,6 @@ import net.minecraft.util.StringUtil;
 import java.util.Locale;
 
 public abstract class UsernameSkinProvider extends AbstractSkinProvider<String> {
-
     @Override
     public SkinProviderParameterType getParameterType() {
         return SkinProviderParameterType.USERNAME;

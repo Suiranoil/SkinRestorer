@@ -1,8 +1,8 @@
 {
-    "skinrestorer.command.skin.affected_players": "त्वचा परिवर्तन %s के लिए लागू किए गए",
-    "skinrestorer.command.skin.no_changes": "कोई त्वचा परिवर्तन नहीं",
-    "skinrestorer.command.skin.failed": "त्वचा बदलने में विफल: %s",
-    "skinrestorer.command.skin.ok": "त्वचा बदल दी गई",
-    "skinrestorer.command.skin.loading": "त्वचा लोड हो रही है...",
+    "skinrestorer.command.skin.affected_players": "स्किन परिवर्तन %s के लिए लागू किए गए",
+    "skinrestorer.command.skin.no_changes": "कोई स्किन परिवर्तन नहीं",
+    "skinrestorer.command.skin.failed": "स्किन बदलने में विफल: %s",
+    "skinrestorer.command.skin.ok": "स्किन बदल दिया गया",
+    "skinrestorer.command.skin.loading": "स्किन लोड हो रहा है...",
     "skinrestorer.command.skin.config_reloaded": "कॉन्फ़िगरेशन फिर से लोड किया गया है"
 }

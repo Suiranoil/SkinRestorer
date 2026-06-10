@@ -7,6 +7,7 @@ import net.lionarius.skinrestorer.mixin.PlayerAccessor;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
+import net.lionarius.skinrestorer.util.SkinExecutor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
@@ -58,8 +59,10 @@ public final class SkinService {
 
     public static CompletableFuture<Result<Collection<ServerPlayer>, String>> setSkinAsync(
             MinecraftServer server, Collection<ServerPlayer> targets, SkinProviderContext context, boolean save) {
-        return CompletableFuture.supplyAsync(() -> SkinRestorer.getProvider(context.name())
-                        .map(provider -> provider.fetchSkin(context.argument(), context.variant())))
+        return CompletableFuture.supplyAsync(
+                        () -> SkinRestorer.getProvider(context.name())
+                                .map(provider -> provider.fetchSkin(context.argument(), context.variant())),
+                        SkinExecutor.FETCH_EXECUTOR)
                 .thenApplyAsync(
                         result -> {
                             if (result.isEmpty())

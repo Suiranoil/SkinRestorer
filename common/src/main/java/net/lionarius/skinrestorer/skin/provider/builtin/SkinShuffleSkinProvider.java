@@ -9,7 +9,6 @@ import net.lionarius.skinrestorer.util.Result;
 import java.util.Optional;
 
 public final class SkinShuffleSkinProvider implements SkinProvider {
-
     public static final String PROVIDER_NAME = "skinshuffle";
 
     @Override

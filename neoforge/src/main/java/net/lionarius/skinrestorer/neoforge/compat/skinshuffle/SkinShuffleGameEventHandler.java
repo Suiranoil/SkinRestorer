@@ -6,7 +6,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 public final class SkinShuffleGameEventHandler {
-
     private SkinShuffleGameEventHandler() {}
 
     @SubscribeEvent
