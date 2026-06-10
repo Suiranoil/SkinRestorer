@@ -8,7 +8,7 @@ import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.SkinExecutor;
-import net.minecraft.network.DisconnectionDetails;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -120,7 +120,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
     }
 
     @Inject(method = "onDisconnect", at = @At("HEAD"))
-    private void onDisconnect(DisconnectionDetails details, CallbackInfo ci) {
+    private void onDisconnect(Component reason, CallbackInfo ci) {
         var pendingSkin = this.skinrestorer$pendingSkin;
         var profile = this.authenticatedProfile;
         if (pendingSkin == null || profile == null) return;
