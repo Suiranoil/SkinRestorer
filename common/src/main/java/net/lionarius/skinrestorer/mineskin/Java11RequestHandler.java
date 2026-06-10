@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.mineskin;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.lionarius.skinrestorer.util.WebUtils;
 import org.mineskin.MineSkinClientImpl;
 import org.mineskin.data.CodeAndMessage;
 import org.mineskin.exception.MineSkinRequestException;
@@ -27,9 +28,8 @@ import java.util.stream.Collectors;
 
 // copy-pasted from
 // https://github.com/InventivetalentDev/MineskinClient/blob/master/java11/src/main/java/org/mineskin/Java11RequestHandler.java
-// with some modifications to support proxy
+// with some modifications to support proxy and closing the underlying HTTP client
 public class Java11RequestHandler extends RequestHandler {
-
     private final Gson gson;
     private final HttpClient httpClient;
 
@@ -49,6 +49,10 @@ public class Java11RequestHandler extends RequestHandler {
         }
 
         this.httpClient = clientBuilder.build();
+    }
+
+    public void close() {
+        WebUtils.closeClient(this.httpClient);
     }
 
     private <T, R extends MineSkinResponse<T>> R wrapResponse(
@@ -97,7 +101,8 @@ public class Java11RequestHandler extends RequestHandler {
         try {
             response = this.httpClient.send(request, BodyHandlers.ofString());
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
         }
         return wrapResponse(response, clazz, constructor);
     }
@@ -126,7 +131,8 @@ public class Java11RequestHandler extends RequestHandler {
         try {
             response = this.httpClient.send(request, BodyHandlers.ofString());
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
         }
         return wrapResponse(response, clazz, constructor);
     }
@@ -197,7 +203,8 @@ public class Java11RequestHandler extends RequestHandler {
         try {
             response = this.httpClient.send(request, BodyHandlers.ofString());
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
         }
         return wrapResponse(response, clazz, constructor);
     }
