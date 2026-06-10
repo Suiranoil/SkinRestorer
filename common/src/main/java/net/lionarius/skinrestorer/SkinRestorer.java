@@ -111,18 +111,21 @@ public final class SkinRestorer {
     }
 
     private static void validateAutoFetchProvider() {
-        var providerName = SkinRestorer.config.join().autoFetchConfig().provider();
-        var provider = SkinRestorer.providersRegistry.get(providerName);
+        var providerNames = SkinRestorer.config.join().autoFetchConfig().providers();
 
-        if (provider == null) {
-            SkinRestorer.LOGGER.warn(
-                    "AutoFetch provider '{}' is not registered. Auto fetch skin fetching will be skipped.",
-                    providerName);
-        } else if (provider.getParameterType() != SkinProviderParameterType.USERNAME) {
-            SkinRestorer.LOGGER.warn(
-                    "AutoFetch provider '{}' has parameter type {}, but only USERNAME providers are supported. Auto fetch skin fetching will be skipped.",
-                    providerName,
-                    provider.getParameterType());
+        for (String providerName : providerNames) {
+            var provider = SkinRestorer.providersRegistry.get(providerName);
+
+            if (provider == null) {
+                SkinRestorer.LOGGER.warn(
+                        "AutoFetch provider '{}' is not registered. Auto fetch skin fetching will be skipped.",
+                        providerName);
+            } else if (provider.getParameterType() != SkinProviderParameterType.USERNAME) {
+                SkinRestorer.LOGGER.warn(
+                        "AutoFetch provider '{}' has parameter type {}, but only USERNAME providers are supported. Auto fetch skin fetching will be skipped.",
+                        providerName,
+                        provider.getParameterType());
+            }
         }
     }
 

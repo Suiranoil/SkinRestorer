@@ -5,7 +5,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
 public final class SkinShuffleGameEventHandler {
-
     private SkinShuffleGameEventHandler() {}
 
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {

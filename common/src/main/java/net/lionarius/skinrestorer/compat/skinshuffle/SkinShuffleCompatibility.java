@@ -13,7 +13,6 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Collections;
 
 public class SkinShuffleCompatibility {
-
     public static final String MOD_ID = "skinshuffle";
 
     private static final boolean SHOULD_APPLY = !Services.PLATFORM.isModLoaded(SkinShuffleCompatibility.MOD_ID);

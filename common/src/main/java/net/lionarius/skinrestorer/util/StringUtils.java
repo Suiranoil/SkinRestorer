@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 public final class StringUtils {
-
     private StringUtils() {}
 
     public static String readString(BufferedReader reader) throws IOException {
