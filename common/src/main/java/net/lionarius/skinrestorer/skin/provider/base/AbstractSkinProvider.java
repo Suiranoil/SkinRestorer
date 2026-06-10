@@ -12,6 +12,7 @@ import net.lionarius.skinrestorer.util.Result;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractSkinProvider<K> implements SkinProvider {
@@ -50,8 +51,8 @@ public abstract class AbstractSkinProvider<K> implements SkinProvider {
             this.validate(argument, variant);
             K key = this.getCacheKey(argument, variant);
             return Result.success(this.skinCache.get(key));
-        } catch (UncheckedExecutionException e) {
-            return Result.error((Exception) e.getCause());
+        } catch (ExecutionException | UncheckedExecutionException e) {
+            return Result.error(e.getCause() instanceof Exception cause ? cause : e);
         } catch (Exception e) {
             return Result.error(e);
         }
