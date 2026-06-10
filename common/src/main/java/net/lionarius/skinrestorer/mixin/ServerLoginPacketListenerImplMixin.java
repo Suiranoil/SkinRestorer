@@ -8,6 +8,7 @@ import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.lionarius.skinrestorer.util.Result;
 import net.lionarius.skinrestorer.util.SkinExecutor;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -104,6 +105,20 @@ public abstract class ServerLoginPacketListenerImplMixin {
         }
 
         if (!skinrestorer$pendingSkin.isDone()) ci.cancel();
+    }
+
+    @Inject(method = "onDisconnect", at = @At("HEAD"))
+    private void onDisconnect(DisconnectionDetails details, CallbackInfo ci) {
+        var pendingSkin = this.skinrestorer$pendingSkin;
+        var profile = this.authenticatedProfile;
+        if (pendingSkin == null || profile == null) return;
+
+        // the player never reached the PlayerList, so the disconnect cleanup there won't run;
+        // evict after the pending fetch completes so its setSkin can't resurrect the entry
+        pendingSkin.whenComplete((ignored, ignoredError) -> {
+            var storage = SkinRestorer.getSkinStorage();
+            if (storage != null) storage.removeSkin(profile.id());
+        });
     }
 
     @Unique
