@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class Result<S, E> {
-
     private final S successValue;
     private final E errorValue;
 

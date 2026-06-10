@@ -11,7 +11,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(SkinRestorer.MOD_ID)
 @Mod.EventBusSubscriber(modid = SkinRestorer.MOD_ID)
 public final class SkinRestorerForge {
-
     public SkinRestorerForge() {
         SkinRestorer.onInitialize();
 

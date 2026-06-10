@@ -13,7 +13,6 @@ import java.net.http.HttpRequest;
 import java.util.UUID;
 
 public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
-
     protected abstract URI baseSessionServerUrl();
 
     protected abstract URI baseServicesServerUrl();
@@ -45,7 +44,7 @@ public abstract class YggdrasilSkinProvider extends ProfileSkinProvider {
         var request = HttpRequest.newBuilder()
                 .uri(this.baseServicesServerUrl()
                         .resolve("/minecraft/profile/lookup/name/")
-                        .resolve(name))
+                        .resolve(WebUtils.urlEncode(name)))
                 .GET()
                 .build();
 
