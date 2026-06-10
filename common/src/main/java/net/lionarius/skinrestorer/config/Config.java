@@ -2,6 +2,7 @@ package net.lionarius.skinrestorer.config;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.ProvidersConfig;
 import net.lionarius.skinrestorer.util.FileUtils;
@@ -47,14 +48,17 @@ public final class Config implements GsonPostProcessable {
         var configFile = path.resolve(Config.CONFIG_FILENAME);
 
         Config config = null;
-        try {
-            var json = FileUtils.readFile(configFile);
-            var jsonObject = JsonUtils.parseJson(json);
+        var json = FileUtils.readFile(configFile);
+        if (json != null) {
+            try {
+                var jsonObject = JsonUtils.parseJson(json);
+                if (jsonObject == null) throw new JsonSyntaxException("config is not a JSON object");
 
-            var migrated = MIGRATOR.migrateToLatest(jsonObject);
-            config = JsonUtils.fromJson(migrated, Config.class);
-        } catch (Exception e) {
-            SkinRestorer.LOGGER.warn("Could not load config", e);
+                var migrated = MIGRATOR.migrateToLatest(jsonObject);
+                config = JsonUtils.fromJson(migrated, Config.class);
+            } catch (Exception e) {
+                SkinRestorer.LOGGER.warn("Could not load config", e);
+            }
         }
 
         if (config == null) config = new Config();

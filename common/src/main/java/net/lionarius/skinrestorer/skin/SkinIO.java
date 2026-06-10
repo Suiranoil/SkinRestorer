@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.skin;
 
+import com.google.gson.JsonSyntaxException;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonMigrator;
@@ -31,9 +32,12 @@ public class SkinIO {
     }
 
     private static SkinValue loadSkin(Path file) {
+        var json = FileUtils.readFile(file);
+        if (json == null) return SkinValue.EMPTY;
+
         try {
-            var json = FileUtils.readFile(file);
             var jsonObject = JsonUtils.parseJson(json);
+            if (jsonObject == null) throw new JsonSyntaxException("skin data is not a JSON object");
 
             var migrated = MIGRATOR.migrateToLatest(jsonObject);
             return JsonUtils.fromJson(migrated, SkinValue.class);
