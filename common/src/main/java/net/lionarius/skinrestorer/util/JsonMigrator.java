@@ -12,7 +12,6 @@ import java.util.function.UnaryOperator;
  * Versioning starts from 1. JSON without a version key is assumed to be version 1.
  */
 public final class JsonMigrator {
-
     public static final String VERSION_KEY = "version";
 
     private final String name;
