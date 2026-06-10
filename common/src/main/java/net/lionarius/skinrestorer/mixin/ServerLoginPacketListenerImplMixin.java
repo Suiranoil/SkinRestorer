@@ -39,69 +39,81 @@ public abstract class ServerLoginPacketListenerImplMixin {
             cancellable = true)
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
-            skinrestorer$pendingSkin = CompletableFuture.supplyAsync(
-                    () -> {
-                        final var profile = authenticatedProfile;
+            skinrestorer$pendingSkin = CompletableFuture.<Void>supplyAsync(
+                            () -> {
+                                final var profile = authenticatedProfile;
 
-                        assert profile != null;
-                        var originalSkin = PlayerUtils.getPlayerSkin(profile);
+                                assert profile != null;
+                                var originalSkin = PlayerUtils.getPlayerSkin(profile);
 
-                        if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.id())) {
-                            if (originalSkin != null) { // update to the latest official skin
-                                var value = SkinRestorer.getSkinStorage().getSkin(profile.id());
-                                SkinRestorer.getSkinStorage()
-                                        .setSkin(profile.id(), value.setOriginalValue(originalSkin));
-                            }
+                                if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.id())) {
+                                    if (originalSkin != null) { // update to the latest official skin
+                                        var value =
+                                                SkinRestorer.getSkinStorage().getSkin(profile.id());
+                                        SkinRestorer.getSkinStorage()
+                                                .setSkin(profile.id(), value.setOriginalValue(originalSkin));
+                                    }
 
-                            if (SkinRestorer.getConfig().join().refreshSkin()) {
-                                var currentSkin = SkinRestorer.getSkinStorage().getSkin(profile.id());
+                                    if (SkinRestorer.getConfig().join().refreshSkin()) {
+                                        var currentSkin =
+                                                SkinRestorer.getSkinStorage().getSkin(profile.id());
 
-                                if (!SkinRestorer.getConfig()
-                                        .join()
-                                        .skipRefreshProviders()
-                                        .contains(currentSkin.provider())) {
-                                    var context = currentSkin.toProviderContext();
-                                    skinrestorer$fetchSkin(profile, context);
+                                        if (!SkinRestorer.getConfig()
+                                                .join()
+                                                .skipRefreshProviders()
+                                                .contains(currentSkin.provider())) {
+                                            var context = currentSkin.toProviderContext();
+                                            skinrestorer$fetchSkin(profile, context);
+                                        }
+                                    }
+
+                                    return null;
                                 }
-                            }
 
-                            return null;
-                        }
+                                var autoFetchConfig =
+                                        SkinRestorer.getConfig().join().autoFetchConfig();
+                                var providerNames = autoFetchConfig.providers();
 
-                        var autoFetchConfig = SkinRestorer.getConfig().join().autoFetchConfig();
-                        var providerNames = autoFetchConfig.providers();
+                                var shouldFetch = (originalSkin == null && autoFetchConfig.enabled())
+                                        || (originalSkin != null && autoFetchConfig.overrideExisting());
 
-                        var shouldFetch = (originalSkin == null && autoFetchConfig.enabled())
-                                || (originalSkin != null && autoFetchConfig.overrideExisting());
+                                if (!shouldFetch) return null;
 
-                        if (!shouldFetch) return null;
+                                for (String providerName : providerNames) {
+                                    var provider = SkinRestorer.getProvider(providerName)
+                                            .orElse(null);
 
-                        for (String providerName : providerNames) {
-                            var provider =
-                                    SkinRestorer.getProvider(providerName).orElse(null);
+                                    if (provider == null
+                                            || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
+                                        SkinRestorer.LOGGER.warn(
+                                                "Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
+                                                profile.name(),
+                                                providerName);
 
-                            if (provider == null || provider.getParameterType() != SkinProviderParameterType.USERNAME) {
-                                SkinRestorer.LOGGER.warn(
-                                        "Skipping first join skin fetch for '{}': provider '{}' does not accept username parameter",
-                                        profile.name(),
-                                        providerName);
+                                        continue;
+                                    }
 
-                                continue;
-                            }
+                                    var context = new SkinProviderContext(providerName, profile.name(), null);
+                                    var skinFetched = skinrestorer$fetchSkin(profile, context);
 
-                            var context = new SkinProviderContext(providerName, profile.name(), null);
-                            var skinFetched = skinrestorer$fetchSkin(profile, context);
+                                    if (!skinFetched) {
+                                        continue;
+                                    }
 
-                            if (!skinFetched) {
-                                continue;
-                            }
+                                    break;
+                                }
 
-                            break;
-                        }
-
+                                return null;
+                            },
+                            SkinExecutor.FETCH_EXECUTOR)
+                    .exceptionally(exception -> {
+                        var profile = this.authenticatedProfile;
+                        SkinRestorer.LOGGER.error(
+                                "Unexpected error while preparing {}'s skin during login",
+                                profile != null ? profile.name() : "<unknown>",
+                                exception);
                         return null;
-                    },
-                    SkinExecutor.FETCH_EXECUTOR);
+                    });
         }
 
         if (!skinrestorer$pendingSkin.isDone()) ci.cancel();
