@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class SkinProviderRegistry {
-
     private final Map<String, Entry> registry = new HashMap<>();
 
     public SkinProvider get(String name) {

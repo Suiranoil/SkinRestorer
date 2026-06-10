@@ -6,20 +6,21 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 public final class WebUtils {
-
     public static final String DEFAULT_USER_AGENT =
             String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
 
-    private static String USER_AGENT = WebUtils.DEFAULT_USER_AGENT;
-    private static HttpClient HTTP_CLIENT = null;
+    private static volatile String USER_AGENT = WebUtils.DEFAULT_USER_AGENT;
+    private static volatile HttpClient HTTP_CLIENT = null;
 
     private WebUtils() {}
 
@@ -31,7 +32,42 @@ public final class WebUtils {
         var configUserAgent = SkinRestorer.getConfig().request().userAgent();
         WebUtils.USER_AGENT = configUserAgent.isEmpty() ? WebUtils.DEFAULT_USER_AGENT : configUserAgent;
 
-        HTTP_CLIENT = WebUtils.buildClient();
+        var oldClient = WebUtils.HTTP_CLIENT;
+        WebUtils.HTTP_CLIENT = WebUtils.buildClient();
+        WebUtils.closeClient(oldClient);
+    }
+
+    public static void closeClient(HttpClient client) {
+        // HttpClient is AutoCloseable on Java 21+ (it owns a selector + thread pool); closing the
+        // replaced instance avoids leaking one per /skin config reload. On Java 17 this instanceof is
+        // simply false and the method is a no-op. close() blocks until in-flight requests finish, so
+        // run it off the reload thread.
+        if (!(client instanceof AutoCloseable closeable)) return;
+
+        var thread = new Thread(
+                () -> {
+                    try {
+                        closeable.close();
+                    } catch (Exception e) {
+                        SkinRestorer.LOGGER.debug("Failed to close previous HTTP client", e);
+                    }
+                },
+                "SkinRestorer-HttpClient-Close");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private static Duration getTimeoutDuration() {
+        try {
+            var timeout = Duration.of(SkinRestorer.getConfig().request().timeout(), ChronoUnit.SECONDS);
+            if (timeout.isZero() || timeout.isNegative())
+                throw new IllegalArgumentException("timeout must be positive");
+
+            return timeout;
+        } catch (IllegalArgumentException e) {
+            SkinRestorer.LOGGER.error("Failed to set request timeout", e);
+            return Duration.of(10, ChronoUnit.SECONDS);
+        }
     }
 
     private static HttpClient buildClient() {
@@ -41,13 +77,7 @@ public final class WebUtils {
         proxy.ifPresent(value ->
                 builder.proxy(ProxySelector.of(InetSocketAddress.createUnresolved(value.host(), value.port()))));
 
-        try {
-            builder.connectTimeout(
-                    Duration.of(SkinRestorer.getConfig().request().timeout(), ChronoUnit.SECONDS));
-        } catch (IllegalArgumentException e) {
-            SkinRestorer.LOGGER.error("Failed to set request timeout", e);
-            builder.connectTimeout(Duration.of(10, ChronoUnit.SECONDS));
-        }
+        builder.connectTimeout(WebUtils.getTimeoutDuration());
 
         return builder.build();
     }
@@ -61,6 +91,7 @@ public final class WebUtils {
         try {
             var modifiedRequest = HttpRequest.newBuilder(request, (name, value) -> true)
                     .header("User-Agent", WebUtils.getUserAgent())
+                    .timeout(WebUtils.getTimeoutDuration())
                     .build();
 
             final var response = WebUtils.HTTP_CLIENT.send(modifiedRequest, bodyHandler);
@@ -86,6 +117,12 @@ public final class WebUtils {
 
     public static String ensureTrailingSlash(String url) {
         return url.endsWith("/") ? url : url + "/";
+    }
+
+    // username validation allows characters like '/', '?', '#' and '"', so anything
+    // player-provided must be encoded before being embedded into a URI
+    public static String urlEncode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     public static void throwOnClientErrors(HttpResponse<?> response) {

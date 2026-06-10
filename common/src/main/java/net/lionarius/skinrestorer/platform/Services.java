@@ -7,7 +7,6 @@ import net.lionarius.skinrestorer.platform.services.PlatformHelper;
 import java.util.ServiceLoader;
 
 public final class Services {
-
     public static final PlatformHelper PLATFORM = load(PlatformHelper.class);
     public static final CompatibilityHelper COMPATIBILITY = load(CompatibilityHelper.class);
 
