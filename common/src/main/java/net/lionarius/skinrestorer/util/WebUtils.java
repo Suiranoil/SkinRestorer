@@ -19,7 +19,7 @@ public final class WebUtils {
     public static final String DEFAULT_USER_AGENT =
             String.format("SkinRestorer/%d", System.currentTimeMillis() % 65535);
 
-    private static String USER_AGENT = WebUtils.DEFAULT_USER_AGENT;
+    private static volatile String USER_AGENT = WebUtils.DEFAULT_USER_AGENT;
     private static volatile HttpClient HTTP_CLIENT = null;
 
     private WebUtils() {}
