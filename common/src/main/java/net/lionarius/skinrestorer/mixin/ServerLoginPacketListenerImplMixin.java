@@ -35,13 +35,14 @@ public abstract class ServerLoginPacketListenerImplMixin {
     @Inject(method = "handleAcceptedLogin", at = @At(value = "HEAD"), cancellable = true)
     public void waitForSkin(CallbackInfo ci) {
         if (skinrestorer$pendingSkin == null) {
-            skinrestorer$pendingSkin = CompletableFuture.<Void>supplyAsync(() -> {
-                var profile = this.gameProfile;
-                assert profile != null;
+            skinrestorer$pendingSkin = CompletableFuture.<Void>supplyAsync(
+                            () -> {
+                                var profile = this.gameProfile;
+                                assert profile != null;
 
-                if (!profile.isComplete()) profile = createFakeProfile(profile);
+                                profile = skinrestorer$effectiveProfile(profile);
 
-                var originalSkin = PlayerUtils.getPlayerSkin(profile);
+                                var originalSkin = PlayerUtils.getPlayerSkin(profile);
 
                                 if (SkinRestorer.getSkinStorage().hasSavedSkin(profile.getId())) {
                                     if (originalSkin != null) { // update to the latest official skin
@@ -122,14 +123,19 @@ public abstract class ServerLoginPacketListenerImplMixin {
         var profile = this.gameProfile;
         if (pendingSkin == null || profile == null) return;
 
-        if (!profile.isComplete()) profile = createFakeProfile(profile);
+        var profileId = skinrestorer$effectiveProfile(profile).getId();
 
         // the player never reached the PlayerList, so the disconnect cleanup there won't run;
         // evict after the pending fetch completes so its setSkin can't resurrect the entry
         pendingSkin.whenComplete((ignored, ignoredError) -> {
             var storage = SkinRestorer.getSkinStorage();
-            if (storage != null) storage.removeSkin(profile.getId());
+            if (storage != null) storage.removeSkin(profileId);
         });
+    }
+
+    @Unique
+    private GameProfile skinrestorer$effectiveProfile(GameProfile profile) {
+        return profile.isComplete() ? profile : this.createFakeProfile(profile);
     }
 
     @Unique
