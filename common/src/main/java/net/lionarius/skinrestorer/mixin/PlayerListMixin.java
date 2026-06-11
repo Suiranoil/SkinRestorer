@@ -19,7 +19,6 @@ import java.util.List;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
-
     @Shadow
     public abstract List<ServerPlayer> getPlayers();
 

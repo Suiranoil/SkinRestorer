@@ -19,7 +19,6 @@ import net.minecraft.world.level.biome.BiomeManager;
 import java.util.*;
 
 public final class PlayerUtils {
-
     public static final String TEXTURES_KEY = "textures";
 
     private PlayerUtils() {}

@@ -7,6 +7,7 @@ import net.lionarius.skinrestorer.config.provider.custom.CustomUsernameUrlProvid
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinSigner;
 import net.lionarius.skinrestorer.skin.provider.base.UsernameSkinProvider;
+import net.lionarius.skinrestorer.util.WebUtils;
 
 import java.net.URI;
 import java.util.Optional;
@@ -92,7 +93,8 @@ public final class CustomUsernameUrlSkinProvider extends UsernameSkinProvider {
 
     @Override
     protected Optional<Property> loadSkin(String username) throws Exception {
-        var url = this.urlTemplate.replace(CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER, username);
+        var url = this.urlTemplate.replace(
+                CustomUsernameUrlSkinProvider.USERNAME_PLACEHOLDER, WebUtils.urlEncode(username));
         return this.skinSigner.signSkin(new URI(url), null);
     }
 }
