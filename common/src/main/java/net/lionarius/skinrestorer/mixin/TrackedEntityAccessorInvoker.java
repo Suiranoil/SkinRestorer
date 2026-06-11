@@ -10,7 +10,6 @@ import java.util.Set;
 
 @Mixin(targets = "net.minecraft.server.level.ChunkMap$TrackedEntity")
 public interface TrackedEntityAccessorInvoker {
-
     @Accessor
     Set<ServerPlayerConnection> getSeenBy();
 

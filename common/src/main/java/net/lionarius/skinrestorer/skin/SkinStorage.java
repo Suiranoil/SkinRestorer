@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SkinStorage {
-
     private final Map<UUID, SkinValue> skinMap = new ConcurrentHashMap<>();
     private final SkinIO skinIO;
 
@@ -22,7 +21,7 @@ public class SkinStorage {
             var skin = skinIO.loadSkin(uuid);
             if (!cache) return skin;
 
-            setSkin(uuid, skin);
+            skinMap.putIfAbsent(uuid, skin);
         }
 
         return skinMap.get(uuid);
@@ -32,26 +31,26 @@ public class SkinStorage {
         return this.getSkin(uuid, true);
     }
 
-    public void removeSkin(UUID uuid, boolean save) {
-        var skin = skinMap.remove(uuid);
-        if (skin != null && save) skinIO.saveSkin(uuid, skin);
-    }
-
     public void removeSkin(UUID uuid) {
-        this.removeSkin(uuid, true);
+        this.skinMap.remove(uuid);
     }
 
     public void deleteSkin(UUID uuid) {
-        this.removeSkin(uuid, false);
+        this.removeSkin(uuid);
         this.skinIO.deleteSkin(uuid);
     }
 
     public void setSkin(UUID uuid, SkinValue skin) {
         if (skin == null) skin = SkinValue.EMPTY;
 
-        if (skinMap.containsKey(uuid) && skin.originalValue() == null)
-            skin = skin.setOriginalValue(skinMap.get(uuid).originalValue());
+        var previous = skinMap.get(uuid);
+        if (previous != null && skin.originalValue() == null) skin = skin.setOriginalValue(previous.originalValue());
+
+        // write-through so a server crash doesn't lose skin changes;
+        // skipped when the value is unchanged (e.g. the original skin refresh on join)
+        if (skin.equals(previous)) return;
 
         skinMap.put(uuid, skin);
+        skinIO.saveSkin(uuid, skin);
     }
 }
