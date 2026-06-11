@@ -1,0 +1,8 @@
+{
+    "skinrestorer.command.skin.affected_players": "%s のスキン変更を適用しました",
+    "skinrestorer.command.skin.no_changes": "スキンの変更はありません",
+    "skinrestorer.command.skin.failed": "スキンの変更に失敗しました: %s",
+    "skinrestorer.command.skin.ok": "スキンを変更しました",
+    "skinrestorer.command.skin.loading": "スキンを読み込み中...",
+    "skinrestorer.command.skin.config_reloaded": "設定を再読み込みしました"
+}

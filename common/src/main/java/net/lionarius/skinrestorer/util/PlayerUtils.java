@@ -18,7 +18,6 @@ import net.minecraft.server.players.PlayerList;
 import java.util.*;
 
 public final class PlayerUtils {
-
     public static final String TEXTURES_KEY = "textures";
 
     private PlayerUtils() {}

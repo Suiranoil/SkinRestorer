@@ -6,7 +6,6 @@ import net.lionarius.skinrestorer.util.gson.GsonPostProcessable;
 import java.util.Optional;
 
 public final class RequestConfig implements GsonPostProcessable {
-
     private String proxy = "";
     private transient Proxy parsedProxy = null;
 

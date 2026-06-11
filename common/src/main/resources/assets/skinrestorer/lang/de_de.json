@@ -1,6 +1,6 @@
 {
-    "skinrestorer.command.skin.affected_players": "Skin änderungen für %s angewendet",
-    "skinrestorer.command.skin.no_changes": "Keine Skinänderungen",
+    "skinrestorer.command.skin.affected_players": "Skin-Änderungen für %s angewendet",
+    "skinrestorer.command.skin.no_changes": "Keine Skin-Änderungen",
     "skinrestorer.command.skin.failed": "Skin konnte nicht geändert werden: %s",
     "skinrestorer.command.skin.ok": "Skin geändert",
     "skinrestorer.command.skin.loading": "Skin wird geladen...",

@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 public final class SkinShuffleCompatibility {
-
     private SkinShuffleCompatibility() {}
 
     public static void initialize() {

@@ -6,7 +6,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public record SkinShuffleHandshakePayload() implements CustomPacketPayload {
-
     public static final SkinShuffleHandshakePayload INSTANCE = new SkinShuffleHandshakePayload();
 
     public static final ResourceLocation PACKET_ID = SkinShuffleCompatibility.resourceLocation("handshake");

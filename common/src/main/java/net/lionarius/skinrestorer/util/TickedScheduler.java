@@ -11,7 +11,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class TickedScheduler implements Runnable {
     private final MinecraftServer server;
     private final Queue<TickTask> queue = new PriorityBlockingQueue<>();
-    private final Map<Integer, Integer> idMap = new ConcurrentHashMap<>();
+    private final Map<Object, Integer> idMap = new ConcurrentHashMap<>();
 
     public TickedScheduler(MinecraftServer server) {
         this.server = server;
@@ -22,15 +22,13 @@ public class TickedScheduler implements Runnable {
     }
 
     public void schedule(Runnable task, int delay, Object id) {
-        var taskId = id.hashCode();
         var serverTick = this.server.getTickCount();
-        this.idMap.merge(taskId, serverTick, Integer::max);
-        this.queue.add(new TickTask(serverTick, serverTick + delay, taskId, task));
+        this.idMap.merge(id, serverTick, Integer::max);
+        this.queue.add(new TickTask(serverTick, serverTick + delay, id, task));
     }
 
     public void cancel(Object id) {
-        var taskId = id.hashCode();
-        this.idMap.remove(taskId);
+        this.idMap.remove(id);
     }
 
     @Override
@@ -49,7 +47,8 @@ public class TickedScheduler implements Runnable {
         }
     }
 
-    private record TickTask(int scheduledOnTick, int runOnTick, int id, Runnable task) implements Comparable<TickTask> {
+    private record TickTask(int scheduledOnTick, int runOnTick, Object id, Runnable task)
+            implements Comparable<TickTask> {
         @Override
         public int compareTo(@NotNull TickedScheduler.TickTask other) {
             return Integer.compare(this.runOnTick, other.runOnTick);
