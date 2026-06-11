@@ -17,7 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public abstract class ProfileSkinProvider extends AbstractSkinProvider<UUID> {
-
     private LoadingCache<String, UUID> uuidCache;
 
     @Override
@@ -50,6 +49,7 @@ public abstract class ProfileSkinProvider extends AbstractSkinProvider<UUID> {
 
         this.uuidCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(time, TimeUnit.SECONDS)
+                .maximumSize(AbstractSkinProvider.MAX_CACHE_SIZE)
                 .build(new CacheLoader<>() {
                     @Override
                     public @NotNull UUID load(@NotNull String username) throws Exception {

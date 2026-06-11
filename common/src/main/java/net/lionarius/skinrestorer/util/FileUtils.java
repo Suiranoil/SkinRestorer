@@ -6,11 +6,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public final class FileUtils {
-
     private FileUtils() {}
 
     public static String readResource(String name) {
@@ -42,9 +43,20 @@ public final class FileUtils {
             var parent = file.getParent();
             if (parent != null) Files.createDirectories(parent);
 
-            if (!Files.exists(file)) Files.createFile(file);
-
-            Files.writeString(file, content);
+            // write to a sibling temp file then atomically swap it in, so a crash mid-write
+            // can't leave a half-written (and thus corrupt/unparseable) file behind
+            var directory = parent != null ? parent : file.toAbsolutePath().getParent();
+            var tmp = Files.createTempFile(directory, file.getFileName().toString(), ".tmp");
+            try {
+                Files.writeString(tmp, content);
+                try {
+                    Files.move(tmp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                } catch (AtomicMoveNotSupportedException e) {
+                    Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
+                }
+            } finally {
+                Files.deleteIfExists(tmp);
+            }
         } catch (IOException e) {
             SkinRestorer.LOGGER.error("Failed to write file", e);
         }
