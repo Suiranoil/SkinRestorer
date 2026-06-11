@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class SkinResigner {
-
     private final SkinSigner skinSigner;
     private boolean useProviderSignature;
     private Cache<Integer, Property> signatureCache;

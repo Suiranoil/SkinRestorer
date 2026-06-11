@@ -11,7 +11,6 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 @Mod(SkinRestorer.MOD_ID)
 @Mod.EventBusSubscriber(modid = SkinRestorer.MOD_ID)
 public final class SkinRestorerNeoForge {
-
     public SkinRestorerNeoForge() {
         SkinRestorer.onInitialize();
 

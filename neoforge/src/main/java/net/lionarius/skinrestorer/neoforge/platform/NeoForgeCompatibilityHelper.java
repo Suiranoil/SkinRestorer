@@ -6,7 +6,6 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class NeoForgeCompatibilityHelper implements CompatibilityHelper {
-
     @Override
     public void skinShuffle_sendHandshake(ServerPlayer player) {
         // we can't use the packet distributor here because

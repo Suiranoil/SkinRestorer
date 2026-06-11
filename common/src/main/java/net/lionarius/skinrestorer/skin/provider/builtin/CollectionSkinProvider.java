@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> {
-
     public static final String PROVIDER_NAME = "collection";
 
     private final SkinSigner skinSigner;
@@ -81,7 +80,7 @@ public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> 
 
     @Override
     protected Integer getCacheKey(String argument, SkinVariant variant) {
-        return Math.abs(argument.hashCode()) % this.collectionSkins.size();
+        return Math.floorMod(argument.hashCode(), this.collectionSkins.size());
     }
 
     @Override
