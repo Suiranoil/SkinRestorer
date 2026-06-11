@@ -13,7 +13,6 @@ import java.net.URI;
 import java.util.Optional;
 
 public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, SkinVariant>> {
-
     public static final String PROVIDER_NAME = "web";
 
     private final MineskinService skinSigner;

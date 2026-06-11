@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class Translation {
-    public static final String LEGACY_TRANSLATION_FILENAME = "translation";
-
     public static final String COMMAND_SKIN_AFFECTED_PLAYERS_KEY = "skinrestorer.command.skin.affected_players";
     public static final String COMMAND_SKIN_NO_CHANGES_KEY = "skinrestorer.command.skin.no_changes";
     public static final String COMMAND_SKIN_FAILED_KEY = "skinrestorer.command.skin.failed";
