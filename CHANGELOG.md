@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2026-07-07
+### Added
+- Added the `storage.location` config option to store skins globally (shared across all worlds) instead of per world ([#110](https://github.com/Suiranoil/SkinRestorer/issues/110))
+
 ## [2.8.1] - 2026-06-10
 ### Changed
 - Improved logging of unexpected errors during skin fetch on login
