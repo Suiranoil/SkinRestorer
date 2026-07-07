@@ -33,6 +33,8 @@ public final class SkinRestorer {
     public static final String MOD_ID = "skinrestorer";
     public static final Logger LOGGER = LoggerFactory.getLogger("SkinRestorer");
 
+    private static final String GLOBAL_SKIN_DIRECTORY_NAME = "saved_skins";
+
     private static final SkinProviderRegistry providersRegistry = new SkinProviderRegistry();
     private static SkinStorage skinStorage;
     private static Path configDir;
@@ -190,9 +192,13 @@ public final class SkinRestorer {
         private Events() {}
 
         public static void onServerStarted(MinecraftServer server) {
-            Path worldSkinDirectory = server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
+            Path skinDirectory =
+                    switch (SkinRestorer.getConfig().storage().location()) {
+                        case WORLD -> server.getWorldPath(LevelResource.ROOT).resolve(SkinRestorer.MOD_ID);
+                        case GLOBAL -> SkinRestorer.getConfigDir().resolve(GLOBAL_SKIN_DIRECTORY_NAME);
+                    };
 
-            SkinRestorer.skinStorage = new SkinStorage(new SkinIO(worldSkinDirectory));
+            SkinRestorer.skinStorage = new SkinStorage(new SkinIO(skinDirectory));
             SkinRestorer.tickedScheduler = new TickedScheduler(server);
             server.addTickable(SkinRestorer.tickedScheduler);
 
