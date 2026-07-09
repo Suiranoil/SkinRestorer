@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.fabric.compat.modmenu;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.StorageConfig;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -19,10 +21,15 @@ public final class SkinRestorerConfigScreen extends Screen {
             "id_id", "it_it", "ja_jp", "pl_pl", "pt_br", "pt_pt", "ru_ru", "tr_tr", "uk_ua", "vi_vn", "zh_cn",
             "zh_tw");
 
+    private static final int HEADER_HEIGHT = 24;
+    private static final int FOOTER_HEIGHT = 28;
     private static final int ROW_HEIGHT = 24;
     private static final int ROW_WIDTH = 320;
 
     private final Screen parent;
+    private final List<ScrollEntry> entries = new ArrayList<>();
+    private int scrollAmount = 0;
+    private int contentHeight = 0;
 
     private String language;
     private StorageConfig.Location storageLocation;
@@ -50,10 +57,14 @@ public final class SkinRestorerConfigScreen extends Screen {
         this.requestUserAgent = config.request().userAgent();
     }
 
+    private record ScrollEntry(AbstractWidget widget, int relativeY) {}
+
     @Override
     protected void init() {
+        this.entries.clear();
+
         var x = (this.width - ROW_WIDTH) / 2;
-        var y = Math.max(32, this.height / 6);
+        var y = 0;
 
         y = this.addLanguageRow(x, y);
         y = this.addStorageLocationRow(x, y);
@@ -94,75 +105,116 @@ public final class SkinRestorerConfigScreen extends Screen {
                 this.requestUserAgent,
                 value -> this.requestUserAgent = value);
 
-        y += 8;
+        this.contentHeight = y;
+        this.scrollAmount = Math.max(0, Math.min(this.scrollAmount, this.maxScroll()));
+        this.updatePositions();
+
+        var footerY = this.height - FOOTER_HEIGHT + 4;
         this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> this.onSave())
-                .bounds(x, y, ROW_WIDTH / 2 - 4, 20)
+                .bounds(x, footerY, ROW_WIDTH / 2 - 4, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> this.onClose())
-                .bounds(x + ROW_WIDTH / 2 + 4, y, ROW_WIDTH / 2 - 4, 20)
+                .bounds(x + ROW_WIDTH / 2 + 4, footerY, ROW_WIDTH / 2 - 4, 20)
                 .build());
+    }
+
+    private int maxScroll() {
+        var viewport = Math.max(0, this.height - HEADER_HEIGHT - FOOTER_HEIGHT);
+        return Math.max(0, this.contentHeight - viewport);
+    }
+
+    private void updatePositions() {
+        for (var entry : this.entries) {
+            entry.widget().setPosition(entry.widget().getX(), HEADER_HEIGHT + entry.relativeY() - this.scrollAmount);
+        }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        var previous = this.scrollAmount;
+        this.scrollAmount = Math.max(0, Math.min(this.scrollAmount - (int) (scrollY * ROW_HEIGHT), this.maxScroll()));
+        if (this.scrollAmount != previous) this.updatePositions();
+
+        return true;
+    }
+
+    private <T extends AbstractWidget> T addRow(T widget, int relativeY) {
+        this.addRenderableWidget(widget);
+        this.entries.add(new ScrollEntry(widget, relativeY));
+
+        return widget;
     }
 
     private int addLanguageRow(int x, int y) {
         var index = Math.max(0, LANGUAGES.indexOf(this.language));
-        this.addRenderableWidget(CycleButton.builder(
-                        (String code) -> Component.literal(code), LANGUAGES.get(index))
-                .withValues(LANGUAGES)
-                .create(
-                        x,
-                        y,
-                        ROW_WIDTH,
-                        20,
-                        Component.translatable("skinrestorer.config.language"),
-                        (button, value) -> this.language = value));
+        this.addRow(
+                CycleButton.builder((String code) -> Component.literal(code), LANGUAGES.get(index))
+                        .withValues(LANGUAGES)
+                        .create(
+                                x,
+                                y,
+                                ROW_WIDTH,
+                                20,
+                                Component.translatable("skinrestorer.config.language"),
+                                (button, value) -> this.language = value),
+                y);
 
         return y + ROW_HEIGHT;
     }
 
     private int addStorageLocationRow(int x, int y) {
-        this.addRenderableWidget(CycleButton.builder(
-                        SkinRestorerConfigScreen::storageLocationName, this.storageLocation)
-                .withValues(StorageConfig.Location.values())
-                .create(
-                        x,
-                        y,
-                        ROW_WIDTH,
-                        20,
-                        Component.translatable("skinrestorer.config.storage.location"),
-                        (button, value) -> this.storageLocation = value));
+        this.addRow(
+                CycleButton.builder(SkinRestorerConfigScreen::storageLocationName, this.storageLocation)
+                        .withValues(StorageConfig.Location.values())
+                        .create(
+                                x,
+                                y,
+                                ROW_WIDTH,
+                                20,
+                                Component.translatable("skinrestorer.config.storage.location"),
+                                (button, value) -> this.storageLocation = value),
+                y);
 
         return y + ROW_HEIGHT;
     }
 
     private int addToggleRow(int x, int y, String labelKey, boolean initial, Consumer<Boolean> onChange) {
-        this.addRenderableWidget(CycleButton.onOffBuilder(initial)
-                .create(x, y, ROW_WIDTH, 20, Component.translatable(labelKey), (button, value) -> onChange.accept(value)));
+        this.addRow(
+                CycleButton.onOffBuilder(initial)
+                        .create(
+                                x,
+                                y,
+                                ROW_WIDTH,
+                                20,
+                                Component.translatable(labelKey),
+                                (button, value) -> onChange.accept(value)),
+                y);
 
         return y + ROW_HEIGHT;
     }
 
     private int addTextRow(int x, int y, String labelKey, String initial, Consumer<String> onChange) {
         var label = Component.translatable(labelKey);
-        this.addRenderableWidget(new StringWidget(x, y, ROW_WIDTH, 12, label, this.font));
+        this.addRow(new StringWidget(x, y, ROW_WIDTH, 12, label, this.font), y);
 
         var box = new EditBox(this.font, x, y + 12, ROW_WIDTH, 18, label);
         box.setValue(initial);
         box.setResponder(onChange::accept);
-        this.addRenderableWidget(box);
+        this.addRow(box, y + 12);
 
         return y + ROW_HEIGHT + 12;
     }
 
     private int addNumberRow(int x, int y, String labelKey, String initial, Consumer<String> onChange) {
         var label = Component.translatable(labelKey);
-        this.addRenderableWidget(new StringWidget(x, y, ROW_WIDTH, 12, label, this.font));
+        this.addRow(new StringWidget(x, y, ROW_WIDTH, 12, label, this.font), y);
 
         var box = new EditBox(this.font, x, y + 12, ROW_WIDTH, 18, label);
         box.setValue(initial);
         // non-digit input is simply ignored on save (parseIntOrDefault/parseLongOrDefault fall back
         // to the previous value); EditBox has no input filter in this Minecraft version
         box.setResponder(onChange::accept);
-        this.addRenderableWidget(box);
+        this.addRow(box, y + 12);
 
         return y + ROW_HEIGHT + 12;
     }
