@@ -266,6 +266,24 @@ public final class SkinRestorerConfigScreen extends Screen {
 
         var titleText = this.title.getString();
         graphics.text(this.font, titleText, (this.width - this.font.width(titleText)) / 2, 12, 0xFFFFFFFF, true);
+
+        this.renderScrollbar(graphics);
+    }
+
+    private void renderScrollbar(GuiGraphicsExtractor graphics) {
+        var maxScroll = this.maxScroll();
+        if (maxScroll <= 0) return;
+
+        var trackX = (this.width - ROW_WIDTH) / 2 + ROW_WIDTH + 6;
+        var trackTop = HEADER_HEIGHT;
+        var trackBottom = this.height - FOOTER_HEIGHT;
+        var trackHeight = trackBottom - trackTop;
+
+        graphics.fill(trackX, trackTop, trackX + 4, trackBottom, 0x40FFFFFF);
+
+        var thumbHeight = Math.max(12, trackHeight * trackHeight / (trackHeight + maxScroll));
+        var thumbTop = trackTop + (trackHeight - thumbHeight) * this.scrollAmount / maxScroll;
+        graphics.fill(trackX, thumbTop, trackX + 4, thumbTop + thumbHeight, 0xFFC0C0C0);
     }
 
     @Override
