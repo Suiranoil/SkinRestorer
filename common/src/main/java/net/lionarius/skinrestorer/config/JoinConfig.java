@@ -27,6 +27,10 @@ public final class JoinConfig implements GsonPostProcessable {
         return this.skipRefreshProviders;
     }
 
+    public void skipRefreshProviders(List<String> skipRefreshProviders) {
+        this.skipRefreshProviders = skipRefreshProviders;
+    }
+
     public int applyDelay() {
         return this.applyDelay;
     }

@@ -36,6 +36,10 @@ public final class AutoFetchConfig implements GsonPostProcessable {
         return this.providers;
     }
 
+    public void providers(List<String> providers) {
+        this.providers = providers;
+    }
+
     @Override
     public void gsonPostProcess() {
         if (this.providers == null || this.providers.isEmpty()) {
