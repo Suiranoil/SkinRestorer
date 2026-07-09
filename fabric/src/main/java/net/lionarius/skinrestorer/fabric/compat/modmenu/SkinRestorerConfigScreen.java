@@ -2,7 +2,7 @@ package net.lionarius.skinrestorer.fabric.compat.modmenu;
 
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.StorageConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -105,9 +105,9 @@ public final class SkinRestorerConfigScreen extends Screen {
 
     private int addLanguageRow(int x, int y) {
         var index = Math.max(0, LANGUAGES.indexOf(this.language));
-        this.addRenderableWidget(CycleButton.builder((String code) -> Component.literal(code))
+        this.addRenderableWidget(CycleButton.builder(
+                        (String code) -> Component.literal(code), LANGUAGES.get(index))
                 .withValues(LANGUAGES)
-                .withInitialValue(LANGUAGES.get(index))
                 .create(
                         x,
                         y,
@@ -120,9 +120,9 @@ public final class SkinRestorerConfigScreen extends Screen {
     }
 
     private int addStorageLocationRow(int x, int y) {
-        this.addRenderableWidget(CycleButton.builder(SkinRestorerConfigScreen::storageLocationName)
+        this.addRenderableWidget(CycleButton.builder(
+                        SkinRestorerConfigScreen::storageLocationName, this.storageLocation)
                 .withValues(StorageConfig.Location.values())
-                .withInitialValue(this.storageLocation)
                 .create(
                         x,
                         y,
@@ -158,8 +158,9 @@ public final class SkinRestorerConfigScreen extends Screen {
         this.addRenderableWidget(new StringWidget(x, y, ROW_WIDTH, 12, label, this.font));
 
         var box = new EditBox(this.font, x, y + 12, ROW_WIDTH, 18, label);
-        box.setFilter(value -> value.matches("\\d*"));
         box.setValue(initial);
+        // non-digit input is simply ignored on save (parseIntOrDefault/parseLongOrDefault fall back
+        // to the previous value); EditBox has no input filter in this Minecraft version
         box.setResponder(onChange::accept);
         this.addRenderableWidget(box);
 
@@ -208,9 +209,11 @@ public final class SkinRestorerConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
+
+        var titleText = this.title.getString();
+        graphics.text(this.font, titleText, (this.width - this.font.width(titleText)) / 2, 12, 0xFFFFFFFF, true);
     }
 
     @Override
