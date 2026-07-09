@@ -23,6 +23,7 @@ abstract class AbstractConfigScreen extends Screen {
     protected static final int FOOTER_HEIGHT = 28;
     protected static final int ROW_HEIGHT = 24;
     protected static final int ROW_WIDTH = 320;
+    protected static final int HALF_ROW_WIDTH = ROW_WIDTH / 2;
 
     protected final Screen parent;
 
@@ -43,6 +44,15 @@ abstract class AbstractConfigScreen extends Screen {
     /** Applies the screen's edited fields to the live config. */
     protected abstract void onSave();
 
+    /** Override to return {@code false} for picker-style screens that apply and close per-row. */
+    protected boolean showDoneButton() {
+        return true;
+    }
+
+    protected int centeredX(int width) {
+        return (this.width - width) / 2;
+    }
+
     @Override
     protected final void init() {
         this.entries.clear();
@@ -53,15 +63,21 @@ abstract class AbstractConfigScreen extends Screen {
         this.updatePositions();
 
         var footerY = this.height - FOOTER_HEIGHT + 4;
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> {
-                    this.onSave();
-                    this.onClose();
-                })
-                .bounds(x, footerY, ROW_WIDTH / 2 - 4, 20)
-                .build());
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> this.onClose())
-                .bounds(x + ROW_WIDTH / 2 + 4, footerY, ROW_WIDTH / 2 - 4, 20)
-                .build());
+        if (this.showDoneButton()) {
+            this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> {
+                        this.onSave();
+                        this.onClose();
+                    })
+                    .bounds(x, footerY, HALF_ROW_WIDTH - 4, 20)
+                    .build());
+            this.addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> this.onClose())
+                    .bounds(x + HALF_ROW_WIDTH + 4, footerY, HALF_ROW_WIDTH - 4, 20)
+                    .build());
+        } else {
+            this.addRenderableWidget(Button.builder(Component.translatable("gui.back"), button -> this.onClose())
+                    .bounds(x, footerY, ROW_WIDTH, 20)
+                    .build());
+        }
     }
 
     private int maxScroll() {
@@ -99,13 +115,25 @@ abstract class AbstractConfigScreen extends Screen {
             List<T> values,
             T initial,
             Consumer<T> onChange) {
+        return this.addCycleRow(x, y, ROW_WIDTH, labelKey, valueToText, values, initial, onChange);
+    }
+
+    protected <T> int addCycleRow(
+            int x,
+            int y,
+            int width,
+            String labelKey,
+            Function<T, Component> valueToText,
+            List<T> values,
+            T initial,
+            Consumer<T> onChange) {
         this.addRow(
                 CycleButton.builder(valueToText, initial)
                         .withValues(values)
                         .create(
                                 x,
                                 y,
-                                ROW_WIDTH,
+                                width,
                                 20,
                                 Component.translatable(labelKey),
                                 (button, value) -> onChange.accept(value)),
@@ -148,11 +176,20 @@ abstract class AbstractConfigScreen extends Screen {
     }
 
     protected int addButtonRow(int x, int y, String labelKey, Runnable onClick) {
+        return this.addButtonRow(x, y, ROW_WIDTH, Component.translatable(labelKey), onClick);
+    }
+
+    protected int addButtonRow(int x, int y, int width, String labelKey, Runnable onClick) {
+        return this.addButtonRow(x, y, width, Component.translatable(labelKey), onClick);
+    }
+
+    protected int addButtonRow(int x, int y, Component label, Runnable onClick) {
+        return this.addButtonRow(x, y, ROW_WIDTH, label, onClick);
+    }
+
+    protected int addButtonRow(int x, int y, int width, Component label, Runnable onClick) {
         this.addRow(
-                Button.builder(Component.translatable(labelKey), button -> onClick.run())
-                        .bounds(x, y, ROW_WIDTH, 20)
-                        .build(),
-                y);
+                Button.builder(label, button -> onClick.run()).bounds(x, y, width, 20).build(), y);
 
         return y + ROW_HEIGHT;
     }

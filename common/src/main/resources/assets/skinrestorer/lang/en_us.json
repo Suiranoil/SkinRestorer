@@ -8,6 +8,7 @@
 
     "skinrestorer.config.title": "SkinRestorer Configuration",
     "skinrestorer.config.language": "Language",
+    "skinrestorer.config.language_button": "Language: %s",
     "skinrestorer.config.storage.location": "Storage Location",
     "skinrestorer.config.storage.location.world": "World",
     "skinrestorer.config.storage.location.global": "Global",
