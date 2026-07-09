@@ -17,6 +17,14 @@ public final class CustomYggdrasilProviderConfig extends CustomProviderConfig {
         super(CustomYggdrasilProviderConfig.TYPE);
     }
 
+    public String baseUrl() {
+        return this.baseUrl;
+    }
+
+    public void baseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
     public String servicesUrl() {
         return this.servicesUrl;
     }

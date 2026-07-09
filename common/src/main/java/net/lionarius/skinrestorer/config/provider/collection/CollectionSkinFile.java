@@ -46,6 +46,18 @@ public final class CollectionSkinFile implements CollectionSkinSource, GsonPostP
         return this.variant;
     }
 
+    public String path() {
+        return this.path;
+    }
+
+    public void path(String path) {
+        this.path = path;
+    }
+
+    public void variant(SkinVariant variant) {
+        this.variant = variant;
+    }
+
     @Override
     public void gsonPostProcess() {
         if (this.path == null) {

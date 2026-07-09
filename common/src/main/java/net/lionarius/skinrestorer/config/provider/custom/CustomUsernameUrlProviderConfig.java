@@ -19,6 +19,10 @@ public final class CustomUsernameUrlProviderConfig extends CustomProviderConfig 
         return this.urlTemplate;
     }
 
+    public void urlTemplate(String urlTemplate) {
+        this.urlTemplate = urlTemplate;
+    }
+
     @Override
     public Result<SkinProvider, String> createSkinProvider(SkinSigner skinSigner) {
         if (this.urlTemplate.isEmpty()) return Result.error("urlTemplate is not configured");

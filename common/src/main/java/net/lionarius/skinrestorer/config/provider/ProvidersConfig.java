@@ -65,6 +65,11 @@ public final class ProvidersConfig implements GsonPostProcessable {
         return this.getValidatedCustom();
     }
 
+    public void custom(List<CustomProviderConfig> custom) {
+        this.custom = custom;
+        this.validatedCustom = null;
+    }
+
     public <T extends CustomProviderConfig> Optional<T> findCustomByName(String name, Class<T> type) {
         return this.getValidatedCustom().stream()
                 .filter(config -> config.name().equals(name))

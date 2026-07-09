@@ -26,6 +26,14 @@ public abstract class AbstractProviderConfig implements GsonPostProcessable {
         return this.cache;
     }
 
+    public void enabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void name(String name) {
+        this.name = name;
+    }
+
     protected void validateName(String defaultName) {
         if (this.name == null || this.name.isBlank()) {
             SkinRestorer.LOGGER.warn("Provider name is null or empty, defaulting to '{}'", defaultName);

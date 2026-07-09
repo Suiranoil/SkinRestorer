@@ -28,6 +28,18 @@ public final class CollectionSkinUrl implements CollectionSkinSource, GsonPostPr
         return this.variant;
     }
 
+    public String url() {
+        return this.url;
+    }
+
+    public void url(String url) {
+        this.url = url;
+    }
+
+    public void variant(SkinVariant variant) {
+        this.variant = variant;
+    }
+
     @Override
     public void gsonPostProcess() {
         if (this.url == null) {

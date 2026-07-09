@@ -20,8 +20,16 @@ public final class MineskinProviderConfig extends BuiltInProviderConfig {
         return apiKey;
     }
 
+    public void apiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
     public boolean proxyUrlUpload() {
         return this.proxyUrlUpload;
+    }
+
+    public void proxyUrlUpload(boolean proxyUrlUpload) {
+        this.proxyUrlUpload = proxyUrlUpload;
     }
 
     @Override

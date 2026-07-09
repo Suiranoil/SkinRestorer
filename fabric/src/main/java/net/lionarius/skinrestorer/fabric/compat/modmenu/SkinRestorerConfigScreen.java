@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 public final class SkinRestorerConfigScreen extends AbstractConfigScreen {
+    private static final int PAIR_GAP = 8;
+
     private String language;
     private StorageConfig.Location storageLocation;
 
@@ -20,20 +22,25 @@ public final class SkinRestorerConfigScreen extends AbstractConfigScreen {
     }
 
     @Override
+    protected boolean centerVertically() {
+        return true;
+    }
+
+    @Override
     protected int buildRows(int x) {
         var y = 0;
-        var halfX = this.centeredX(HALF_ROW_WIDTH);
+        var leftX = this.centeredX(HALF_ROW_WIDTH * 2 + PAIR_GAP);
+        var rightX = leftX + HALF_ROW_WIDTH + PAIR_GAP;
 
-        y = this.addButtonRow(
-                halfX,
+        this.addButtonRow(
+                leftX,
                 y,
                 HALF_ROW_WIDTH,
                 Component.translatable("skinrestorer.config.language_button", this.language),
                 () -> this.minecraft.setScreen(
                         new SkinRestorerLanguageScreen(this, this.language, value -> this.language = value)));
-
         y = this.addCycleRow(
-                halfX,
+                rightX,
                 y,
                 HALF_ROW_WIDTH,
                 "skinrestorer.config.storage.location",
@@ -42,19 +49,22 @@ public final class SkinRestorerConfigScreen extends AbstractConfigScreen {
                 this.storageLocation,
                 value -> this.storageLocation = value);
 
+        this.addButtonRow(
+                leftX, y, HALF_ROW_WIDTH, "skinrestorer.config.join.title", () -> this.minecraft.setScreen(
+                        new SkinRestorerJoinScreen(this)));
         y = this.addButtonRow(
-                halfX,
-                y,
-                HALF_ROW_WIDTH,
-                "skinrestorer.config.join.title",
-                () -> this.minecraft.setScreen(new SkinRestorerJoinScreen(this)));
-
-        y = this.addButtonRow(
-                halfX,
+                rightX,
                 y,
                 HALF_ROW_WIDTH,
                 "skinrestorer.config.request.title",
                 () -> this.minecraft.setScreen(new SkinRestorerRequestScreen(this)));
+
+        y = this.addButtonRow(
+                this.centeredX(HALF_ROW_WIDTH),
+                y,
+                HALF_ROW_WIDTH,
+                "skinrestorer.config.providers.title",
+                () -> this.minecraft.setScreen(new SkinRestorerProvidersScreen(this)));
 
         return y;
     }

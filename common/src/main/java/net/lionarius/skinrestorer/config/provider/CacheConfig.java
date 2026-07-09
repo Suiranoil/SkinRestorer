@@ -19,6 +19,14 @@ public final class CacheConfig {
         return duration;
     }
 
+    public void enabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void duration(long duration) {
+        this.duration = duration;
+    }
+
     void validate(CacheConfig defaultValue) {
         if (this.duration <= 0) {
             SkinRestorer.LOGGER.warn(

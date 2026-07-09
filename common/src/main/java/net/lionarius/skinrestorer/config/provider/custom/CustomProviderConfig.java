@@ -26,6 +26,10 @@ public abstract class CustomProviderConfig extends AbstractProviderConfig {
         return this.useProviderSignature;
     }
 
+    public void useProviderSignature(boolean useProviderSignature) {
+        this.useProviderSignature = useProviderSignature;
+    }
+
     public abstract Result<SkinProvider, String> createSkinProvider(SkinSigner skinSigner);
 
     @Override

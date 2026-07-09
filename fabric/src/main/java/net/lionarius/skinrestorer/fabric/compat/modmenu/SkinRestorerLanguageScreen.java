@@ -12,6 +12,9 @@ public final class SkinRestorerLanguageScreen extends AbstractConfigScreen {
             "id_id", "it_it", "ja_jp", "pl_pl", "pt_br", "pt_pt", "ru_ru", "tr_tr", "uk_ua", "vi_vn", "zh_cn",
             "zh_tw");
 
+    private static final int COLUMNS = 3;
+    private static final int COLUMN_GAP = 8;
+
     private final String initialLanguage;
     private final Consumer<String> onSelect;
 
@@ -29,13 +32,21 @@ public final class SkinRestorerLanguageScreen extends AbstractConfigScreen {
     @Override
     protected int buildRows(int x) {
         var y = 0;
+        var columnWidth = (ROW_WIDTH - (COLUMNS - 1) * COLUMN_GAP) / COLUMNS;
 
-        for (var code : LANGUAGES) {
-            var marker = code.equals(this.initialLanguage) ? "✓ " : "";
-            y = this.addButtonRow(x, y, Component.literal(marker + code), () -> {
-                this.onSelect.accept(code);
-                this.onClose();
-            });
+        for (var i = 0; i < LANGUAGES.size(); i += COLUMNS) {
+            for (var column = 0; column < COLUMNS && i + column < LANGUAGES.size(); column++) {
+                var code = LANGUAGES.get(i + column);
+                var marker = code.equals(this.initialLanguage) ? "✓ " : "";
+                var columnX = x + column * (columnWidth + COLUMN_GAP);
+
+                this.addButtonRow(columnX, y, columnWidth, Component.literal(marker + code), () -> {
+                    this.onSelect.accept(code);
+                    this.onClose();
+                });
+            }
+
+            y += ROW_HEIGHT;
         }
 
         return y;

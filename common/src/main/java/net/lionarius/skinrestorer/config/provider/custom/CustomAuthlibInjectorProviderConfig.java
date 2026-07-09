@@ -19,6 +19,10 @@ public final class CustomAuthlibInjectorProviderConfig extends CustomProviderCon
         return this.baseUrl;
     }
 
+    public void baseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
     @Override
     public Result<SkinProvider, String> createSkinProvider(SkinSigner skinSigner) {
         if (this.baseUrl.isEmpty()) return Result.error("baseUrl is not configured");

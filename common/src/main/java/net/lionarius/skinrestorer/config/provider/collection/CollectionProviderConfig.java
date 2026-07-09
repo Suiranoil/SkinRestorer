@@ -23,6 +23,10 @@ public final class CollectionProviderConfig extends BuiltInProviderConfig implem
         return this.sources;
     }
 
+    public void sources(List<CollectionSkinSource> sources) {
+        this.sources = sources;
+    }
+
     @Override
     public void gsonPostProcess() {
         if (this.sources == null) {
