@@ -4,11 +4,19 @@ plugins {
     id("multiloader-publish")
 }
 
+repositories {
+    maven {
+        name = "TerraformersMC"
+        url = uri("https://maven.terraformersmc.com/")
+    }
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
 
     implementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     compileOnly("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
+    compileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
     include(implementation("org.mineskin:java-client:${property("mineskin_client_version")}")!!)
 }

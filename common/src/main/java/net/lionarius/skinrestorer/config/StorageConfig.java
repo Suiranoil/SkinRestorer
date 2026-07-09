@@ -11,6 +11,10 @@ public final class StorageConfig implements GsonPostProcessable {
         return this.location;
     }
 
+    public void location(Location location) {
+        this.location = location;
+    }
+
     @Override
     public void gsonPostProcess() {
         if (this.location == null) {

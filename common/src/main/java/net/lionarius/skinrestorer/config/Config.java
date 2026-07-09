@@ -50,6 +50,16 @@ public final class Config implements GsonPostProcessable {
         return this.providers;
     }
 
+    public void language(String language) {
+        this.language = language;
+    }
+
+    public void save(Path path) {
+        var jsonObject = JsonUtils.toJsonObject(this);
+        Config.MIGRATOR.stampVersion(jsonObject);
+        FileUtils.writeFile(path.resolve(Config.CONFIG_FILENAME), JsonUtils.toJson(jsonObject));
+    }
+
     public static Config load(Path path) {
         var configFile = path.resolve(Config.CONFIG_FILENAME);
 
@@ -69,9 +79,7 @@ public final class Config implements GsonPostProcessable {
 
         if (config == null) config = new Config();
 
-        var jsonObject = JsonUtils.toJsonObject(config);
-        MIGRATOR.stampVersion(jsonObject);
-        FileUtils.writeFile(configFile, JsonUtils.toJson(jsonObject));
+        config.save(path);
 
         return config;
     }

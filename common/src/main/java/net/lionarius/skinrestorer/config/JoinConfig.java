@@ -19,12 +19,20 @@ public final class JoinConfig implements GsonPostProcessable {
         return this.refreshSkin;
     }
 
+    public void refreshSkin(boolean refreshSkin) {
+        this.refreshSkin = refreshSkin;
+    }
+
     public List<String> skipRefreshProviders() {
         return this.skipRefreshProviders;
     }
 
     public int applyDelay() {
         return this.applyDelay;
+    }
+
+    public void applyDelay(int applyDelay) {
+        this.applyDelay = applyDelay;
     }
 
     public AutoFetchConfig autoFetchConfig() {

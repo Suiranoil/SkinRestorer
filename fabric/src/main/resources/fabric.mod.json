@@ -18,6 +18,9 @@
     "entrypoints": {
         "main": [
             "net.lionarius.skinrestorer.fabric.SkinRestorerFabric"
+        ],
+        "modmenu": [
+            "net.lionarius.skinrestorer.fabric.compat.modmenu.SkinRestorerModMenu"
         ]
     },
     "mixins": [
@@ -31,6 +34,7 @@
         "java": ">=${java_version}"
     },
     "suggests": {
-        "fabric-api": "*"
+        "fabric-api": "*",
+        "modmenu": "*"
     }
 }

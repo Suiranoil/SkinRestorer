@@ -17,12 +17,28 @@ public final class RequestConfig implements GsonPostProcessable {
         return Optional.ofNullable(this.parsedProxy);
     }
 
+    public String rawProxy() {
+        return this.proxy;
+    }
+
+    public void rawProxy(String proxy) {
+        this.proxy = proxy;
+    }
+
     public long timeout() {
         return this.timeout;
     }
 
+    public void timeout(long timeout) {
+        this.timeout = timeout;
+    }
+
     public String userAgent() {
         return this.userAgent;
+    }
+
+    public void userAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
     @Override

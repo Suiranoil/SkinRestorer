@@ -20,8 +20,16 @@ public final class AutoFetchConfig implements GsonPostProcessable {
         return this.enabled;
     }
 
+    public void enabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public boolean overrideExisting() {
         return this.overrideExisting;
+    }
+
+    public void overrideExisting(boolean overrideExisting) {
+        this.overrideExisting = overrideExisting;
     }
 
     public List<String> providers() {

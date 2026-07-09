@@ -4,5 +4,18 @@
     "skinrestorer.command.skin.failed": "Failed to change skin: %s",
     "skinrestorer.command.skin.ok": "Skin changed",
     "skinrestorer.command.skin.loading": "Loading skin...",
-    "skinrestorer.command.skin.config_reloaded": "Config has been reloaded"
+    "skinrestorer.command.skin.config_reloaded": "Config has been reloaded",
+
+    "skinrestorer.config.title": "SkinRestorer Configuration",
+    "skinrestorer.config.language": "Language",
+    "skinrestorer.config.storage.location": "Storage Location",
+    "skinrestorer.config.storage.location.world": "World",
+    "skinrestorer.config.storage.location.global": "Global",
+    "skinrestorer.config.join.refresh_skin": "Refresh Skin On Join",
+    "skinrestorer.config.join.apply_delay": "Apply Delay (ticks)",
+    "skinrestorer.config.join.auto_fetch.enabled": "Auto Fetch On First Join",
+    "skinrestorer.config.join.auto_fetch.override_existing": "Override Existing Skin",
+    "skinrestorer.config.request.proxy": "Proxy (host:port)",
+    "skinrestorer.config.request.timeout": "Request Timeout (seconds)",
+    "skinrestorer.config.request.user_agent": "User Agent"
 }
