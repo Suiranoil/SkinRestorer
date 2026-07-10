@@ -31,7 +31,9 @@ abstract class AbstractConfigScreen extends Screen {
     protected static final int PAIR_GAP = 8;
 
     private static final int HEADER_HEIGHT = 32;
-    private static final int INNER_TOP_PADDING = 8;
+    // matches the gap a plain button row already has below it (ROW_HEIGHT is taller than the
+    // BUTTON_HEIGHT widget it holds), so the first row's spacing looks the same as the rest
+    private static final int INNER_TOP_PADDING = ROW_HEIGHT - BUTTON_HEIGHT;
     private static final int PANEL_GAP = 6;
     private static final int BUTTON_GAP = 6;
     private static final int BOTTOM_MARGIN = 8;
@@ -40,6 +42,7 @@ abstract class AbstractConfigScreen extends Screen {
     protected final Screen parent;
 
     private RowList rowList;
+    private int contentHeight;
 
     protected AbstractConfigScreen(Component title, Screen parent) {
         super(title);
@@ -93,10 +96,19 @@ abstract class AbstractConfigScreen extends Screen {
         this.addRenderableWidget(this.rowList);
 
         // top-aligned screens get a small invisible spacer so their first row doesn't
-        // touch the panel's top edge; centered screens are already balanced without one
+        // touch the panel's top edge; centered screens are balanced manually below instead
         if (!this.centerVertically()) this.addWidgetsRow(INNER_TOP_PADDING);
 
         this.buildRows(x);
+
+        if (this.centerVertically()) {
+            // ContainerObjectSelectionList's own centerListVertically field turned out to only
+            // affect scroll-to-entry behaviour, not the resting layout of a short list - so the
+            // actual centering is done here, using the real total height of what buildRows just
+            // added, retroactively inserted as a blank spacer above everything via addEntryToTop
+            var topPad = (listHeight - this.contentHeight) / 2;
+            if (topPad > 0) this.rowList.addRowToTop(new RowEntry(List.of(), new int[0]), topPad);
+        }
 
         if (fixedBottomHeight > 0) this.buildFixedBottomRows(x, listBottom + PANEL_GAP);
 
@@ -171,14 +183,19 @@ abstract class AbstractConfigScreen extends Screen {
             return ROW_WIDTH;
         }
 
-        // bridges the protected addEntry(E, int) from AbstractSelectionList, which
-        // AbstractConfigScreen can't call directly since it isn't a subclass of that vanilla type
+        // bridges the protected addEntry(E, int)/addEntryToTop(E, int) from AbstractSelectionList,
+        // which AbstractConfigScreen can't call directly since it isn't a subclass of that vanilla type
         void addRow(RowEntry entry, int height) {
             this.addEntry(entry, height);
+        }
+
+        void addRowToTop(RowEntry entry, int height) {
+            this.addEntryToTop(entry, height);
         }
     }
 
     private void addEntry(int height, List<AbstractWidget> widgets, int[] offsetsY) {
+        this.contentHeight += height;
         this.rowList.addRow(new RowEntry(widgets, offsetsY), height);
     }
 
@@ -312,7 +329,9 @@ abstract class AbstractConfigScreen extends Screen {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         var titleText = this.title.getString();
-        var titleY = (HEADER_HEIGHT - 9) / 2;
+        // centered against the panel's own real top (not just the HEADER_HEIGHT constant we
+        // asked for), so it stays centered even if the list ends up positioned slightly differently
+        var titleY = (this.rowList.getY() - this.font.lineHeight) / 2;
         graphics.text(this.font, titleText, (this.width - this.font.width(titleText)) / 2, titleY, 0xFFFFFFFF, true);
     }
 
