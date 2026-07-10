@@ -65,6 +65,14 @@ abstract class AbstractConfigScreen extends Screen {
         return false;
     }
 
+    /** Override to reserve space at the bottom of the panel for fixed (non-scrolling) rows. */
+    protected int fixedBottomHeight() {
+        return 0;
+    }
+
+    /** Adds fixed rows pinned to the bottom of the panel, below {@code y}. No-op unless overridden. */
+    protected void buildFixedBottomRows(int x, int y) {}
+
     protected int centeredX(int width) {
         return (this.width - width) / 2;
     }
@@ -81,6 +89,8 @@ abstract class AbstractConfigScreen extends Screen {
                 : TOP_PADDING;
         this.scrollAmount = Math.max(0, Math.min(this.scrollAmount, this.maxScroll()));
         this.updatePositions();
+
+        if (this.fixedBottomHeight() > 0) this.buildFixedBottomRows(x, this.contentBottom());
 
         var footerY = this.height - FOOTER_HEIGHT + 4;
         if (this.showDoneButton()) {
@@ -100,9 +110,13 @@ abstract class AbstractConfigScreen extends Screen {
         }
     }
 
+    private int contentBottom() {
+        return this.height - FOOTER_HEIGHT - this.fixedBottomHeight();
+    }
+
     private int viewportHeight() {
         var padding = this.centerVertically() ? 0 : TOP_PADDING;
-        return Math.max(0, this.height - HEADER_HEIGHT - FOOTER_HEIGHT - padding);
+        return Math.max(0, this.contentBottom() - HEADER_HEIGHT - padding);
     }
 
     private int maxScroll() {
@@ -110,11 +124,14 @@ abstract class AbstractConfigScreen extends Screen {
     }
 
     private void updatePositions() {
+        var contentBottom = this.contentBottom();
+
         for (var entry : this.entries) {
-            entry.widget()
-                    .setPosition(
-                            entry.widget().getX(),
-                            HEADER_HEIGHT + this.verticalOffset + entry.relativeY() - this.scrollAmount);
+            var widget = entry.widget();
+            var y = HEADER_HEIGHT + this.verticalOffset + entry.relativeY() - this.scrollAmount;
+            widget.setPosition(widget.getX(), y);
+            // widgets that would poke out past the darkened panel are hidden instead of clipped
+            widget.visible = y >= HEADER_HEIGHT && y + widget.getHeight() <= contentBottom;
         }
     }
 
@@ -142,7 +159,7 @@ abstract class AbstractConfigScreen extends Screen {
         return mouseX >= trackX - 2
                 && mouseX <= trackX + SCROLLBAR_WIDTH + 2
                 && mouseY >= HEADER_HEIGHT
-                && mouseY <= this.height - FOOTER_HEIGHT;
+                && mouseY <= this.contentBottom();
     }
 
     private void scrollToMouseY(double mouseY) {
@@ -150,7 +167,7 @@ abstract class AbstractConfigScreen extends Screen {
         if (maxScroll <= 0) return;
 
         var trackTop = HEADER_HEIGHT;
-        var trackHeight = this.height - FOOTER_HEIGHT - trackTop;
+        var trackHeight = this.contentBottom() - trackTop;
         var thumbHeight = this.scrollbarThumbHeight(trackHeight, maxScroll);
         var usableTrack = Math.max(1, trackHeight - thumbHeight);
 
@@ -316,9 +333,24 @@ abstract class AbstractConfigScreen extends Screen {
         return y + ROW_HEIGHT;
     }
 
+    /** Adds a button pinned at a fixed position within the panel, unaffected by scrolling. */
+    protected void addFixedButtonRow(int x, int y, int width, String labelKey, Runnable onClick) {
+        this.addRenderableWidget(Button.builder(Component.translatable(labelKey), button -> onClick.run())
+                .bounds(x, y, width, 20)
+                .build());
+    }
+
     private void renderPanelBackground(GuiGraphicsExtractor graphics) {
         var panelX = this.centeredX(PANEL_WIDTH);
         graphics.fill(panelX, HEADER_HEIGHT, panelX + PANEL_WIDTH, this.height - FOOTER_HEIGHT, 0x60000000);
+    }
+
+    private void renderDivider(GuiGraphicsExtractor graphics) {
+        if (this.fixedBottomHeight() <= 0) return;
+
+        var panelX = this.centeredX(PANEL_WIDTH);
+        var dividerY = this.contentBottom();
+        graphics.fill(panelX + 10, dividerY, panelX + PANEL_WIDTH - 10, dividerY + 1, 0x80FFFFFF);
     }
 
     private void renderScrollbar(GuiGraphicsExtractor graphics) {
@@ -327,7 +359,7 @@ abstract class AbstractConfigScreen extends Screen {
 
         var trackX = this.scrollbarTrackX();
         var trackTop = HEADER_HEIGHT;
-        var trackBottom = this.height - FOOTER_HEIGHT;
+        var trackBottom = this.contentBottom();
         var trackHeight = trackBottom - trackTop;
 
         graphics.fill(trackX, trackTop, trackX + SCROLLBAR_WIDTH, trackBottom, 0x40FFFFFF);
@@ -347,6 +379,7 @@ abstract class AbstractConfigScreen extends Screen {
         graphics.text(this.font, titleText, (this.width - this.font.width(titleText)) / 2, 12, 0xFFFFFFFF, true);
 
         this.renderScrollbar(graphics);
+        this.renderDivider(graphics);
     }
 
     @Override

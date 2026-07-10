@@ -34,19 +34,37 @@ public final class SkinRestorerCustomProvidersScreen extends AbstractConfigScree
             y = this.addButtonRow(x, y, label, () -> this.openEditor(index));
         }
 
-        y = this.addButtonRow(
-                x, y, "skinrestorer.config.providers.custom.add_yggdrasil", () -> this.openNew(
-                        new CustomYggdrasilProviderConfig()));
-        y = this.addButtonRow(
+        return y;
+    }
+
+    @Override
+    protected int fixedBottomHeight() {
+        return ROW_HEIGHT + 8;
+    }
+
+    @Override
+    protected void buildFixedBottomRows(int x, int y) {
+        var addY = y + 8;
+        var columnWidth = (ROW_WIDTH - 2 * PAIR_GAP) / 3;
+
+        this.addFixedButtonRow(
                 x,
-                y,
+                addY,
+                columnWidth,
+                "skinrestorer.config.providers.custom.add_yggdrasil",
+                () -> this.openNew(new CustomYggdrasilProviderConfig()));
+        this.addFixedButtonRow(
+                x + columnWidth + PAIR_GAP,
+                addY,
+                columnWidth,
                 "skinrestorer.config.providers.custom.add_authlib_injector",
                 () -> this.openNew(new CustomAuthlibInjectorProviderConfig()));
-        y = this.addButtonRow(
-                x, y, "skinrestorer.config.providers.custom.add_username_url", () -> this.openNew(
-                        new CustomUsernameUrlProviderConfig()));
-
-        return y;
+        this.addFixedButtonRow(
+                x + 2 * (columnWidth + PAIR_GAP),
+                addY,
+                columnWidth,
+                "skinrestorer.config.providers.custom.add_username_url",
+                () -> this.openNew(new CustomUsernameUrlProviderConfig()));
     }
 
     private void openEditor(int index) {
