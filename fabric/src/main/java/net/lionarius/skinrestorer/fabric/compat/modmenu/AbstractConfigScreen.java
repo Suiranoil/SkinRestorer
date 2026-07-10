@@ -27,9 +27,12 @@ abstract class AbstractConfigScreen extends Screen {
     protected static final int ROW_WIDTH = 320;
     protected static final int HALF_ROW_WIDTH = ROW_WIDTH / 2;
 
+    protected static final int PAIR_GAP = 8;
+
     private static final int PANEL_WIDTH = ROW_WIDTH + 40;
     private static final int SCROLLBAR_GAP = 6;
     private static final int SCROLLBAR_WIDTH = 4;
+    private static final int TOP_PADDING = 6;
 
     protected final Screen parent;
 
@@ -73,8 +76,9 @@ abstract class AbstractConfigScreen extends Screen {
         var x = (this.width - ROW_WIDTH) / 2;
         this.contentHeight = this.buildRows(x);
 
-        var viewport = Math.max(0, this.height - HEADER_HEIGHT - FOOTER_HEIGHT);
-        this.verticalOffset = this.centerVertically() ? Math.max(0, (viewport - this.contentHeight) / 2) : 0;
+        this.verticalOffset = this.centerVertically()
+                ? Math.max(0, (this.viewportHeight() - this.contentHeight) / 2)
+                : TOP_PADDING;
         this.scrollAmount = Math.max(0, Math.min(this.scrollAmount, this.maxScroll()));
         this.updatePositions();
 
@@ -96,9 +100,13 @@ abstract class AbstractConfigScreen extends Screen {
         }
     }
 
+    private int viewportHeight() {
+        var padding = this.centerVertically() ? 0 : TOP_PADDING;
+        return Math.max(0, this.height - HEADER_HEIGHT - FOOTER_HEIGHT - padding);
+    }
+
     private int maxScroll() {
-        var viewport = Math.max(0, this.height - HEADER_HEIGHT - FOOTER_HEIGHT);
-        return Math.max(0, this.contentHeight - viewport);
+        return Math.max(0, this.contentHeight - this.viewportHeight());
     }
 
     private void updatePositions() {
@@ -262,6 +270,31 @@ abstract class AbstractConfigScreen extends Screen {
         // non-digit input is simply ignored on save (callers fall back to the previous value);
         // EditBox has no input filter in this Minecraft version
         return this.addTextRow(x, y, labelKey, initial, onChange);
+    }
+
+    /** A toggle on the left half and a labelled text field on the right half, sharing one row. */
+    protected int addToggleTextRow(
+            int x,
+            int y,
+            String toggleLabelKey,
+            boolean toggleInitial,
+            Consumer<Boolean> onToggleChange,
+            String textLabelKey,
+            String textInitial,
+            Consumer<String> onTextChange) {
+        var rightX = x + HALF_ROW_WIDTH + PAIR_GAP;
+
+        this.addToggleRow(x, y + 12, HALF_ROW_WIDTH, toggleLabelKey, toggleInitial, onToggleChange);
+
+        var label = Component.translatable(textLabelKey);
+        this.addRow(new StringWidget(rightX, y, HALF_ROW_WIDTH, 12, label, this.font), y);
+
+        var box = new EditBox(this.font, rightX, y + 12, HALF_ROW_WIDTH, 18, label);
+        box.setValue(textInitial);
+        box.setResponder(onTextChange::accept);
+        this.addRow(box, y + 12);
+
+        return y + ROW_HEIGHT + 12;
     }
 
     protected int addButtonRow(int x, int y, String labelKey, Runnable onClick) {

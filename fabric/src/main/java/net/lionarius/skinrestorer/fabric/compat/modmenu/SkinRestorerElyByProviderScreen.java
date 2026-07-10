@@ -24,14 +24,21 @@ public final class SkinRestorerElyByProviderScreen extends AbstractConfigScreen 
     protected int buildRows(int x) {
         var y = 0;
 
-        y = this.addToggleRow(x, y, "skinrestorer.config.providers.enabled", this.enabled, value -> this.enabled = value);
-        y = this.addTextRow(x, y, "skinrestorer.config.providers.name", this.name, value -> this.name = value);
-        y = this.addToggleRow(
-                x, y, "skinrestorer.config.providers.cache.enabled", this.cacheEnabled, value -> this.cacheEnabled =
-                        value);
-        y = this.addNumberRow(
+        y = this.addToggleTextRow(
                 x,
                 y,
+                "skinrestorer.config.providers.enabled",
+                this.enabled,
+                value -> this.enabled = value,
+                "skinrestorer.config.providers.name",
+                this.name,
+                value -> this.name = value);
+        y = this.addToggleTextRow(
+                x,
+                y,
+                "skinrestorer.config.providers.cache.enabled",
+                this.cacheEnabled,
+                value -> this.cacheEnabled = value,
                 "skinrestorer.config.providers.cache.duration",
                 Long.toString(this.cacheDuration),
                 value -> this.cacheDuration =

@@ -8,8 +8,6 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 public final class SkinRestorerConfigScreen extends AbstractConfigScreen {
-    private static final int PAIR_GAP = 8;
-
     private String language;
     private StorageConfig.Location storageLocation;
 
