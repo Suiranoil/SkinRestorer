@@ -32,10 +32,12 @@ abstract class AbstractConfigScreen extends Screen {
 
     private static final int HEADER_HEIGHT = 24;
     private static final int FOOTER_HEIGHT = 28;
+    private static final int LIST_MARGIN = 20;
 
     protected final Screen parent;
 
     private RowList rowList;
+    private int listBottom;
 
     protected AbstractConfigScreen(Component title, Screen parent) {
         super(title);
@@ -70,24 +72,26 @@ abstract class AbstractConfigScreen extends Screen {
         return (this.width - width) / 2;
     }
 
-    private int listBottom() {
-        return this.height - FOOTER_HEIGHT - this.fixedBottomHeight();
-    }
-
     @Override
     protected final void init() {
         var x = (this.width - ROW_WIDTH) / 2;
+        var requestedBottom = this.height - FOOTER_HEIGHT - LIST_MARGIN - this.fixedBottomHeight();
 
         assert this.minecraft != null;
         this.rowList = new RowList(
-                this.minecraft, this.width, this.listBottom(), HEADER_HEIGHT, ROW_HEIGHT, this.centerVertically());
+                this.minecraft, this.width, requestedBottom, HEADER_HEIGHT, ROW_HEIGHT, this.centerVertically());
         this.addRenderableWidget(this.rowList);
 
         this.buildRows(x);
 
-        if (this.fixedBottomHeight() > 0) this.buildFixedBottomRows(x, this.listBottom());
+        // the list's own reported bounds are used as ground truth for everything positioned
+        // below it, rather than trusting the constructor arguments meant what we assumed -
+        // this way nothing we place can end up overlapping the list's actual clickable area
+        this.listBottom = this.rowList.getY() + this.rowList.getHeight();
 
-        var footerY = this.height - FOOTER_HEIGHT + 4;
+        if (this.fixedBottomHeight() > 0) this.buildFixedBottomRows(x, this.listBottom);
+
+        var footerY = Math.max(this.height - FOOTER_HEIGHT + 4, this.listBottom + 8);
         if (this.showDoneButton()) {
             this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> {
                         this.onSave();
@@ -296,7 +300,7 @@ abstract class AbstractConfigScreen extends Screen {
 
         if (this.fixedBottomHeight() > 0) {
             var panelX = this.centeredX(ROW_WIDTH + 40);
-            var dividerY = this.listBottom() + 3;
+            var dividerY = this.listBottom + 3;
             graphics.fill(panelX + 10, dividerY, panelX + ROW_WIDTH + 40 - 10, dividerY + 1, 0x80FFFFFF);
         }
     }
