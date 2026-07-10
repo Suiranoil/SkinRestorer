@@ -209,8 +209,14 @@ abstract class AbstractConfigScreen extends Screen {
         return super.mouseReleased(event);
     }
 
+    /**
+     * Rows are registered as interactive children only (not "renderable" widgets) - they're
+     * drawn manually in extractRenderState within a scissor region clipped to the panel, while
+     * footer/fixed-bottom widgets stay on the normal addRenderableWidget path and render
+     * unclipped via the super call.
+     */
     protected <T extends AbstractWidget> T addRow(T widget, int relativeY) {
-        this.addRenderableWidget(widget);
+        this.addWidget(widget);
         this.entries.add(new ScrollEntry(widget, relativeY));
 
         return widget;
@@ -387,6 +393,14 @@ abstract class AbstractConfigScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         this.renderPanelBackground(graphics);
 
+        var panelX = this.centeredX(PANEL_WIDTH);
+        graphics.enableScissor(panelX, HEADER_HEIGHT, panelX + PANEL_WIDTH, this.contentBottom());
+        for (var entry : this.entries) {
+            entry.widget().extractRenderState(graphics, mouseX, mouseY, delta);
+        }
+        graphics.disableScissor();
+
+        // footer + fixed-bottom widgets go through addRenderableWidget, so this only renders those
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         var titleText = this.title.getString();
