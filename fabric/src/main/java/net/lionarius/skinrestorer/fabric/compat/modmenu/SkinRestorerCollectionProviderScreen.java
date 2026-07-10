@@ -10,7 +10,6 @@ import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public final class SkinRestorerCollectionProviderScreen extends AbstractConfigScreen {
     private final List<CollectionSkinSource> sources;
@@ -64,13 +63,7 @@ public final class SkinRestorerCollectionProviderScreen extends AbstractConfigSc
 
     @Override
     protected void buildFixedBottomRows(int x, int y) {
-        var halfWidth = HALF_ROW_WIDTH - 4;
-        var rightX = x + HALF_ROW_WIDTH + 4;
-
-        this.addFixedButtonRow(
-                x, y, halfWidth, "skinrestorer.config.providers.collection.add_file", () -> this.openNew(new CollectionSkinFile()));
-        this.addFixedButtonRow(
-                rightX, y, halfWidth, "skinrestorer.config.providers.collection.add_url", () -> this.openNew(new CollectionSkinUrl()));
+        this.addFixedButtonRow(x, y, ROW_WIDTH, "skinrestorer.config.providers.collection.add", this::openNew);
     }
 
     private static long parseLongOrDefault(String value, long fallback) {
@@ -100,21 +93,15 @@ public final class SkinRestorerCollectionProviderScreen extends AbstractConfigSc
         assert this.minecraft != null;
 
         var source = this.sources.get(index);
-        this.minecraft.setScreen(SkinRestorerCollectionProviderScreen.createEditor(
+        this.minecraft.setScreen(new SkinRestorerCollectionSkinScreen(
                 this, source, edited -> this.sources.set(index, edited), () -> this.sources.remove(index)));
     }
 
-    private void openNew(CollectionSkinSource blank) {
+    private void openNew() {
         assert this.minecraft != null;
 
-        this.minecraft.setScreen(SkinRestorerCollectionProviderScreen.createEditor(this, blank, this.sources::add, null));
-    }
-
-    private static Screen createEditor(
-            Screen parent, CollectionSkinSource source, Consumer<CollectionSkinSource> onCommit, Runnable onDelete) {
-        if (source instanceof CollectionSkinFile file) return new SkinRestorerCollectionFileScreen(parent, file, onCommit, onDelete);
-        if (source instanceof CollectionSkinUrl url) return new SkinRestorerCollectionUrlScreen(parent, url, onCommit, onDelete);
-        throw new IllegalStateException("unknown collection skin source type: " + source.getClass());
+        this.minecraft.setScreen(
+                new SkinRestorerCollectionSkinScreen(this, new CollectionSkinFile(), this.sources::add, null));
     }
 
     @Override

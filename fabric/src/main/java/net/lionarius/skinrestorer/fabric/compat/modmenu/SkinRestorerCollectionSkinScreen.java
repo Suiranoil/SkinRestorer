@@ -1,5 +1,6 @@
 package net.lionarius.skinrestorer.fabric.compat.modmenu;
 
+import net.lionarius.skinrestorer.config.provider.collection.CollectionSkinFile;
 import net.lionarius.skinrestorer.config.provider.collection.CollectionSkinSource;
 import net.lionarius.skinrestorer.config.provider.collection.CollectionSkinUrl;
 import net.lionarius.skinrestorer.skin.SkinVariant;
@@ -9,37 +10,42 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.function.Consumer;
 
-public final class SkinRestorerCollectionUrlScreen extends AbstractConfigScreen {
-    private final CollectionSkinUrl source;
+public final class SkinRestorerCollectionSkinScreen extends AbstractConfigScreen {
     private final Consumer<CollectionSkinSource> onCommit;
     private final Runnable onDelete;
 
-    private String url;
+    private String value;
     private SkinVariant variant;
 
-    public SkinRestorerCollectionUrlScreen(
-            Screen parent, CollectionSkinUrl source, Consumer<CollectionSkinSource> onCommit, Runnable onDelete) {
+    public SkinRestorerCollectionSkinScreen(
+            Screen parent, CollectionSkinSource source, Consumer<CollectionSkinSource> onCommit, Runnable onDelete) {
         super(
                 Component.translatable(
                         onDelete == null
-                                ? "skinrestorer.config.providers.collection.url.add_title"
-                                : "skinrestorer.config.providers.collection.url.title"),
+                                ? "skinrestorer.config.providers.collection.skin.add_title"
+                                : "skinrestorer.config.providers.collection.skin.title"),
                 parent);
-        this.source = source;
         this.onCommit = onCommit;
         this.onDelete = onDelete;
 
-        this.url = source.url();
+        this.value = SkinRestorerCollectionSkinScreen.valueOf(source);
         this.variant = source.variant();
+    }
+
+    private static String valueOf(CollectionSkinSource source) {
+        if (source instanceof CollectionSkinFile file) return file.path();
+        if (source instanceof CollectionSkinUrl url) return url.url();
+        return "";
     }
 
     @Override
     protected void buildRows(int x) {
-        this.addTextRow(x, "skinrestorer.config.providers.collection.url.value", this.url, value -> this.url = value);
+        this.addTextRow(
+                x, "skinrestorer.config.providers.collection.skin.value", this.value, value -> this.value = value);
         this.addCycleRow(
                 x,
                 "skinrestorer.config.providers.collection.variant",
-                SkinRestorerCollectionUrlScreen::variantName,
+                SkinRestorerCollectionSkinScreen::variantName,
                 List.of(SkinVariant.CLASSIC, SkinVariant.SLIM),
                 this.variant,
                 value -> this.variant = value);
@@ -61,9 +67,19 @@ public final class SkinRestorerCollectionUrlScreen extends AbstractConfigScreen 
 
     @Override
     protected void onSave() {
-        this.source.url(this.url);
-        this.source.variant(this.variant);
+        CollectionSkinSource result;
+        if (this.value.startsWith("http://") || this.value.startsWith("https://")) {
+            var url = new CollectionSkinUrl();
+            url.url(this.value);
+            url.variant(this.variant);
+            result = url;
+        } else {
+            var file = new CollectionSkinFile();
+            file.path(this.value);
+            file.variant(this.variant);
+            result = file;
+        }
 
-        this.onCommit.accept(this.source);
+        this.onCommit.accept(result);
     }
 }

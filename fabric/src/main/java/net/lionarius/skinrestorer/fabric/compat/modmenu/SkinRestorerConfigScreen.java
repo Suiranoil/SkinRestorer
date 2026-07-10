@@ -27,6 +27,11 @@ public final class SkinRestorerConfigScreen extends AbstractConfigScreen {
     }
 
     @Override
+    protected boolean showBackground() {
+        return false;
+    }
+
+    @Override
     protected void buildRows(int x) {
         var leftX = this.centeredX(HALF_ROW_WIDTH * 2 + PAIR_GAP);
         var rightX = leftX + HALF_ROW_WIDTH + PAIR_GAP;

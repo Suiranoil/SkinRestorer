@@ -31,6 +31,8 @@ abstract class AbstractConfigScreen extends Screen {
     protected static final int PAIR_GAP = 8;
 
     protected static final int BUTTON_HEIGHT = 20;
+    // EditBox otherwise defaults to a 32-character limit, too short for URLs and file paths
+    protected static final int TEXT_FIELD_MAX_LENGTH = 1024;
 
     private static final int HEADER_HEIGHT = 32;
     // matches the gap a plain button row already has below it (ROW_HEIGHT is taller than the
@@ -66,6 +68,11 @@ abstract class AbstractConfigScreen extends Screen {
         return false;
     }
 
+    /** Override to return {@code false} to hide the list's darkened background/scrollbar texture. */
+    protected boolean showBackground() {
+        return true;
+    }
+
     /** Override to reserve space below the list for fixed (non-scrolling) rows, e.g. {@code BUTTON_HEIGHT}. */
     protected int fixedBottomHeight() {
         return 0;
@@ -80,6 +87,12 @@ abstract class AbstractConfigScreen extends Screen {
 
     @Override
     protected final void init() {
+        // init() can run more than once on the same screen instance - Minecraft re-inits a
+        // screen every time it's set as the current screen, including when navigating "back" to
+        // a parent screen we're still holding a reference to, not just on first creation - so any
+        // state built up during a previous init() has to be wiped here, not just at construction
+        this.contentHeight = 0;
+
         var x = (this.width - ROW_WIDTH) / 2;
 
         // laid out bottom-up so every gap is an explicit, small constant instead of
@@ -93,7 +106,13 @@ abstract class AbstractConfigScreen extends Screen {
 
         assert this.minecraft != null;
         this.rowList = new RowList(
-                this.minecraft, this.width, listHeight, HEADER_HEIGHT, ROW_HEIGHT, this.centerVertically());
+                this.minecraft,
+                this.width,
+                listHeight,
+                HEADER_HEIGHT,
+                ROW_HEIGHT,
+                this.centerVertically(),
+                this.showBackground());
         this.addRenderableWidget(this.rowList);
 
         // top-aligned screens get a small invisible spacer so their first row doesn't
@@ -166,9 +185,19 @@ abstract class AbstractConfigScreen extends Screen {
     }
 
     private static final class RowList extends ContainerObjectSelectionList<RowEntry> {
-        RowList(Minecraft minecraft, int width, int height, int top, int itemHeight, boolean centerVertically) {
+        private final boolean showBackground;
+
+        RowList(
+                Minecraft minecraft,
+                int width,
+                int height,
+                int top,
+                int itemHeight,
+                boolean centerVertically,
+                boolean showBackground) {
             super(minecraft, width, height, top, itemHeight);
             this.centerListVertically = centerVertically;
+            this.showBackground = showBackground;
         }
 
         @Override
@@ -182,6 +211,11 @@ abstract class AbstractConfigScreen extends Screen {
         @Override
         public int getRowWidth() {
             return ROW_WIDTH;
+        }
+
+        @Override
+        protected void extractListBackground(GuiGraphicsExtractor graphics) {
+            if (this.showBackground) super.extractListBackground(graphics);
         }
 
         // bridges the protected addEntry(E, int)/addEntryToTop(E, int) from AbstractSelectionList,
@@ -251,6 +285,7 @@ abstract class AbstractConfigScreen extends Screen {
         var labelWidget = new StringWidget(x, 0, ROW_WIDTH, 12, label, this.font);
 
         var box = new EditBox(this.font, x, 0, ROW_WIDTH, 18, label);
+        box.setMaxLength(TEXT_FIELD_MAX_LENGTH);
         box.setValue(initial);
         box.setResponder(onChange::accept);
 
@@ -293,6 +328,7 @@ abstract class AbstractConfigScreen extends Screen {
         var labelWidget = new StringWidget(rightX, 0, halfWidth, 12, label, this.font);
 
         var box = new EditBox(this.font, rightX, 0, halfWidth, 18, label);
+        box.setMaxLength(TEXT_FIELD_MAX_LENGTH);
         box.setValue(textInitial);
         box.setResponder(onTextChange::accept);
 
