@@ -30,6 +30,8 @@ abstract class AbstractConfigScreen extends Screen {
     protected static final int HALF_ROW_WIDTH = ROW_WIDTH / 2;
     protected static final int PAIR_GAP = 8;
 
+    protected static final int BUTTON_HEIGHT = 20;
+
     private static final int HEADER_HEIGHT = 32;
     // matches the gap a plain button row already has below it (ROW_HEIGHT is taller than the
     // BUTTON_HEIGHT widget it holds), so the first row's spacing looks the same as the rest
@@ -37,7 +39,6 @@ abstract class AbstractConfigScreen extends Screen {
     private static final int PANEL_GAP = 6;
     private static final int BUTTON_GAP = 6;
     private static final int BOTTOM_MARGIN = 8;
-    protected static final int BUTTON_HEIGHT = 20;
 
     protected final Screen parent;
 
