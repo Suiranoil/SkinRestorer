@@ -2,6 +2,8 @@ package net.lionarius.skinrestorer.fabric.compat.modmenu;
 
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.StorageConfig;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -25,46 +27,44 @@ public final class SkinRestorerConfigScreen extends AbstractConfigScreen {
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
+    protected void buildRows(int x) {
         var leftX = this.centeredX(HALF_ROW_WIDTH * 2 + PAIR_GAP);
         var rightX = leftX + HALF_ROW_WIDTH + PAIR_GAP;
 
-        this.addButtonRow(
-                leftX,
-                y,
-                HALF_ROW_WIDTH,
-                Component.translatable("skinrestorer.config.language_button", this.language),
-                () -> this.minecraft.setScreen(
-                        new SkinRestorerLanguageScreen(this, this.language, value -> this.language = value)));
-        y = this.addCycleRow(
-                rightX,
-                y,
-                HALF_ROW_WIDTH,
-                "skinrestorer.config.storage.location",
-                SkinRestorerConfigScreen::storageLocationName,
-                List.of(StorageConfig.Location.values()),
-                this.storageLocation,
-                value -> this.storageLocation = value);
+        var languageButton = Button.builder(
+                        Component.translatable("skinrestorer.config.language_button", this.language),
+                        button -> this.minecraft.setScreen(new SkinRestorerLanguageScreen(
+                                this, this.language, value -> this.language = value)))
+                .bounds(leftX, 0, HALF_ROW_WIDTH, 20)
+                .build();
+        var storageLocationButton = CycleButton.builder(SkinRestorerConfigScreen::storageLocationName, this.storageLocation)
+                .withValues(List.of(StorageConfig.Location.values()))
+                .create(
+                        rightX,
+                        0,
+                        HALF_ROW_WIDTH,
+                        20,
+                        Component.translatable("skinrestorer.config.storage.location"),
+                        (button, value) -> this.storageLocation = value);
+        this.addWidgetsRow(ROW_HEIGHT, languageButton, storageLocationButton);
+
+        var joinButton = Button.builder(
+                        Component.translatable("skinrestorer.config.join.title"),
+                        button -> this.minecraft.setScreen(new SkinRestorerJoinScreen(this)))
+                .bounds(leftX, 0, HALF_ROW_WIDTH, 20)
+                .build();
+        var requestButton = Button.builder(
+                        Component.translatable("skinrestorer.config.request.title"),
+                        button -> this.minecraft.setScreen(new SkinRestorerRequestScreen(this)))
+                .bounds(rightX, 0, HALF_ROW_WIDTH, 20)
+                .build();
+        this.addWidgetsRow(ROW_HEIGHT, joinButton, requestButton);
 
         this.addButtonRow(
-                leftX, y, HALF_ROW_WIDTH, "skinrestorer.config.join.title", () -> this.minecraft.setScreen(
-                        new SkinRestorerJoinScreen(this)));
-        y = this.addButtonRow(
-                rightX,
-                y,
-                HALF_ROW_WIDTH,
-                "skinrestorer.config.request.title",
-                () -> this.minecraft.setScreen(new SkinRestorerRequestScreen(this)));
-
-        y = this.addButtonRow(
                 this.centeredX(HALF_ROW_WIDTH),
-                y,
                 HALF_ROW_WIDTH,
                 "skinrestorer.config.providers.title",
                 () -> this.minecraft.setScreen(new SkinRestorerProvidersScreen(this)));
-
-        return y;
     }
 
     private static Component storageLocationName(StorageConfig.Location location) {

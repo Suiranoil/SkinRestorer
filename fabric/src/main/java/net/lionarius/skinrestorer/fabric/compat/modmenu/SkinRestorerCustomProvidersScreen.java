@@ -22,19 +22,15 @@ public final class SkinRestorerCustomProvidersScreen extends AbstractConfigScree
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
+    protected void buildRows(int x) {
         for (var i = 0; i < this.providers.size(); i++) {
             var provider = this.providers.get(i);
             if (provider.type() == CustomProviderType.UNKNOWN) continue;
 
             var index = i;
             var label = Component.literal(provider.name() + " (" + provider.type() + ")");
-            y = this.addButtonRow(x, y, label, () -> this.openEditor(index));
+            this.addButtonRow(x, label, () -> this.openEditor(index));
         }
-
-        return y;
     }
 
     @Override

@@ -43,21 +43,17 @@ public final class SkinRestorerCustomYggdrasilScreen extends AbstractConfigScree
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
-        y = this.addToggleTextRow(
+    protected void buildRows(int x) {
+        this.addToggleTextRow(
                 x,
-                y,
                 "skinrestorer.config.providers.enabled",
                 this.enabled,
                 value -> this.enabled = value,
                 "skinrestorer.config.providers.name",
                 this.name,
                 value -> this.name = value);
-        y = this.addToggleTextRow(
+        this.addToggleTextRow(
                 x,
-                y,
                 "skinrestorer.config.providers.cache.enabled",
                 this.cacheEnabled,
                 value -> this.cacheEnabled = value,
@@ -65,27 +61,23 @@ public final class SkinRestorerCustomYggdrasilScreen extends AbstractConfigScree
                 Long.toString(this.cacheDuration),
                 value -> this.cacheDuration =
                         SkinRestorerCustomYggdrasilScreen.parseLongOrDefault(value, this.cacheDuration));
-        y = this.addToggleRow(
+        this.addToggleRow(
                 x,
-                y,
                 "skinrestorer.config.providers.custom.use_provider_signature",
                 this.useProviderSignature,
                 value -> this.useProviderSignature = value);
-        y = this.addTextRow(
+        this.addTextRow(
                 x,
-                y,
                 "skinrestorer.config.providers.custom.yggdrasil.base_url",
                 this.baseUrl,
                 value -> this.baseUrl = value);
 
         if (this.onDelete != null) {
-            y = this.addButtonRow(x, y, "skinrestorer.config.providers.custom.delete", () -> {
+            this.addButtonRow(x, "skinrestorer.config.providers.custom.delete", () -> {
                 this.onDelete.run();
                 this.onClose();
             });
         }
-
-        return y;
     }
 
     private static long parseLongOrDefault(String value, long fallback) {

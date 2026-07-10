@@ -21,21 +21,17 @@ public final class SkinRestorerElyByProviderScreen extends AbstractConfigScreen 
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
-        y = this.addToggleTextRow(
+    protected void buildRows(int x) {
+        this.addToggleTextRow(
                 x,
-                y,
                 "skinrestorer.config.providers.enabled",
                 this.enabled,
                 value -> this.enabled = value,
                 "skinrestorer.config.providers.name",
                 this.name,
                 value -> this.name = value);
-        y = this.addToggleTextRow(
+        this.addToggleTextRow(
                 x,
-                y,
                 "skinrestorer.config.providers.cache.enabled",
                 this.cacheEnabled,
                 value -> this.cacheEnabled = value,
@@ -43,8 +39,6 @@ public final class SkinRestorerElyByProviderScreen extends AbstractConfigScreen 
                 Long.toString(this.cacheDuration),
                 value -> this.cacheDuration =
                         SkinRestorerElyByProviderScreen.parseLongOrDefault(value, this.cacheDuration));
-
-        return y;
     }
 
     private static long parseLongOrDefault(String value, long fallback) {

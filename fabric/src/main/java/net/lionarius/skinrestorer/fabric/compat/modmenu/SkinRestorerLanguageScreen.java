@@ -1,8 +1,11 @@
 package net.lionarius.skinrestorer.fabric.compat.modmenu;
 
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,26 +33,27 @@ public final class SkinRestorerLanguageScreen extends AbstractConfigScreen {
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
+    protected void buildRows(int x) {
         var columnWidth = (ROW_WIDTH - (COLUMNS - 1) * COLUMN_GAP) / COLUMNS;
 
         for (var i = 0; i < LANGUAGES.size(); i += COLUMNS) {
+            var widgets = new ArrayList<AbstractWidget>();
+
             for (var column = 0; column < COLUMNS && i + column < LANGUAGES.size(); column++) {
                 var code = LANGUAGES.get(i + column);
                 var marker = code.equals(this.initialLanguage) ? "✓ " : "";
                 var columnX = x + column * (columnWidth + COLUMN_GAP);
 
-                this.addButtonRow(columnX, y, columnWidth, Component.literal(marker + code), () -> {
-                    this.onSelect.accept(code);
-                    this.onClose();
-                });
+                widgets.add(Button.builder(Component.literal(marker + code), button -> {
+                            this.onSelect.accept(code);
+                            this.onClose();
+                        })
+                        .bounds(columnX, 0, columnWidth, 20)
+                        .build());
             }
 
-            y += ROW_HEIGHT;
+            this.addWidgetsRow(ROW_HEIGHT, widgets.toArray(new AbstractWidget[0]));
         }
-
-        return y;
     }
 
     @Override

@@ -25,21 +25,17 @@ public final class SkinRestorerMineskinProviderScreen extends AbstractConfigScre
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
-        y = this.addToggleTextRow(
+    protected void buildRows(int x) {
+        this.addToggleTextRow(
                 x,
-                y,
                 "skinrestorer.config.providers.enabled",
                 this.enabled,
                 value -> this.enabled = value,
                 "skinrestorer.config.providers.name",
                 this.name,
                 value -> this.name = value);
-        y = this.addToggleTextRow(
+        this.addToggleTextRow(
                 x,
-                y,
                 "skinrestorer.config.providers.cache.enabled",
                 this.cacheEnabled,
                 value -> this.cacheEnabled = value,
@@ -47,16 +43,13 @@ public final class SkinRestorerMineskinProviderScreen extends AbstractConfigScre
                 Long.toString(this.cacheDuration),
                 value -> this.cacheDuration =
                         SkinRestorerMineskinProviderScreen.parseLongOrDefault(value, this.cacheDuration));
-        y = this.addTextRow(
-                x, y, "skinrestorer.config.providers.mineskin.api_key", this.apiKey, value -> this.apiKey = value);
-        y = this.addToggleRow(
+        this.addTextRow(
+                x, "skinrestorer.config.providers.mineskin.api_key", this.apiKey, value -> this.apiKey = value);
+        this.addToggleRow(
                 x,
-                y,
                 "skinrestorer.config.providers.mineskin.proxy_url_upload",
                 this.proxyUrlUpload,
                 value -> this.proxyUrlUpload = value);
-
-        return y;
     }
 
     private static long parseLongOrDefault(String value, long fallback) {

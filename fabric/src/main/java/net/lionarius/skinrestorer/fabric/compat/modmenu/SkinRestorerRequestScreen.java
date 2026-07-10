@@ -19,20 +19,15 @@ public final class SkinRestorerRequestScreen extends AbstractConfigScreen {
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
-        y = this.addTextRow(x, y, "skinrestorer.config.request.proxy", this.proxy, value -> this.proxy = value);
-        y = this.addNumberRow(
+    protected void buildRows(int x) {
+        this.addTextRow(x, "skinrestorer.config.request.proxy", this.proxy, value -> this.proxy = value);
+        this.addNumberRow(
                 x,
-                y,
                 "skinrestorer.config.request.timeout",
                 Long.toString(this.timeout),
                 value -> this.timeout = SkinRestorerRequestScreen.parseLongOrDefault(value, this.timeout));
-        y = this.addTextRow(
-                x, y, "skinrestorer.config.request.user_agent", this.userAgent, value -> this.userAgent = value);
-
-        return y;
+        this.addTextRow(
+                x, "skinrestorer.config.request.user_agent", this.userAgent, value -> this.userAgent = value);
     }
 
     private static long parseLongOrDefault(String value, long fallback) {

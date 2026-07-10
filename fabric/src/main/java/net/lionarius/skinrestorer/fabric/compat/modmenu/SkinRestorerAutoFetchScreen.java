@@ -22,25 +22,19 @@ public final class SkinRestorerAutoFetchScreen extends AbstractConfigScreen {
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
-        y = this.addToggleRow(
-                x, y, "skinrestorer.config.join.auto_fetch.enabled", this.enabled, value -> this.enabled = value);
-        y = this.addToggleRow(
+    protected void buildRows(int x) {
+        this.addToggleRow(
+                x, "skinrestorer.config.join.auto_fetch.enabled", this.enabled, value -> this.enabled = value);
+        this.addToggleRow(
                 x,
-                y,
                 "skinrestorer.config.join.auto_fetch.override_existing",
                 this.overrideExisting,
                 value -> this.overrideExisting = value);
-        y = this.addTextRow(
+        this.addTextRow(
                 x,
-                y,
                 "skinrestorer.config.join.auto_fetch.providers",
                 this.providers,
                 value -> this.providers = value);
-
-        return y;
     }
 
     private static List<String> parseList(String value) {

@@ -9,26 +9,22 @@ public final class SkinRestorerProvidersScreen extends AbstractConfigScreen {
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
-        y = this.addButtonRow(
-                x, y, "skinrestorer.config.providers.mojang.title", () -> this.minecraft.setScreen(
+    protected void buildRows(int x) {
+        this.addButtonRow(
+                x, "skinrestorer.config.providers.mojang.title", () -> this.minecraft.setScreen(
                         new SkinRestorerMojangProviderScreen(this)));
-        y = this.addButtonRow(
-                x, y, "skinrestorer.config.providers.ely_by.title", () -> this.minecraft.setScreen(
+        this.addButtonRow(
+                x, "skinrestorer.config.providers.ely_by.title", () -> this.minecraft.setScreen(
                         new SkinRestorerElyByProviderScreen(this)));
-        y = this.addButtonRow(
-                x, y, "skinrestorer.config.providers.mineskin.title", () -> this.minecraft.setScreen(
+        this.addButtonRow(
+                x, "skinrestorer.config.providers.mineskin.title", () -> this.minecraft.setScreen(
                         new SkinRestorerMineskinProviderScreen(this)));
-        y = this.addButtonRow(
-                x, y, "skinrestorer.config.providers.collection.title", () -> this.minecraft.setScreen(
+        this.addButtonRow(
+                x, "skinrestorer.config.providers.collection.title", () -> this.minecraft.setScreen(
                         new SkinRestorerCollectionProviderScreen(this)));
-        y = this.addButtonRow(
-                x, y, "skinrestorer.config.providers.custom.title", () -> this.minecraft.setScreen(
+        this.addButtonRow(
+                x, "skinrestorer.config.providers.custom.title", () -> this.minecraft.setScreen(
                         new SkinRestorerCustomProvidersScreen(this)));
-
-        return y;
     }
 
     @Override

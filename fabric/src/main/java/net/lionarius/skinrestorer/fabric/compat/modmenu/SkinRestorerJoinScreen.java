@@ -22,30 +22,23 @@ public final class SkinRestorerJoinScreen extends AbstractConfigScreen {
     }
 
     @Override
-    protected int buildRows(int x) {
-        var y = 0;
-
-        y = this.addToggleRow(
-                x, y, "skinrestorer.config.join.refresh_skin", this.refreshSkin, value -> this.refreshSkin = value);
-        y = this.addNumberRow(
+    protected void buildRows(int x) {
+        this.addToggleRow(
+                x, "skinrestorer.config.join.refresh_skin", this.refreshSkin, value -> this.refreshSkin = value);
+        this.addNumberRow(
                 x,
-                y,
                 "skinrestorer.config.join.apply_delay",
                 Integer.toString(this.applyDelay),
                 value -> this.applyDelay = SkinRestorerJoinScreen.parseIntOrDefault(value, this.applyDelay));
-        y = this.addTextRow(
+        this.addTextRow(
                 x,
-                y,
                 "skinrestorer.config.join.skip_refresh_providers",
                 this.skipRefreshProviders,
                 value -> this.skipRefreshProviders = value);
-        y = this.addButtonRow(
+        this.addButtonRow(
                 x,
-                y,
                 "skinrestorer.config.join.auto_fetch.title",
                 () -> this.minecraft.setScreen(new SkinRestorerAutoFetchScreen(this)));
-
-        return y;
     }
 
     private static int parseIntOrDefault(String value, int fallback) {
