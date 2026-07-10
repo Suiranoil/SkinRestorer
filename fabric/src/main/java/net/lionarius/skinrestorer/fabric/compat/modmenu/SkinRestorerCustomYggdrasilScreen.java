@@ -24,7 +24,12 @@ public final class SkinRestorerCustomYggdrasilScreen extends AbstractConfigScree
             CustomYggdrasilProviderConfig provider,
             Consumer<CustomProviderConfig> onCommit,
             Runnable onDelete) {
-        super(Component.translatable("skinrestorer.config.providers.custom.yggdrasil.title"), parent);
+        super(
+                Component.translatable(
+                        onDelete == null
+                                ? "skinrestorer.config.providers.custom.yggdrasil.add_title"
+                                : "skinrestorer.config.providers.custom.yggdrasil.title"),
+                parent);
         this.provider = provider;
         this.onCommit = onCommit;
         this.onDelete = onDelete;

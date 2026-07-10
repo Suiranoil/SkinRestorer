@@ -24,7 +24,12 @@ public final class SkinRestorerCustomAuthlibInjectorScreen extends AbstractConfi
             CustomAuthlibInjectorProviderConfig provider,
             Consumer<CustomProviderConfig> onCommit,
             Runnable onDelete) {
-        super(Component.translatable("skinrestorer.config.providers.custom.authlib_injector.title"), parent);
+        super(
+                Component.translatable(
+                        onDelete == null
+                                ? "skinrestorer.config.providers.custom.authlib_injector.add_title"
+                                : "skinrestorer.config.providers.custom.authlib_injector.title"),
+                parent);
         this.provider = provider;
         this.onCommit = onCommit;
         this.onDelete = onDelete;

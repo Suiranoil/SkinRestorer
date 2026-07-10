@@ -289,7 +289,12 @@ abstract class AbstractConfigScreen extends Screen {
         return this.addTextRow(x, y, labelKey, initial, onChange);
     }
 
-    /** A toggle on the left half and a labelled text field on the right half, sharing one row. */
+    /**
+     * A toggle on the left half and a labelled text field on the right half, sharing one row.
+     * Halves are {@code HALF_ROW_WIDTH - 4} wide with an 8px gap, so the pair's total width
+     * matches ROW_WIDTH exactly (the same trick the Done/Cancel footer buttons use) and both
+     * controls share the same 18px height, so the two halves line up top and bottom.
+     */
     protected int addToggleTextRow(
             int x,
             int y,
@@ -299,14 +304,23 @@ abstract class AbstractConfigScreen extends Screen {
             String textLabelKey,
             String textInitial,
             Consumer<String> onTextChange) {
-        var rightX = x + HALF_ROW_WIDTH + PAIR_GAP;
+        var halfWidth = HALF_ROW_WIDTH - 4;
+        var rightX = x + HALF_ROW_WIDTH + 4;
 
-        this.addToggleRow(x, y + 12, HALF_ROW_WIDTH, toggleLabelKey, toggleInitial, onToggleChange);
+        var toggle = CycleButton.onOffBuilder(toggleInitial)
+                .create(
+                        x,
+                        y + 12,
+                        halfWidth,
+                        18,
+                        Component.translatable(toggleLabelKey),
+                        (button, value) -> onToggleChange.accept(value));
+        this.addRow(toggle, y + 12);
 
         var label = Component.translatable(textLabelKey);
-        this.addRow(new StringWidget(rightX, y, HALF_ROW_WIDTH, 12, label, this.font), y);
+        this.addRow(new StringWidget(rightX, y, halfWidth, 12, label, this.font), y);
 
-        var box = new EditBox(this.font, rightX, y + 12, HALF_ROW_WIDTH, 18, label);
+        var box = new EditBox(this.font, rightX, y + 12, halfWidth, 18, label);
         box.setValue(textInitial);
         box.setResponder(onTextChange::accept);
         this.addRow(box, y + 12);

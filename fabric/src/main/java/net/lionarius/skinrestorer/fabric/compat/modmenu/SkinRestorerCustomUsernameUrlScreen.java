@@ -24,7 +24,12 @@ public final class SkinRestorerCustomUsernameUrlScreen extends AbstractConfigScr
             CustomUsernameUrlProviderConfig provider,
             Consumer<CustomProviderConfig> onCommit,
             Runnable onDelete) {
-        super(Component.translatable("skinrestorer.config.providers.custom.username_url.title"), parent);
+        super(
+                Component.translatable(
+                        onDelete == null
+                                ? "skinrestorer.config.providers.custom.username_url.add_title"
+                                : "skinrestorer.config.providers.custom.username_url.title"),
+                parent);
         this.provider = provider;
         this.onCommit = onCommit;
         this.onDelete = onDelete;
