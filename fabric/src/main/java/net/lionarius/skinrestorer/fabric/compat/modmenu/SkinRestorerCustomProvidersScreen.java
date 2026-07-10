@@ -35,29 +35,28 @@ public final class SkinRestorerCustomProvidersScreen extends AbstractConfigScree
 
     @Override
     protected int fixedBottomHeight() {
-        return ROW_HEIGHT + 8;
+        return BUTTON_HEIGHT;
     }
 
     @Override
     protected void buildFixedBottomRows(int x, int y) {
-        var addY = y + 8;
         var columnWidth = (ROW_WIDTH - 2 * PAIR_GAP) / 3;
 
         this.addFixedButtonRow(
                 x,
-                addY,
+                y,
                 columnWidth,
                 "skinrestorer.config.providers.custom.add_yggdrasil",
                 () -> this.openNew(new CustomYggdrasilProviderConfig()));
         this.addFixedButtonRow(
                 x + columnWidth + PAIR_GAP,
-                addY,
+                y,
                 columnWidth,
                 "skinrestorer.config.providers.custom.add_authlib_injector",
                 () -> this.openNew(new CustomAuthlibInjectorProviderConfig()));
         this.addFixedButtonRow(
                 x + 2 * (columnWidth + PAIR_GAP),
-                addY,
+                y,
                 columnWidth,
                 "skinrestorer.config.providers.custom.add_username_url",
                 () -> this.openNew(new CustomUsernameUrlProviderConfig()));

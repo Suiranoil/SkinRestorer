@@ -30,14 +30,16 @@ abstract class AbstractConfigScreen extends Screen {
     protected static final int HALF_ROW_WIDTH = ROW_WIDTH / 2;
     protected static final int PAIR_GAP = 8;
 
-    private static final int HEADER_HEIGHT = 36;
-    private static final int FOOTER_HEIGHT = 28;
-    private static final int LIST_MARGIN = 20;
+    private static final int HEADER_HEIGHT = 32;
+    private static final int INNER_TOP_PADDING = 8;
+    private static final int PANEL_GAP = 6;
+    private static final int BUTTON_GAP = 6;
+    private static final int BOTTOM_MARGIN = 8;
+    protected static final int BUTTON_HEIGHT = 20;
 
     protected final Screen parent;
 
     private RowList rowList;
-    private int listBottom;
 
     protected AbstractConfigScreen(Component title, Screen parent) {
         super(title);
@@ -60,7 +62,7 @@ abstract class AbstractConfigScreen extends Screen {
         return false;
     }
 
-    /** Override to reserve space at the bottom of the list for fixed (non-scrolling) rows. */
+    /** Override to reserve space below the list for fixed (non-scrolling) rows, e.g. {@code BUTTON_HEIGHT}. */
     protected int fixedBottomHeight() {
         return 0;
     }
@@ -75,39 +77,42 @@ abstract class AbstractConfigScreen extends Screen {
     @Override
     protected final void init() {
         var x = (this.width - ROW_WIDTH) / 2;
-        // AbstractSelectionList's constructor takes the list's own HEIGHT (not the Y coordinate
-        // of its bottom edge) alongside its top Y - so the reserved space below the list has to
-        // be subtracted out of the height, not treated as an absolute bottom coordinate
-        var listHeight = this.height - HEADER_HEIGHT - FOOTER_HEIGHT - LIST_MARGIN - this.fixedBottomHeight();
+
+        // laid out bottom-up so every gap is an explicit, small constant instead of
+        // whatever slack happens to be left over above the footer
+        var footerY = this.height - BOTTOM_MARGIN - BUTTON_HEIGHT;
+        var fixedBottomHeight = this.fixedBottomHeight();
+        var listBottom = fixedBottomHeight > 0
+                ? footerY - BUTTON_GAP - fixedBottomHeight - PANEL_GAP
+                : footerY - PANEL_GAP;
+        var listHeight = listBottom - HEADER_HEIGHT;
 
         assert this.minecraft != null;
         this.rowList = new RowList(
                 this.minecraft, this.width, listHeight, HEADER_HEIGHT, ROW_HEIGHT, this.centerVertically());
         this.addRenderableWidget(this.rowList);
 
+        // top-aligned screens get a small invisible spacer so their first row doesn't
+        // touch the panel's top edge; centered screens are already balanced without one
+        if (!this.centerVertically()) this.addWidgetsRow(INNER_TOP_PADDING);
+
         this.buildRows(x);
 
-        // the list's own reported bounds are used as ground truth for everything positioned
-        // below it, rather than trusting the constructor arguments meant what we assumed -
-        // this way nothing we place can end up overlapping the list's actual clickable area
-        this.listBottom = this.rowList.getY() + this.rowList.getHeight();
+        if (fixedBottomHeight > 0) this.buildFixedBottomRows(x, listBottom + PANEL_GAP);
 
-        if (this.fixedBottomHeight() > 0) this.buildFixedBottomRows(x, this.listBottom);
-
-        var footerY = Math.max(this.height - FOOTER_HEIGHT + 4, this.listBottom + 8);
         if (this.showDoneButton()) {
             this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> {
                         this.onSave();
                         this.onClose();
                     })
-                    .bounds(x, footerY, HALF_ROW_WIDTH - 4, 20)
+                    .bounds(x, footerY, HALF_ROW_WIDTH - 4, BUTTON_HEIGHT)
                     .build());
             this.addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> this.onClose())
-                    .bounds(x + HALF_ROW_WIDTH + 4, footerY, HALF_ROW_WIDTH - 4, 20)
+                    .bounds(x + HALF_ROW_WIDTH + 4, footerY, HALF_ROW_WIDTH - 4, BUTTON_HEIGHT)
                     .build());
         } else {
             this.addRenderableWidget(Button.builder(Component.translatable("gui.back"), button -> this.onClose())
-                    .bounds(x, footerY, ROW_WIDTH, 20)
+                    .bounds(x, footerY, ROW_WIDTH, BUTTON_HEIGHT)
                     .build());
         }
     }
@@ -298,7 +303,7 @@ abstract class AbstractConfigScreen extends Screen {
     /** Adds a button pinned at a fixed position below the list, unaffected by scrolling. */
     protected void addFixedButtonRow(int x, int y, int width, String labelKey, Runnable onClick) {
         this.addRenderableWidget(Button.builder(Component.translatable(labelKey), button -> onClick.run())
-                .bounds(x, y, width, 20)
+                .bounds(x, y, width, BUTTON_HEIGHT)
                 .build());
     }
 
