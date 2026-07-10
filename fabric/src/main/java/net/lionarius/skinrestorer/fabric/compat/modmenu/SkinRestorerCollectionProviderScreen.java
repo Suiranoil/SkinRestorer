@@ -10,14 +10,15 @@ import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.function.Consumer;
 
 public final class SkinRestorerCollectionProviderScreen extends AbstractConfigScreen {
+    private final List<CollectionSkinSource> sources;
+
     private boolean enabled;
     private String name;
     private boolean cacheEnabled;
     private long cacheDuration;
-    private String sources;
 
     public SkinRestorerCollectionProviderScreen(Screen parent) {
         super(Component.translatable("skinrestorer.config.providers.collection.title"), parent);
@@ -27,7 +28,7 @@ public final class SkinRestorerCollectionProviderScreen extends AbstractConfigSc
         this.name = provider.name();
         this.cacheEnabled = provider.cache().enabled();
         this.cacheDuration = provider.cache().duration();
-        this.sources = SkinRestorerCollectionProviderScreen.encode(provider.sources());
+        this.sources = new ArrayList<>(provider.sources());
     }
 
     @Override
@@ -49,11 +50,27 @@ public final class SkinRestorerCollectionProviderScreen extends AbstractConfigSc
                 Long.toString(this.cacheDuration),
                 value -> this.cacheDuration =
                         SkinRestorerCollectionProviderScreen.parseLongOrDefault(value, this.cacheDuration));
-        this.addTextRow(
-                x,
-                "skinrestorer.config.providers.collection.sources",
-                this.sources,
-                value -> this.sources = value);
+
+        for (var i = 0; i < this.sources.size(); i++) {
+            var index = i;
+            this.addButtonRow(x, SkinRestorerCollectionProviderScreen.describe(this.sources.get(i)), () -> this.openEditor(index));
+        }
+    }
+
+    @Override
+    protected int fixedBottomHeight() {
+        return BUTTON_HEIGHT;
+    }
+
+    @Override
+    protected void buildFixedBottomRows(int x, int y) {
+        var halfWidth = HALF_ROW_WIDTH - 4;
+        var rightX = x + HALF_ROW_WIDTH + 4;
+
+        this.addFixedButtonRow(
+                x, y, halfWidth, "skinrestorer.config.providers.collection.add_file", () -> this.openNew(new CollectionSkinFile()));
+        this.addFixedButtonRow(
+                rightX, y, halfWidth, "skinrestorer.config.providers.collection.add_url", () -> this.openNew(new CollectionSkinUrl()));
     }
 
     private static long parseLongOrDefault(String value, long fallback) {
@@ -64,52 +81,40 @@ public final class SkinRestorerCollectionProviderScreen extends AbstractConfigSc
         }
     }
 
-    private static String encode(List<CollectionSkinSource> sources) {
-        var parts = new ArrayList<String>();
-        for (var source : sources) {
-            var variant = source.variant() == SkinVariant.SLIM ? "slim" : "classic";
-            if (source instanceof CollectionSkinFile file) parts.add(variant + ":" + file.path());
-            else if (source instanceof CollectionSkinUrl url) parts.add(variant + ":" + url.url());
-        }
+    private static Component describe(CollectionSkinSource source) {
+        var variant = Component.translatable(
+                source.variant() == SkinVariant.SLIM
+                        ? "skinrestorer.config.providers.collection.variant.slim"
+                        : "skinrestorer.config.providers.collection.variant.classic");
 
-        return String.join("; ", parts);
+        if (source instanceof CollectionSkinFile file) {
+            return Component.translatable("skinrestorer.config.providers.collection.entry.file", variant, file.path());
+        }
+        if (source instanceof CollectionSkinUrl url) {
+            return Component.translatable("skinrestorer.config.providers.collection.entry.url", variant, url.url());
+        }
+        return Component.empty();
     }
 
-    private static List<CollectionSkinSource> decode(String raw) {
-        var result = new ArrayList<CollectionSkinSource>();
+    private void openEditor(int index) {
+        assert this.minecraft != null;
 
-        for (var part : raw.split(";")) {
-            var trimmed = part.trim();
-            if (trimmed.isEmpty()) continue;
+        var source = this.sources.get(index);
+        this.minecraft.setScreen(SkinRestorerCollectionProviderScreen.createEditor(
+                this, source, edited -> this.sources.set(index, edited), () -> this.sources.remove(index)));
+    }
 
-            var variant = SkinVariant.CLASSIC;
-            var value = trimmed;
+    private void openNew(CollectionSkinSource blank) {
+        assert this.minecraft != null;
 
-            var colon = trimmed.indexOf(':');
-            if (colon > 0) {
-                var prefix = trimmed.substring(0, colon).trim().toLowerCase(Locale.ROOT);
-                if (prefix.equals("classic") || prefix.equals("slim")) {
-                    variant = prefix.equals("slim") ? SkinVariant.SLIM : SkinVariant.CLASSIC;
-                    value = trimmed.substring(colon + 1).trim();
-                }
-            }
+        this.minecraft.setScreen(SkinRestorerCollectionProviderScreen.createEditor(this, blank, this.sources::add, null));
+    }
 
-            if (value.isEmpty()) continue;
-
-            if (value.startsWith("http://") || value.startsWith("https://")) {
-                var url = new CollectionSkinUrl();
-                url.url(value);
-                url.variant(variant);
-                result.add(url);
-            } else {
-                var file = new CollectionSkinFile();
-                file.path(value);
-                file.variant(variant);
-                result.add(file);
-            }
-        }
-
-        return result;
+    private static Screen createEditor(
+            Screen parent, CollectionSkinSource source, Consumer<CollectionSkinSource> onCommit, Runnable onDelete) {
+        if (source instanceof CollectionSkinFile file) return new SkinRestorerCollectionFileScreen(parent, file, onCommit, onDelete);
+        if (source instanceof CollectionSkinUrl url) return new SkinRestorerCollectionUrlScreen(parent, url, onCommit, onDelete);
+        throw new IllegalStateException("unknown collection skin source type: " + source.getClass());
     }
 
     @Override
@@ -119,6 +124,6 @@ public final class SkinRestorerCollectionProviderScreen extends AbstractConfigSc
         provider.name(this.name);
         provider.cache().enabled(this.cacheEnabled);
         provider.cache().duration(this.cacheDuration);
-        provider.sources(SkinRestorerCollectionProviderScreen.decode(this.sources));
+        provider.sources(this.sources);
     }
 }
