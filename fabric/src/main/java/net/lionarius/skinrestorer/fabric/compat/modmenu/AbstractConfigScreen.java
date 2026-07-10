@@ -30,7 +30,7 @@ abstract class AbstractConfigScreen extends Screen {
     protected static final int HALF_ROW_WIDTH = ROW_WIDTH / 2;
     protected static final int PAIR_GAP = 8;
 
-    private static final int HEADER_HEIGHT = 24;
+    private static final int HEADER_HEIGHT = 36;
     private static final int FOOTER_HEIGHT = 28;
     private static final int LIST_MARGIN = 20;
 
@@ -75,11 +75,14 @@ abstract class AbstractConfigScreen extends Screen {
     @Override
     protected final void init() {
         var x = (this.width - ROW_WIDTH) / 2;
-        var requestedBottom = this.height - FOOTER_HEIGHT - LIST_MARGIN - this.fixedBottomHeight();
+        // AbstractSelectionList's constructor takes the list's own HEIGHT (not the Y coordinate
+        // of its bottom edge) alongside its top Y - so the reserved space below the list has to
+        // be subtracted out of the height, not treated as an absolute bottom coordinate
+        var listHeight = this.height - HEADER_HEIGHT - FOOTER_HEIGHT - LIST_MARGIN - this.fixedBottomHeight();
 
         assert this.minecraft != null;
         this.rowList = new RowList(
-                this.minecraft, this.width, requestedBottom, HEADER_HEIGHT, ROW_HEIGHT, this.centerVertically());
+                this.minecraft, this.width, listHeight, HEADER_HEIGHT, ROW_HEIGHT, this.centerVertically());
         this.addRenderableWidget(this.rowList);
 
         this.buildRows(x);
@@ -145,14 +148,22 @@ abstract class AbstractConfigScreen extends Screen {
     }
 
     private static final class RowList extends ContainerObjectSelectionList<RowEntry> {
-        RowList(Minecraft minecraft, int width, int bottom, int top, int itemHeight, boolean centerVertically) {
-            super(minecraft, width, bottom, top, itemHeight);
+        RowList(Minecraft minecraft, int width, int height, int top, int itemHeight, boolean centerVertically) {
+            super(minecraft, width, height, top, itemHeight);
             this.centerListVertically = centerVertically;
         }
 
         @Override
         protected boolean entriesCanBeSelected() {
             return false;
+        }
+
+        // without this, the row content column (and therefore the scrollbar, which vanilla
+        // positions just to the right of it) defaults to a width unrelated to our own ROW_WIDTH,
+        // leaving the scrollbar sitting awkwardly close to the middle of the screen
+        @Override
+        public int getRowWidth() {
+            return ROW_WIDTH;
         }
 
         // bridges the protected addEntry(E, int) from AbstractSelectionList, which
@@ -296,13 +307,8 @@ abstract class AbstractConfigScreen extends Screen {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
 
         var titleText = this.title.getString();
-        graphics.text(this.font, titleText, (this.width - this.font.width(titleText)) / 2, 12, 0xFFFFFFFF, true);
-
-        if (this.fixedBottomHeight() > 0) {
-            var panelX = this.centeredX(ROW_WIDTH + 40);
-            var dividerY = this.listBottom + 3;
-            graphics.fill(panelX + 10, dividerY, panelX + ROW_WIDTH + 40 - 10, dividerY + 1, 0x80FFFFFF);
-        }
+        var titleY = (HEADER_HEIGHT - 9) / 2;
+        graphics.text(this.font, titleText, (this.width - this.font.width(titleText)) / 2, titleY, 0xFFFFFFFF, true);
     }
 
     @Override
