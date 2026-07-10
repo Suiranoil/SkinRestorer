@@ -130,8 +130,9 @@ abstract class AbstractConfigScreen extends Screen {
             var widget = entry.widget();
             var y = HEADER_HEIGHT + this.verticalOffset + entry.relativeY() - this.scrollAmount;
             widget.setPosition(widget.getX(), y);
-            // widgets that would poke out past the darkened panel are hidden instead of clipped
-            widget.visible = y >= HEADER_HEIGHT && y + widget.getHeight() <= contentBottom;
+            // only fully out-of-bounds widgets are hidden outright (so they can't be clicked);
+            // partial overlap stays visible and gets cut off by the scissor in extractRenderState
+            widget.visible = y + widget.getHeight() > HEADER_HEIGHT && y < contentBottom;
         }
     }
 
