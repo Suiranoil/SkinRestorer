@@ -45,7 +45,6 @@ abstract class AbstractConfigScreen extends Screen {
     protected final Screen parent;
 
     private RowList rowList;
-    private int contentHeight;
 
     protected AbstractConfigScreen(Component title, Screen parent) {
         super(title);
@@ -87,12 +86,6 @@ abstract class AbstractConfigScreen extends Screen {
 
     @Override
     protected final void init() {
-        // init() can run more than once on the same screen instance - Minecraft re-inits a
-        // screen every time it's set as the current screen, including when navigating "back" to
-        // a parent screen we're still holding a reference to, not just on first creation - so any
-        // state built up during a previous init() has to be wiped here, not just at construction
-        this.contentHeight = 0;
-
         var x = (this.width - ROW_WIDTH) / 2;
 
         // laid out bottom-up so every gap is an explicit, small constant instead of
@@ -124,9 +117,11 @@ abstract class AbstractConfigScreen extends Screen {
         if (this.centerVertically()) {
             // ContainerObjectSelectionList's own centerListVertically field turned out to only
             // affect scroll-to-entry behaviour, not the resting layout of a short list - so the
-            // actual centering is done here, using the real total height of what buildRows just
-            // added, retroactively inserted as a blank spacer above everything via addEntryToTop
-            var topPad = (listHeight - this.contentHeight) / 2;
+            // actual centering is done here, using the list's own tracked content height (queried
+            // fresh from the vanilla list itself, so there's no separate counter of ours that could
+            // go stale or need resetting across repeated init() calls on a reused screen instance),
+            // retroactively inserted as a blank spacer above everything via addEntryToTop
+            var topPad = (listHeight - this.rowList.getContentHeight()) / 2;
             if (topPad > 0) this.rowList.addRowToTop(new RowEntry(List.of(), new int[0]), topPad);
         }
 
@@ -213,13 +208,21 @@ abstract class AbstractConfigScreen extends Screen {
             return ROW_WIDTH;
         }
 
+        // the top/bottom fade-to-black overlays are separate from the background texture and
+        // need to be suppressed the same way, or they're the only thing left of the panel
         @Override
         protected void extractListBackground(GuiGraphicsExtractor graphics) {
             if (this.showBackground) super.extractListBackground(graphics);
         }
 
-        // bridges the protected addEntry(E, int)/addEntryToTop(E, int) from AbstractSelectionList,
-        // which AbstractConfigScreen can't call directly since it isn't a subclass of that vanilla type
+        @Override
+        protected void extractListSeparators(GuiGraphicsExtractor graphics) {
+            if (this.showBackground) super.extractListSeparators(graphics);
+        }
+
+        // bridges the protected addEntry(E, int)/addEntryToTop(E, int)/contentHeight() from
+        // AbstractSelectionList, which AbstractConfigScreen can't call directly since it isn't a
+        // subclass of that vanilla type
         void addRow(RowEntry entry, int height) {
             this.addEntry(entry, height);
         }
@@ -227,10 +230,13 @@ abstract class AbstractConfigScreen extends Screen {
         void addRowToTop(RowEntry entry, int height) {
             this.addEntryToTop(entry, height);
         }
+
+        int getContentHeight() {
+            return this.contentHeight();
+        }
     }
 
     private void addEntry(int height, List<AbstractWidget> widgets, int[] offsetsY) {
-        this.contentHeight += height;
         this.rowList.addRow(new RowEntry(widgets, offsetsY), height);
     }
 
