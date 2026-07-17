@@ -17,6 +17,7 @@ import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
@@ -182,18 +183,16 @@ public final class SkinCommand {
         if (provider.hasVariantSupport()) {
             for (SkinVariant variant : SkinVariant.values()) {
                 action.then(literal(variant.toString())
-                        .then(buildSetSubcommandArgument(
-                                argument(provider.getArgumentName(), StringArgumentType.string()), context -> {
-                                    var argument = StringArgumentType.getString(context, provider.getArgumentName());
-                                    return new SkinProviderContext(name, argument, variant);
-                                })));
+                        .then(buildSetSubcommandArgument(makeProviderArgument(provider), context -> {
+                            var argument = StringArgumentType.getString(context, provider.getArgumentName());
+                            return new SkinProviderContext(name, argument, variant);
+                        })));
             }
         } else {
-            action.then(buildSetSubcommandArgument(
-                    argument(provider.getArgumentName(), StringArgumentType.string()), context -> {
-                        var argument = StringArgumentType.getString(context, provider.getArgumentName());
-                        return new SkinProviderContext(name, argument, null);
-                    }));
+            action.then(buildSetSubcommandArgument(makeProviderArgument(provider), context -> {
+                var argument = StringArgumentType.getString(context, provider.getArgumentName());
+                return new SkinProviderContext(name, argument, null);
+            }));
         }
 
         return action;
@@ -211,6 +210,12 @@ public final class SkinCommand {
         return argument.executes(context -> setSubcommand(context.getSource(), provider.apply(context)))
                 .then(makeTargetsArgument((context, targets) ->
                         setSubcommand(context.getSource(), targets, provider.apply(context), true)));
+    }
+
+    private static RequiredArgumentBuilder<CommandSourceStack, String> makeProviderArgument(SkinProvider provider) {
+        return argument(provider.getArgumentName(), StringArgumentType.string())
+                .suggests((context, builder) ->
+                        SharedSuggestionProvider.suggest(provider.getArgumentSuggestions(), builder));
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, GameProfileArgument.Result> makeTargetsArgument(
