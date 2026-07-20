@@ -38,24 +38,52 @@ public final class SkinCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         var base = literal("skin")
-                .then(buildSetSubcommand("clear", SkinValue.EMPTY::toProviderContext))
+                .requires(src -> SkinCommand.canUseSkinCommand(src) || SkinCommand.canUseConfigCommand(src))
+                .then(buildSetSubcommand("clear", SkinValue.EMPTY::toProviderContext)
+                        .requires(SkinCommand::canUseSkinCommand))
                 .then(literal("reset")
+                        .requires(SkinCommand::canUseSkinCommand)
                         .executes(context -> resetSubcommand(context.getSource()))
                         .then(makeTargetsArgument(
                                 (context, profiles) -> resetSubcommand(context.getSource(), profiles, true))))
-                .then(literal("refresh").executes(context -> refreshSubcommand(context.getSource())));
+                .then(literal("refresh")
+                        .requires(SkinCommand::canUseSkinCommand)
+                        .executes(context -> refreshSubcommand(context.getSource())));
 
-        var set = literal("set");
+        var set = literal("set").requires(SkinCommand::canUseSkinCommand);
 
         var providers = SkinRestorer.getProvidersRegistry().getPublicProviders();
         for (var entry : providers) set.then(buildSetSubcommand(entry.first(), entry.second()));
         if (!providers.isEmpty()) base.then(set);
 
         base.then(literal("config")
-                .requires(commandSourceStack -> Commands.LEVEL_OWNERS.check(commandSourceStack.permissions()))
+                .requires(SkinCommand::canUseConfigCommand)
                 .then(literal("reload").executes(SkinCommand::configReloadSubcommand)));
 
         dispatcher.register(base);
+    }
+
+    private static boolean canUseSkinCommand(CommandSourceStack src) {
+        var config = SkinRestorer.getConfig().command();
+
+        return config.enabled() && SkinCommand.hasPermissionLevel(src, config.permissionLevel());
+    }
+
+    private static boolean canUseConfigCommand(CommandSourceStack src) {
+        return Commands.LEVEL_OWNERS.check(src.permissions());
+    }
+
+    private static boolean hasPermissionLevel(CommandSourceStack src, int level) {
+        var check =
+                switch (level) {
+                    case 0 -> Commands.LEVEL_ALL;
+                    case 1 -> Commands.LEVEL_MODERATORS;
+                    case 2 -> Commands.LEVEL_GAMEMASTERS;
+                    case 3 -> Commands.LEVEL_ADMINS;
+                    default -> Commands.LEVEL_OWNERS;
+                };
+
+        return check.check(src.permissions());
     }
 
     private static int refreshSubcommand(CommandSourceStack src) {
@@ -225,7 +253,8 @@ public final class SkinCommand {
     private static RequiredArgumentBuilder<CommandSourceStack, GameProfileArgument.Result> makeTargetsArgument(
             BiFunction<CommandContext<CommandSourceStack>, Collection<NameAndId>, Integer> consumer) {
         return argument("targets", GameProfileArgument.gameProfile())
-                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .requires(source -> SkinCommand.hasPermissionLevel(
+                        source, SkinRestorer.getConfig().command().targetsPermissionLevel()))
                 .executes(context -> consumer.apply(context, GameProfileArgument.getGameProfiles(context, "targets")));
     }
 }
