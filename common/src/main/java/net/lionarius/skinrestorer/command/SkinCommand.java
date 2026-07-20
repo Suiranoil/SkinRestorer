@@ -151,6 +151,10 @@ public final class SkinCommand {
     private static int configReloadSubcommand(CommandContext<CommandSourceStack> context) {
         SkinRestorer.reloadConfig();
 
+        var server = context.getSource().getServer();
+        for (var player : server.getPlayerList().getPlayers())
+            server.getCommands().sendCommands(player);
+
         context.getSource()
                 .sendSuccess(
                         () -> Translation.translatableWithFallback(Translation.COMMAND_SKIN_CONFIG_RELOADED_KEY), true);
