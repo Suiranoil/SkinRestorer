@@ -22,6 +22,8 @@ public final class Config implements GsonPostProcessable {
 
     private String language = "en_us";
 
+    private CommandConfig command = new CommandConfig();
+
     private StorageConfig storage = new StorageConfig();
 
     private JoinConfig join = new JoinConfig();
@@ -32,6 +34,10 @@ public final class Config implements GsonPostProcessable {
 
     public String language() {
         return this.language;
+    }
+
+    public CommandConfig command() {
+        return this.command;
     }
 
     public StorageConfig storage() {
@@ -81,6 +87,11 @@ public final class Config implements GsonPostProcessable {
         if (this.language == null || this.language.isEmpty()) {
             SkinRestorer.LOGGER.warn("Language config is null or empty, defaulting to 'en_us'");
             this.language = "en_us";
+        }
+
+        if (this.command == null) {
+            SkinRestorer.LOGGER.warn("Command config is null, using default");
+            this.command = new CommandConfig();
         }
 
         if (this.storage == null) {

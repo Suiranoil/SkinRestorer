@@ -17,6 +17,7 @@ import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.PlayerUtils;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -35,24 +36,43 @@ public final class SkinCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         var base = literal("skin")
-                .then(buildSetSubcommand("clear", SkinValue.EMPTY::toProviderContext))
+                .requires(src -> SkinCommand.canUseSkinCommand(src) || SkinCommand.canUseConfigCommand(src))
+                .then(buildSetSubcommand("clear", SkinValue.EMPTY::toProviderContext)
+                        .requires(SkinCommand::canUseSkinCommand))
                 .then(literal("reset")
+                        .requires(SkinCommand::canUseSkinCommand)
                         .executes(context -> resetSubcommand(context.getSource()))
                         .then(makeTargetsArgument(
                                 (context, profiles) -> resetSubcommand(context.getSource(), profiles, true))))
-                .then(literal("refresh").executes(context -> refreshSubcommand(context.getSource())));
+                .then(literal("refresh")
+                        .requires(SkinCommand::canUseSkinCommand)
+                        .executes(context -> refreshSubcommand(context.getSource())));
 
-        var set = literal("set");
+        var set = literal("set").requires(SkinCommand::canUseSkinCommand);
 
         var providers = SkinRestorer.getProvidersRegistry().getPublicProviders();
         for (var entry : providers) set.then(buildSetSubcommand(entry.first(), entry.second()));
         if (!providers.isEmpty()) base.then(set);
 
         base.then(literal("config")
-                .requires(commandSourceStack -> commandSourceStack.hasPermission(4))
+                .requires(SkinCommand::canUseConfigCommand)
                 .then(literal("reload").executes(SkinCommand::configReloadSubcommand)));
 
         dispatcher.register(base);
+    }
+
+    private static boolean canUseSkinCommand(CommandSourceStack src) {
+        var config = SkinRestorer.getConfig().command();
+
+        return config.enabled() && SkinCommand.hasPermissionLevel(src, config.permissionLevel());
+    }
+
+    private static boolean canUseConfigCommand(CommandSourceStack src) {
+        return src.hasPermission(4);
+    }
+
+    private static boolean hasPermissionLevel(CommandSourceStack src, int level) {
+        return src.hasPermission(level);
     }
 
     private static int refreshSubcommand(CommandSourceStack src) {
@@ -143,6 +163,10 @@ public final class SkinCommand {
     private static int configReloadSubcommand(CommandContext<CommandSourceStack> context) {
         SkinRestorer.reloadConfig();
 
+        var server = context.getSource().getServer();
+        for (var player : server.getPlayerList().getPlayers())
+            server.getCommands().sendCommands(player);
+
         context.getSource()
                 .sendSuccess(
                         () -> Translation.translatableWithFallback(Translation.COMMAND_SKIN_CONFIG_RELOADED_KEY), true);
@@ -175,18 +199,16 @@ public final class SkinCommand {
         if (provider.hasVariantSupport()) {
             for (SkinVariant variant : SkinVariant.values()) {
                 action.then(literal(variant.toString())
-                        .then(buildSetSubcommandArgument(
-                                argument(provider.getArgumentName(), StringArgumentType.string()), context -> {
-                                    var argument = StringArgumentType.getString(context, provider.getArgumentName());
-                                    return new SkinProviderContext(name, argument, variant);
-                                })));
+                        .then(buildSetSubcommandArgument(makeProviderArgument(provider), context -> {
+                            var argument = StringArgumentType.getString(context, provider.getArgumentName());
+                            return new SkinProviderContext(name, argument, variant);
+                        })));
             }
         } else {
-            action.then(buildSetSubcommandArgument(
-                    argument(provider.getArgumentName(), StringArgumentType.string()), context -> {
-                        var argument = StringArgumentType.getString(context, provider.getArgumentName());
-                        return new SkinProviderContext(name, argument, null);
-                    }));
+            action.then(buildSetSubcommandArgument(makeProviderArgument(provider), context -> {
+                var argument = StringArgumentType.getString(context, provider.getArgumentName());
+                return new SkinProviderContext(name, argument, null);
+            }));
         }
 
         return action;
@@ -206,10 +228,17 @@ public final class SkinCommand {
                         setSubcommand(context.getSource(), targets, provider.apply(context), true)));
     }
 
+    private static RequiredArgumentBuilder<CommandSourceStack, String> makeProviderArgument(SkinProvider provider) {
+        return argument(provider.getArgumentName(), StringArgumentType.string())
+                .suggests((context, builder) ->
+                        SharedSuggestionProvider.suggest(provider.getArgumentSuggestions(), builder));
+    }
+
     private static RequiredArgumentBuilder<CommandSourceStack, GameProfileArgument.Result> makeTargetsArgument(
             BiFunction<CommandContext<CommandSourceStack>, Collection<GameProfile>, Integer> consumer) {
         return argument("targets", GameProfileArgument.gameProfile())
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> SkinCommand.hasPermissionLevel(
+                        source, SkinRestorer.getConfig().command().targetsPermissionLevel()))
                 .executes(context -> consumer.apply(context, GameProfileArgument.getGameProfiles(context, "targets")));
     }
 }
