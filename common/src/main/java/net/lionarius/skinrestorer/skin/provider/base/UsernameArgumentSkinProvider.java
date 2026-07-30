@@ -1,8 +1,13 @@
 package net.lionarius.skinrestorer.skin.provider.base;
 
+import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.minecraft.util.StringUtil;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 public abstract class UsernameArgumentSkinProvider<K> extends AbstractSkinProvider<K> {
     @Override
@@ -24,5 +29,13 @@ public abstract class UsernameArgumentSkinProvider<K> extends AbstractSkinProvid
     protected void validate(String argument, SkinVariant variant) throws Exception {
         super.validate(argument, variant);
         if (!StringUtil.isValidPlayerName(argument)) throw new IllegalArgumentException("invalid username");
+    }
+
+    @Override
+    public Collection<String> getArgumentSuggestions() {
+        var server = SkinRestorer.getMinecraftServer();
+        if (server == null) return Collections.emptyList();
+
+        return Arrays.asList(server.getPlayerNames());
     }
 }
