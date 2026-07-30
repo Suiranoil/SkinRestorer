@@ -10,4 +10,7 @@ public interface CollectionSkinSource {
     URI uri();
 
     SkinVariant variant();
+
+    @Nullable
+    String name();
 }

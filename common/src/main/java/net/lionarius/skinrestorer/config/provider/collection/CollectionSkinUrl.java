@@ -11,6 +11,9 @@ public final class CollectionSkinUrl implements CollectionSkinSource, GsonPostPr
     private String url = "";
     private SkinVariant variant = SkinVariant.CLASSIC;
 
+    @Nullable
+    private String name = null;
+
     @Override
     public @Nullable URI uri() {
         try {
@@ -29,12 +32,20 @@ public final class CollectionSkinUrl implements CollectionSkinSource, GsonPostPr
     }
 
     @Override
+    public @Nullable String name() {
+        return this.name;
+    }
+
+    @Override
     public void gsonPostProcess() {
         if (this.url == null) {
             this.url = "";
         }
         if (this.variant == null) {
             this.variant = SkinVariant.CLASSIC;
+        }
+        if (this.name != null && this.name.isBlank()) {
+            this.name = null;
         }
     }
 }
