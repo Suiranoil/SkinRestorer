@@ -10,6 +10,8 @@ import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.skin.provider.base.AbstractSkinProvider;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, SkinVariant>> {
@@ -49,6 +51,36 @@ public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, S
     @Override
     protected CacheConfig getCacheConfig() {
         return SkinRestorer.getConfig().providers().mineskin().cache();
+    }
+
+    @Override
+    protected void validate(String argument, SkinVariant variant) throws Exception {
+        super.validate(argument, variant);
+
+        var uri = new URI(argument);
+        var scheme = uri.getScheme();
+        if ((!"http".equals(scheme) && !"https".equals(scheme)) || uri.getHost() == null)
+            throw new IllegalArgumentException("only http(s) urls are allowed");
+
+        var allowedDomains = SkinRestorer.getConfig().providers().mineskin().allowedDomains();
+        if (allowedDomains.isEmpty()) return;
+
+        if (!MineskinSkinProvider.isDomainAllowed(uri.getHost(), allowedDomains))
+            throw new IllegalArgumentException("domain '" + uri.getHost() + "' is not allowed");
+    }
+
+    private static boolean isDomainAllowed(String host, List<String> allowedDomains) {
+        var normalizedHost = host.toLowerCase(Locale.ROOT);
+
+        for (var domain : allowedDomains) {
+            if (domain.startsWith("*.")) {
+                if (normalizedHost.endsWith(domain.substring(1))) return true;
+            } else if (normalizedHost.equals(domain)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

@@ -12,7 +12,11 @@ import net.lionarius.skinrestorer.skin.provider.base.AbstractSkinProvider;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> {
@@ -21,6 +25,7 @@ public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> 
     private final SkinSigner skinSigner;
 
     private List<Pair<URI, SkinVariant>> collectionSkins;
+    private Map<String, Integer> namedSkins = Collections.emptyMap();
 
     public CollectionSkinProvider(SkinSigner skinSigner) {
         this.skinSigner = skinSigner;
@@ -34,17 +39,23 @@ public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> 
 
     private void loadCollectionSkins() {
         List<Pair<URI, SkinVariant>> skins = new ArrayList<>();
+        Map<String, Integer> names = new LinkedHashMap<>();
 
         var config = SkinRestorer.getConfig().providers().collection();
 
         for (CollectionSkinSource source : config.sources()) {
             var uri = source.uri();
-            if (uri != null) {
-                skins.add(Pair.of(uri, source.variant()));
-            }
+            if (uri == null) continue;
+
+            skins.add(Pair.of(uri, source.variant()));
+
+            var name = source.name();
+            if (name != null && names.putIfAbsent(name, skins.size() - 1) != null)
+                SkinRestorer.LOGGER.warn("Duplicate collection skin name: {}", name);
         }
 
         this.collectionSkins = skins;
+        this.namedSkins = names;
     }
 
     @Override
@@ -79,7 +90,15 @@ public final class CollectionSkinProvider extends AbstractSkinProvider<Integer> 
     }
 
     @Override
+    public Collection<String> getArgumentSuggestions() {
+        return this.namedSkins.keySet();
+    }
+
+    @Override
     protected Integer getCacheKey(String argument, SkinVariant variant) {
+        var named = this.namedSkins.get(argument);
+        if (named != null) return named;
+
         return Math.floorMod(argument.hashCode(), this.collectionSkins.size());
     }
 
