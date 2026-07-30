@@ -6,9 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.lionarius.skinrestorer.skin.SkinVariant;
-import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.util.PlayerUtils;
-import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -16,29 +14,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public abstract class ProfileSkinProvider extends AbstractSkinProvider<UUID> {
+public abstract class ProfileSkinProvider extends UsernameArgumentSkinProvider<UUID> {
     private LoadingCache<String, UUID> uuidCache;
-
-    @Override
-    public SkinProviderParameterType getParameterType() {
-        return SkinProviderParameterType.USERNAME;
-    }
-
-    @Override
-    public String getArgumentName() {
-        return "username";
-    }
-
-    @Override
-    public boolean hasVariantSupport() {
-        return false;
-    }
-
-    @Override
-    protected void validate(String argument, SkinVariant variant) throws Exception {
-        super.validate(argument, variant);
-        if (!StringUtil.isValidPlayerName(argument)) throw new IllegalArgumentException("invalid username");
-    }
 
     @Override
     protected void createSkinCache() {
