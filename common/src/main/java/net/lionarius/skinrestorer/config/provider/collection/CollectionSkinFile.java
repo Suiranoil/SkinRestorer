@@ -12,6 +12,9 @@ public final class CollectionSkinFile implements CollectionSkinSource, GsonPostP
     private String path = "";
     private SkinVariant variant = SkinVariant.CLASSIC;
 
+    @Nullable
+    private String name = null;
+
     @Override
     public @Nullable URI uri() {
         if (this.path.isEmpty()) return null;
@@ -47,12 +50,20 @@ public final class CollectionSkinFile implements CollectionSkinSource, GsonPostP
     }
 
     @Override
+    public @Nullable String name() {
+        return this.name;
+    }
+
+    @Override
     public void gsonPostProcess() {
         if (this.path == null) {
             this.path = "";
         }
         if (this.variant == null) {
             this.variant = SkinVariant.CLASSIC;
+        }
+        if (this.name != null && this.name.isBlank()) {
+            this.name = null;
         }
     }
 }

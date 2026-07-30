@@ -7,6 +7,8 @@ import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.builtin.*;
 import net.lionarius.skinrestorer.util.Result;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,6 +35,11 @@ public interface SkinProvider {
     String getArgumentName();
 
     boolean hasVariantSupport();
+
+    // called on tab-complete, must be fast and non-blocking
+    default Collection<String> getArgumentSuggestions() {
+        return Collections.emptyList();
+    }
 
     Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant);
 
