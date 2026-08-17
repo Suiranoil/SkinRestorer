@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,8 +39,12 @@ public final class SkinCommand {
                 .then(buildSetSubcommand("clear", SkinValue.EMPTY::toProviderContext))
                 .then(literal("reset")
                         .executes(context -> resetSubcommand(context.getSource()))
-                        .then(makeTargetsArgument(
-                                (context, profiles) -> resetSubcommand(context.getSource(), profiles, true))))
+                        .then(literal("targets")
+                                .then(makeTargetsArgument(
+                                        (context, profiles) -> resetSubcommand(context.getSource(), profiles, true))))
+                        .then(literal("uuid")
+                                .then(makeUUIDTargetsArgument(
+                                        (context, profiles) -> resetSubcommand(context.getSource(), profiles, true)))))
                 .then(literal("refresh").executes(context -> refreshSubcommand(context.getSource())));
 
         var set = literal("set");
@@ -202,8 +207,12 @@ public final class SkinCommand {
                     ArgumentBuilder<CommandSourceStack, T> argument,
                     Function<CommandContext<CommandSourceStack>, SkinProviderContext> provider) {
         return argument.executes(context -> setSubcommand(context.getSource(), provider.apply(context)))
-                .then(makeTargetsArgument((context, targets) ->
-                        setSubcommand(context.getSource(), targets, provider.apply(context), true)));
+                .then(literal("targets")
+                        .then(makeTargetsArgument((context, targets) ->
+                                setSubcommand(context.getSource(), targets, provider.apply(context), true))))
+                .then(literal("uuid")
+                        .then(makeUUIDTargetsArgument((context, targets) ->
+                                setSubcommand(context.getSource(), targets, provider.apply(context), true))));
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, GameProfileArgument.Result> makeTargetsArgument(
@@ -211,5 +220,31 @@ public final class SkinCommand {
         return argument("targets", GameProfileArgument.gameProfile())
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> consumer.apply(context, GameProfileArgument.getGameProfiles(context, "targets")));
+    }
+
+    private static RequiredArgumentBuilder<CommandSourceStack, String> makeUUIDTargetsArgument(
+            BiFunction<CommandContext<CommandSourceStack>, Collection<GameProfile>, Integer> consumer) {
+        return argument("uuid", StringArgumentType.string())
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> {
+                    var input = StringArgumentType.getString(context, "uuid");
+                    try {
+                        var uuid = UUID.fromString(input);
+                        var server = context.getSource().getServer();
+                        var player = server.getPlayerList().getPlayer(uuid);
+                        GameProfile profile;
+                        if (player != null) {
+                            profile = player.getGameProfile();
+                        } else {
+                            profile = server.getProfileCache().get(uuid).orElse(new GameProfile(uuid, null));
+                        }
+                        return consumer.apply(context, Collections.singleton(profile));
+                    } catch (IllegalArgumentException e) {
+                        context.getSource()
+                                .sendFailure(Translation.translatableWithFallback(
+                                        Translation.COMMAND_SKIN_FAILED_KEY, input));
+                        return 0;
+                    }
+                });
     }
 }
