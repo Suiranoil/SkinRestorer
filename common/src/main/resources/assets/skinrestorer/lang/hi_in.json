@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "स्किन परिवर्तन %s के लिए लागू किए गए",
+    "skinrestorer.command.skin.restored_players": "%s की मूल स्किन पुनर्स्थापित की गई",
+    "skinrestorer.command.skin.saved_for_offline": "%s के लिए स्किन सहेजी गई, अगली बार जुड़ने पर लागू होगी",
+    "skinrestorer.command.skin.cleared_for_offline": "%s की सहेजी गई स्किन हटा दी गई",
     "skinrestorer.command.skin.no_changes": "कोई स्किन परिवर्तन नहीं",
     "skinrestorer.command.skin.failed": "स्किन बदलने में विफल: %s",
     "skinrestorer.command.skin.ok": "स्किन बदल दिया गया",
