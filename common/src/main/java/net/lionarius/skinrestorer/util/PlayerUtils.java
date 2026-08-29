@@ -9,9 +9,11 @@ import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
+import net.lionarius.skinrestorer.skin.SkinTarget;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,13 +26,13 @@ public final class PlayerUtils {
 
     private PlayerUtils() {}
 
-    public static Component createPlayerListComponent(Collection<ServerPlayer> players) {
+    public static Component createTargetListComponent(MinecraftServer server, Collection<SkinTarget> targets) {
         var component = Component.empty();
         int index = 0;
-        for (var player : players) {
-            component.append(Objects.requireNonNull(player.getDisplayName()));
+        for (var target : targets) {
+            component.append(target.displayName(server));
             index++;
-            if (index < players.size()) component.append(", ");
+            if (index < targets.size()) component.append(", ");
         }
         return component;
     }

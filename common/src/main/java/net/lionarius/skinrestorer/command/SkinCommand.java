@@ -6,8 +6,10 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinService;
+import net.lionarius.skinrestorer.skin.SkinTarget;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
@@ -19,13 +21,12 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.NameAndId;
+import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -41,11 +42,11 @@ public final class SkinCommand {
                 .requires(src -> SkinCommand.canUseSkinCommand(src) || SkinCommand.canUseConfigCommand(src))
                 .then(buildSetSubcommand("clear", SkinValue.EMPTY::toProviderContext)
                         .requires(SkinCommand::canUseSkinCommand))
-                .then(literal("reset")
-                        .requires(SkinCommand::canUseSkinCommand)
-                        .executes(context -> resetSubcommand(context.getSource()))
-                        .then(makeTargetsArgument(
-                                (context, profiles) -> resetSubcommand(context.getSource(), profiles, true))))
+                .then(withTargets(
+                        literal("reset")
+                                .requires(SkinCommand::canUseSkinCommand)
+                                .executes(context -> resetSubcommand(context.getSource())),
+                        (context, targets) -> resetSubcommand(context.getSource(), targets, true)))
                 .then(literal("refresh")
                         .requires(SkinCommand::canUseSkinCommand)
                         .executes(context -> refreshSubcommand(context.getSource())));
@@ -71,6 +72,11 @@ public final class SkinCommand {
 
     private static boolean canUseConfigCommand(CommandSourceStack src) {
         return Commands.LEVEL_OWNERS.check(src.permissions());
+    }
+
+    private static boolean canUseTargets(CommandSourceStack src) {
+        return SkinCommand.hasPermissionLevel(
+                src, SkinRestorer.getConfig().command().targetsPermissionLevel());
     }
 
     private static boolean hasPermissionLevel(CommandSourceStack src, int level) {
@@ -105,75 +111,79 @@ public final class SkinCommand {
 
         if (context == null) return 0;
 
-        return SkinCommand.setSubcommand(src, Collections.singleton(new NameAndId(profile)), context, save, false);
+        return SkinCommand.setSubcommand(src, Collections.singleton(SkinTarget.of(player)), context, save, false);
     }
 
-    private static int resetSubcommand(CommandSourceStack src, Collection<NameAndId> targets, boolean setByOperator) {
-        var updatedPlayers = new HashSet<ServerPlayer>();
-        for (var nameAndId : targets) {
-            SkinValue skin = null;
-            if (SkinRestorer.getSkinStorage().hasSavedSkin(nameAndId.id()))
-                skin = SkinRestorer.getSkinStorage().getSkin(nameAndId.id()).replaceValueWithOriginal();
+    private static int resetSubcommand(CommandSourceStack src, Collection<SkinTarget> targets, boolean setByOperator) {
+        var storage = SkinRestorer.getSkinStorage();
+        var updatedTargets = new HashSet<SkinTarget>();
 
-            if (skin == null) continue;
+        for (var target : targets) {
+            if (!storage.hasSavedSkin(target.id())) continue;
 
-            var player = src.getServer().getPlayerList().getPlayer(nameAndId.id());
-            if (player == null) continue;
+            var skin = storage.getSkin(target.id()).replaceValueWithOriginal();
+            SkinService.applySkin(src.getServer(), Collections.singleton(target), skin, false);
 
-            var updatedPlayer = SkinService.applySkin(src.getServer(), Collections.singleton(player), skin, false);
-            SkinRestorer.getSkinStorage().deleteSkin(nameAndId.id());
-
-            updatedPlayers.addAll(updatedPlayer);
+            storage.deleteSkin(target.id());
+            updatedTargets.add(target);
         }
 
-        SkinCommand.sendResponse(src, updatedPlayers, setByOperator);
+        SkinCommand.sendResponse(
+                src,
+                updatedTargets,
+                setByOperator,
+                Translation.COMMAND_SKIN_RESTORED_PLAYERS_KEY,
+                Translation.COMMAND_SKIN_CLEARED_FOR_OFFLINE_KEY);
 
         return targets.size();
     }
 
     private static int resetSubcommand(CommandSourceStack src) {
-        if (src.getPlayer() == null) return 0;
+        var player = src.getPlayer();
+        if (player == null) return 0;
 
-        return resetSubcommand(src, Collections.singleton(src.getPlayer().nameAndId()), false);
+        return resetSubcommand(src, Collections.singleton(SkinTarget.of(player)), false);
     }
 
     private static int setSubcommand(
             CommandSourceStack src,
-            Collection<NameAndId> targets,
+            Collection<SkinTarget> targets,
             SkinProviderContext context,
             boolean save,
             boolean setByOperator) {
         src.sendSystemMessage(Translation.translatableWithFallback(Translation.COMMAND_SKIN_LOADING_KEY));
 
-        var profileTargets = targets.stream()
-                .map(nameAndId -> src.getServer().getPlayerList().getPlayer(nameAndId.id()))
-                .filter(Objects::nonNull)
-                .toList();
-
-        SkinService.setSkinAsync(src.getServer(), profileTargets, context, save).thenAccept(result -> {
+        SkinService.setSkinAsync(src.getServer(), targets, context, save).thenAccept(result -> {
             if (result.isError()) {
                 src.sendFailure(Translation.translatableWithFallback(
                         Translation.COMMAND_SKIN_FAILED_KEY, result.getErrorValue()));
                 return;
             }
 
-            var updatedPlayers = result.getSuccessValue();
-
-            SkinCommand.sendResponse(src, updatedPlayers, setByOperator);
+            SkinCommand.sendResponse(
+                    src,
+                    result.getSuccessValue(),
+                    setByOperator,
+                    Translation.COMMAND_SKIN_AFFECTED_PLAYERS_KEY,
+                    Translation.COMMAND_SKIN_SAVED_FOR_OFFLINE_KEY);
         });
 
         return targets.size();
     }
 
     private static int setSubcommand(
-            CommandSourceStack src, Collection<NameAndId> targets, SkinProviderContext context, boolean setByOperator) {
+            CommandSourceStack src,
+            Collection<SkinTarget> targets,
+            SkinProviderContext context,
+            boolean setByOperator) {
         return SkinCommand.setSubcommand(src, targets, context, true, setByOperator);
     }
 
     private static int setSubcommand(CommandSourceStack src, SkinProviderContext context) {
-        if (src.getPlayer() == null) return 0;
+        var player = src.getPlayer();
+        if (player == null) return 0;
 
-        return setSubcommand(src, Collections.singleton(src.getPlayer().nameAndId()), context, false);
+        return setSubcommand(src, Collections.singleton(SkinTarget.of(player)), context, false);
     }
 
     private static int configReloadSubcommand(CommandContext<CommandSourceStack> context) {
@@ -191,22 +201,29 @@ public final class SkinCommand {
     }
 
     private static void sendResponse(
-            CommandSourceStack src, Collection<ServerPlayer> updatedPlayers, boolean setByOperator) {
-        if (updatedPlayers.isEmpty()) {
+            CommandSourceStack src,
+            Collection<SkinTarget> updatedTargets,
+            boolean setByOperator,
+            String onlineKey,
+            String offlineKey) {
+        if (updatedTargets.isEmpty()) {
             src.sendSuccess(() -> Translation.translatableWithFallback(Translation.COMMAND_SKIN_NO_CHANGES_KEY), true);
             return;
         }
 
-        if (setByOperator) {
-            var playersComponent = PlayerUtils.createPlayerListComponent(updatedPlayers);
-
-            src.sendSuccess(
-                    () -> Translation.translatableWithFallback(
-                            Translation.COMMAND_SKIN_AFFECTED_PLAYERS_KEY, playersComponent),
-                    true);
-        } else {
+        if (!setByOperator) {
             src.sendSuccess(() -> Translation.translatableWithFallback(Translation.COMMAND_SKIN_OK_KEY), true);
+            return;
         }
+
+        var playerList = src.getServer().getPlayerList();
+
+        var key = updatedTargets.stream().anyMatch(target -> playerList.getPlayer(target.id()) != null)
+                ? onlineKey
+                : offlineKey;
+        var targetsComponent = PlayerUtils.createTargetListComponent(src.getServer(), updatedTargets);
+
+        src.sendSuccess(() -> Translation.translatableWithFallback(key, targetsComponent), true);
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildSetSubcommand(String name, SkinProvider provider) {
@@ -230,18 +247,16 @@ public final class SkinCommand {
         return action;
     }
 
-    private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> buildSetSubcommand(
+    private static LiteralArgumentBuilder<CommandSourceStack> buildSetSubcommand(
             String name, Supplier<SkinProviderContext> supplier) {
         return buildSetSubcommandArgument(literal(name), context -> supplier.get());
     }
 
-    private static <T extends ArgumentBuilder<CommandSourceStack, T>>
-            ArgumentBuilder<CommandSourceStack, T> buildSetSubcommandArgument(
-                    ArgumentBuilder<CommandSourceStack, T> argument,
-                    Function<CommandContext<CommandSourceStack>, SkinProviderContext> provider) {
-        return argument.executes(context -> setSubcommand(context.getSource(), provider.apply(context)))
-                .then(makeTargetsArgument((context, targets) ->
-                        setSubcommand(context.getSource(), targets, provider.apply(context), true)));
+    private static <T extends ArgumentBuilder<CommandSourceStack, T>> T buildSetSubcommandArgument(
+            T argument, Function<CommandContext<CommandSourceStack>, SkinProviderContext> provider) {
+        return withTargets(
+                argument.executes(context -> setSubcommand(context.getSource(), provider.apply(context))),
+                (context, targets) -> setSubcommand(context.getSource(), targets, provider.apply(context), true));
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, String> makeProviderArgument(SkinProvider provider) {
@@ -250,11 +265,66 @@ public final class SkinCommand {
                         SharedSuggestionProvider.suggest(provider.getArgumentSuggestions(), builder));
     }
 
-    private static RequiredArgumentBuilder<CommandSourceStack, GameProfileArgument.Result> makeTargetsArgument(
-            BiFunction<CommandContext<CommandSourceStack>, Collection<NameAndId>, Integer> consumer) {
-        return argument("targets", GameProfileArgument.gameProfile())
-                .requires(source -> SkinCommand.hasPermissionLevel(
-                        source, SkinRestorer.getConfig().command().targetsPermissionLevel()))
-                .executes(context -> consumer.apply(context, GameProfileArgument.getGameProfiles(context, "targets")));
+    // uuid is registered first on purpose: a uuid-shaped token parses under both children and
+    // brigadier's stable sort of equally good candidates then falls back to insertion order
+    private static <T extends ArgumentBuilder<CommandSourceStack, T>> T withTargets(
+            T parent, BiFunction<CommandContext<CommandSourceStack>, Collection<SkinTarget>, Integer> consumer) {
+        return parent.then(argument("uuid", UuidArgument.uuid())
+                        .requires(SkinCommand::canUseTargets)
+                        .executes(context -> {
+                            var id = UuidArgument.getUuid(context, "uuid");
+                            var typed = SkinCommand.argumentText(context, "uuid");
+
+                            // UuidArgument delegates to UUID.fromString, which also accepts short
+                            // forms such as "a-b-c-d-e". Those are valid player names in offline
+                            // mode, so only let canonical UUID text take this branch.
+                            if (typed != null && !id.toString().equalsIgnoreCase(typed))
+                                return consumer.apply(context, SkinCommand.resolveNameTarget(context, typed));
+
+                            return consumer.apply(context, Collections.singleton(SkinTarget.of(id)));
+                        }))
+                .then(argument("targets", GameProfileArgument.gameProfile())
+                        .requires(SkinCommand::canUseTargets)
+                        .executes(context -> consumer.apply(context, resolveTargets(context))));
+    }
+
+    private static Collection<SkinTarget> resolveTargets(CommandContext<CommandSourceStack> context)
+            throws CommandSyntaxException {
+        var server = context.getSource().getServer();
+        var typed = SkinCommand.argumentText(context, "targets");
+
+        // vanilla resolves a name through usercache and then the Mojang API regardless of the
+        // server's mode, so on an offline-mode server it lands on an id the player will never
+        // log in as; derive it the way the login path does instead
+        if (typed != null && !typed.startsWith("@") && !server.usesAuthentication())
+            return SkinCommand.resolveNameTarget(context, typed);
+
+        return GameProfileArgument.getGameProfiles(context, "targets").stream()
+                .map(SkinTarget::of)
+                .toList();
+    }
+
+    private static Collection<SkinTarget> resolveNameTarget(CommandContext<CommandSourceStack> context, String typed)
+            throws CommandSyntaxException {
+        if (!StringUtil.isValidPlayerName(typed)) throw GameProfileArgument.ERROR_UNKNOWN_PLAYER.create();
+
+        var server = context.getSource().getServer();
+        if (!server.usesAuthentication()) return Collections.singleton(SkinTarget.byOfflineName(server, typed));
+
+        return Collections.singleton(server.services()
+                .nameToIdCache()
+                .get(typed)
+                .map(SkinTarget::of)
+                .orElseThrow(GameProfileArgument.ERROR_UNKNOWN_PLAYER::create));
+    }
+
+    private static String argumentText(CommandContext<CommandSourceStack> context, String name) {
+        for (var node : context.getNodes()) {
+            if (!node.getNode().getName().equals(name)) continue;
+
+            return node.getRange().get(context.getInput());
+        }
+
+        return null;
     }
 }
