@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "Skin-Änderungen für %s angewendet",
+    "skinrestorer.command.skin.restored_players": "Originalen Skin für %s wiederhergestellt",
+    "skinrestorer.command.skin.saved_for_offline": "Skin für %s gespeichert; wird beim nächsten Beitritt angewendet",
+    "skinrestorer.command.skin.cleared_for_offline": "Gespeicherten Skin für %s entfernt",
     "skinrestorer.command.skin.no_changes": "Keine Skin-Änderungen",
     "skinrestorer.command.skin.failed": "Skin konnte nicht geändert werden: %s",
     "skinrestorer.command.skin.ok": "Skin geändert",
