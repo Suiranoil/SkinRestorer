@@ -14,6 +14,7 @@ import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
+import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.skin.provider.builtin.MojangSkinProvider;
 import net.lionarius.skinrestorer.translation.Translation;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -21,12 +22,12 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -231,20 +232,30 @@ public final class SkinCommand {
 
         if (provider.hasVariantSupport()) {
             for (SkinVariant variant : SkinVariant.values()) {
-                action.then(literal(variant.toString())
-                        .then(buildSetSubcommandArgument(makeProviderArgument(provider), context -> {
-                            var argument = StringArgumentType.getString(context, provider.getArgumentName());
-                            return new SkinProviderContext(name, argument, variant);
-                        })));
+                action.then(withProviderArgument(literal(variant.toString()), name, provider, variant));
             }
         } else {
-            action.then(buildSetSubcommandArgument(makeProviderArgument(provider), context -> {
-                var argument = StringArgumentType.getString(context, provider.getArgumentName());
-                return new SkinProviderContext(name, argument, null);
-            }));
+            withProviderArgument(action, name, provider, null);
         }
 
         return action;
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> withProviderArgument(
+            LiteralArgumentBuilder<CommandSourceStack> parent,
+            String name,
+            SkinProvider provider,
+            SkinVariant variant) {
+        var argument = buildSetSubcommandArgument(makeProviderArgument(provider), context -> {
+                    var value = StringArgumentType.getString(context, provider.getArgumentName());
+                    return new SkinProviderContext(name, value, variant);
+                })
+                .build();
+
+        return parent.then(
+                provider.getParameterType() == SkinProviderParameterType.URL
+                        ? new UrlArgumentCommandNode<>(argument)
+                        : argument);
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildSetSubcommand(
@@ -265,27 +276,11 @@ public final class SkinCommand {
                         SharedSuggestionProvider.suggest(provider.getArgumentSuggestions(), builder));
     }
 
-    // uuid is registered first on purpose: a uuid-shaped token parses under both children and
-    // brigadier's stable sort of equally good candidates then falls back to insertion order
     private static <T extends ArgumentBuilder<CommandSourceStack, T>> T withTargets(
             T parent, BiFunction<CommandContext<CommandSourceStack>, Collection<SkinTarget>, Integer> consumer) {
-        return parent.then(argument("uuid", UuidArgument.uuid())
-                        .requires(SkinCommand::canUseTargets)
-                        .executes(context -> {
-                            var id = UuidArgument.getUuid(context, "uuid");
-                            var typed = SkinCommand.argumentText(context, "uuid");
-
-                            // UuidArgument delegates to UUID.fromString, which also accepts short
-                            // forms such as "a-b-c-d-e". Those are valid player names in offline
-                            // mode, so only let canonical UUID text take this branch.
-                            if (typed != null && !id.toString().equalsIgnoreCase(typed))
-                                return consumer.apply(context, SkinCommand.resolveNameTarget(context, typed));
-
-                            return consumer.apply(context, Collections.singleton(SkinTarget.of(id)));
-                        }))
-                .then(argument("targets", GameProfileArgument.gameProfile())
-                        .requires(SkinCommand::canUseTargets)
-                        .executes(context -> consumer.apply(context, resolveTargets(context))));
+        return parent.then(argument("targets", GameProfileArgument.gameProfile())
+                .requires(SkinCommand::canUseTargets)
+                .executes(context -> consumer.apply(context, resolveTargets(context))));
     }
 
     private static Collection<SkinTarget> resolveTargets(CommandContext<CommandSourceStack> context)
@@ -293,29 +288,27 @@ public final class SkinCommand {
         var server = context.getSource().getServer();
         var typed = SkinCommand.argumentText(context, "targets");
 
+        // GameProfileArgument already accepts UUID text, so no competing argument branch is needed.
+        // Only canonical UUIDs count: shortened forms such as "a-b-c-d-e" may be offline names.
+        if (typed != null && typed.length() == 36) {
+            try {
+                var id = UUID.fromString(typed);
+                if (id.toString().equalsIgnoreCase(typed)) return Collections.singleton(SkinTarget.of(id));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
         // vanilla resolves a name through usercache and then the Mojang API regardless of the
         // server's mode, so on an offline-mode server it lands on an id the player will never
         // log in as; derive it the way the login path does instead
-        if (typed != null && !typed.startsWith("@") && !server.usesAuthentication())
-            return SkinCommand.resolveNameTarget(context, typed);
+        if (typed != null && !typed.startsWith("@") && !server.usesAuthentication()) {
+            if (!StringUtil.isValidPlayerName(typed)) throw GameProfileArgument.ERROR_UNKNOWN_PLAYER.create();
+            return Collections.singleton(SkinTarget.byOfflineName(server, typed));
+        }
 
         return GameProfileArgument.getGameProfiles(context, "targets").stream()
                 .map(SkinTarget::of)
                 .toList();
-    }
-
-    private static Collection<SkinTarget> resolveNameTarget(CommandContext<CommandSourceStack> context, String typed)
-            throws CommandSyntaxException {
-        if (!StringUtil.isValidPlayerName(typed)) throw GameProfileArgument.ERROR_UNKNOWN_PLAYER.create();
-
-        var server = context.getSource().getServer();
-        if (!server.usesAuthentication()) return Collections.singleton(SkinTarget.byOfflineName(server, typed));
-
-        return Collections.singleton(server.services()
-                .nameToIdCache()
-                .get(typed)
-                .map(SkinTarget::of)
-                .orElseThrow(GameProfileArgument.ERROR_UNKNOWN_PLAYER::create));
     }
 
     private static String argumentText(CommandContext<CommandSourceStack> context, String name) {
