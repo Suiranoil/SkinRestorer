@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0] - 2026-09-05
+### Added
+- `/skin set`, `/skin clear` and `/skin reset` now accept offline players and UUIDs as targets; the skin is saved right away and applied on their next join
+### Changed
+- `/skin set web` now accepts URLs without quotes and suggests a quoted form when the URL has to be quoted
+### Fixed
+- Fixed a crash when a player head was displayed on a client that has the mod installed and is connected to a multiplayer server (1.20 and older)
+
 ## [2.10.0] - 2026-07-31
 ### Added
 - Added an optional `name` field to collection provider sources, allowing players to pick a specific skin with `/skin set collection <name>` (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providerscollection)) ([#113](https://github.com/Suiranoil/SkinRestorer/issues/113))
