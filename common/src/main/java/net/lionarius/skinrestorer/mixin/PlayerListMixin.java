@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Collections;
 import java.util.List;
 
 @Mixin(PlayerList.class)
@@ -45,14 +44,14 @@ public abstract class PlayerListMixin {
         var delay = SkinRestorer.getConfig().join().applyDelay();
 
         if (delay <= 0) {
-            skinrestorer$tryApplySkin(server, player);
+            skinrestorer$tryApplySkin(player);
         } else {
             var uuid = player.getUUID();
             SkinRestorer.getTickedScheduler()
                     .schedule(
                             () -> {
                                 var actualPlayer = server.getPlayerList().getPlayer(uuid);
-                                if (actualPlayer != null) skinrestorer$tryApplySkin(server, actualPlayer);
+                                if (actualPlayer != null) skinrestorer$tryApplySkin(actualPlayer);
                             },
                             delay,
                             uuid);
@@ -60,11 +59,8 @@ public abstract class PlayerListMixin {
     }
 
     @Unique
-    private static void skinrestorer$tryApplySkin(MinecraftServer server, ServerPlayer player) {
+    private static void skinrestorer$tryApplySkin(ServerPlayer player) {
         if (SkinRestorer.getSkinStorage().hasSavedSkin(player.getUUID()))
-            SkinService.applySkin(
-                    server,
-                    Collections.singleton(player.getGameProfile()),
-                    SkinRestorer.getSkinStorage().getSkin(player.getUUID()));
+            SkinService.applySkin(player, SkinRestorer.getSkinStorage().getSkin(player.getUUID()), true);
     }
 }
