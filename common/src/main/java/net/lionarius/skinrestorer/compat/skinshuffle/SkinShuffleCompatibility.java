@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.compat.skinshuffle;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.platform.Services;
 import net.lionarius.skinrestorer.skin.SkinService;
+import net.lionarius.skinrestorer.skin.SkinTarget;
 import net.lionarius.skinrestorer.skin.SkinValue;
 import net.lionarius.skinrestorer.skin.provider.builtin.SkinShuffleSkinProvider;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -42,7 +43,7 @@ public class SkinShuffleCompatibility {
         server.execute(() -> {
             SkinService.applySkin(
                     server,
-                    Collections.singleton(player),
+                    Collections.singleton(SkinTarget.of(player)),
                     new SkinValue(SkinShuffleSkinProvider.PROVIDER_NAME, null, null, property),
                     !server.usesAuthentication());
 
