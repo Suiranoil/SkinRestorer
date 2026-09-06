@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "%s のスキン変更を適用しました",
+    "skinrestorer.command.skin.restored_players": "%s の元のスキンを復元しました",
+    "skinrestorer.command.skin.saved_for_offline": "%s のスキンを保存しました。次回参加時に適用されます",
+    "skinrestorer.command.skin.cleared_for_offline": "%s の保存済みスキンを削除しました",
     "skinrestorer.command.skin.no_changes": "スキンの変更はありません",
     "skinrestorer.command.skin.failed": "スキンの変更に失敗しました: %s",
     "skinrestorer.command.skin.ok": "スキンを変更しました",

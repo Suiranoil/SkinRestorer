@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "Застосовано зміни скіна для %s",
+    "skinrestorer.command.skin.restored_players": "Початковий скін відновлено для %s",
+    "skinrestorer.command.skin.saved_for_offline": "Скін збережено для %s і буде застосовано під час наступного входу",
+    "skinrestorer.command.skin.cleared_for_offline": "Збережений скін видалено для %s",
     "skinrestorer.command.skin.no_changes": "Змін скіна немає",
     "skinrestorer.command.skin.failed": "Не вдалося змінити скін: %s",
     "skinrestorer.command.skin.ok": "Скін змінено",
