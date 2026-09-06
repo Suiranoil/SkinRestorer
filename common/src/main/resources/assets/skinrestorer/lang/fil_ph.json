@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "Na-apply ang pagbabago ng skin para kay %s",
+    "skinrestorer.command.skin.restored_players": "Naibalik ang orihinal na skin ni %s",
+    "skinrestorer.command.skin.saved_for_offline": "Na-save ang skin para kay %s; maa-apply ito sa susunod na pagsali",
+    "skinrestorer.command.skin.cleared_for_offline": "Inalis ang naka-save na skin ni %s",
     "skinrestorer.command.skin.no_changes": "Walang pagbabago sa skin",
     "skinrestorer.command.skin.failed": "Nabigo sa pagbabago ng skin: %s",
     "skinrestorer.command.skin.ok": "Nabago ang skin",

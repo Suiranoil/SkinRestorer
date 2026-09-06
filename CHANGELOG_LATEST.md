@@ -1,8 +1,6 @@
 ### Added
-- Added an optional `name` field to collection provider sources, allowing players to pick a specific skin with `/skin set collection <name>` (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providerscollection)) ([#113](https://github.com/Suiranoil/SkinRestorer/issues/113))
-- Added tab-completion for skin provider command arguments: online players for username-based providers, named skins for the collection provider
-- Added the `providers.mineskin.allowedDomains` config option to restrict which domains players can use with `/skin set web` (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#providersmineskin))
-- Added the `command` config section to control who can change skins: `command.enabled`, `command.permissionLevel` and `command.targetsPermissionLevel` (see [wiki](https://github.com/Suiranoil/SkinRestorer/wiki/Configuration#command)) ([#114](https://github.com/Suiranoil/SkinRestorer/issues/114))
+- `/skin set`, `/skin clear` and `/skin reset` now accept offline players and UUIDs as targets; the skin is saved right away and applied on their next join
 ### Changed
-- `/skin set web` now only accepts `http(s)` URLs
-- `/skin config reload` now resends the command tree to online players, so command changes apply without relogging
+- `/skin set web` now accepts URLs without quotes and suggests a quoted form when the URL has to be quoted
+### Fixed
+- Fixed a crash when a player head was displayed on a client that has the mod installed and is connected to a multiplayer server (1.20 and older)

@@ -13,6 +13,9 @@ import java.util.Objects;
 
 public final class Translation {
     public static final String COMMAND_SKIN_AFFECTED_PLAYERS_KEY = "skinrestorer.command.skin.affected_players";
+    public static final String COMMAND_SKIN_RESTORED_PLAYERS_KEY = "skinrestorer.command.skin.restored_players";
+    public static final String COMMAND_SKIN_SAVED_FOR_OFFLINE_KEY = "skinrestorer.command.skin.saved_for_offline";
+    public static final String COMMAND_SKIN_CLEARED_FOR_OFFLINE_KEY = "skinrestorer.command.skin.cleared_for_offline";
     public static final String COMMAND_SKIN_NO_CHANGES_KEY = "skinrestorer.command.skin.no_changes";
     public static final String COMMAND_SKIN_FAILED_KEY = "skinrestorer.command.skin.failed";
     public static final String COMMAND_SKIN_OK_KEY = "skinrestorer.command.skin.ok";

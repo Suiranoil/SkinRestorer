@@ -35,7 +35,7 @@ public final class MineskinSkinProvider extends AbstractSkinProvider<Pair<URI, S
 
     @Override
     public SkinProviderParameterType getParameterType() {
-        return SkinProviderParameterType.CUSTOM;
+        return SkinProviderParameterType.URL;
     }
 
     @Override

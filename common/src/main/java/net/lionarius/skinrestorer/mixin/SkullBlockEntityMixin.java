@@ -42,6 +42,8 @@ public abstract class SkullBlockEntityMixin {
     @Unique
     private static void skinrestorer$replaceSkin(
             Optional<GameProfile> profileOpt, Consumer<GameProfile> profileConsumer, CallbackInfo ci) {
+        if (SkinRestorer.getMinecraftServer() == null) return;
+
         if (profileOpt.isEmpty()) return;
 
         var profile = PlayerUtils.cloneGameProfile(profileOpt.get());
