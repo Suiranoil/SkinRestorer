@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "Skin-változások alkalmazva %s részére",
+    "skinrestorer.command.skin.restored_players": "%s eredeti skinje visszaállítva",
+    "skinrestorer.command.skin.saved_for_offline": "Skin mentve %s számára, a következő csatlakozáskor lesz alkalmazva",
+    "skinrestorer.command.skin.cleared_for_offline": "%s mentett skinje eltávolítva",
     "skinrestorer.command.skin.no_changes": "Nincsenek skin-változások",
     "skinrestorer.command.skin.failed": "Skin-változtatás sikertelen: %s",
     "skinrestorer.command.skin.ok": "Skin megváltoztatva",

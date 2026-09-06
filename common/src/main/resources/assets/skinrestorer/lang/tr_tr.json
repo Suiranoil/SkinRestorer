@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "%s için skin değişiklikleri uygulandı",
+    "skinrestorer.command.skin.restored_players": "%s için orijinal skin geri yüklendi",
+    "skinrestorer.command.skin.saved_for_offline": "%s için skin kaydedildi, bir sonraki girişte uygulanacak",
+    "skinrestorer.command.skin.cleared_for_offline": "%s için kaydedilmiş skin kaldırıldı",
     "skinrestorer.command.skin.no_changes": "Skin değişikliği yok",
     "skinrestorer.command.skin.failed": "Skin değiştirme başarısız: %s",
     "skinrestorer.command.skin.ok": "Skin değiştirildi",
