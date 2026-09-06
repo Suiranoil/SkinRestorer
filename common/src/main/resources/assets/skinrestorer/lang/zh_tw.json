@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "已變更 %s 的外觀",
+    "skinrestorer.command.skin.restored_players": "已還原 %s 的原始外觀",
+    "skinrestorer.command.skin.saved_for_offline": "已儲存 %s 的外觀，將在下次加入時套用",
+    "skinrestorer.command.skin.cleared_for_offline": "已移除為 %s 儲存的外觀",
     "skinrestorer.command.skin.no_changes": "沒有外觀變更",
     "skinrestorer.command.skin.failed": "變更外觀失敗：%s",
     "skinrestorer.command.skin.ok": "已變更外觀",

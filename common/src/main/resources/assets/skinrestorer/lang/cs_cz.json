@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "Změny skinu použity pro %s",
+    "skinrestorer.command.skin.restored_players": "Původní skin obnoven pro %s",
+    "skinrestorer.command.skin.saved_for_offline": "Skin pro %s uložen, použije se při příštím připojení",
+    "skinrestorer.command.skin.cleared_for_offline": "Uložený skin pro %s odstraněn",
     "skinrestorer.command.skin.no_changes": "Žádné změny skinu",
     "skinrestorer.command.skin.failed": "Nepodařilo se změnit skin: %s",
     "skinrestorer.command.skin.ok": "Skin změněn",
