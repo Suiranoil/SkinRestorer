@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "Perubahan skin diterapkan untuk %s",
+    "skinrestorer.command.skin.restored_players": "Skin asli dipulihkan untuk %s",
+    "skinrestorer.command.skin.saved_for_offline": "Skin disimpan untuk %s, akan diterapkan saat bergabung berikutnya",
+    "skinrestorer.command.skin.cleared_for_offline": "Skin tersimpan dihapus untuk %s",
     "skinrestorer.command.skin.no_changes": "Tidak ada perubahan skin",
     "skinrestorer.command.skin.failed": "Gagal mengubah skin: %s",
     "skinrestorer.command.skin.ok": "Skin diubah",

@@ -1,5 +1,8 @@
 {
     "skinrestorer.command.skin.affected_players": "Áp dụng thay đổi skin cho %s",
+    "skinrestorer.command.skin.restored_players": "Đã khôi phục skin gốc cho %s",
+    "skinrestorer.command.skin.saved_for_offline": "Đã lưu skin cho %s, sẽ áp dụng ở lần tham gia tiếp theo",
+    "skinrestorer.command.skin.cleared_for_offline": "Đã xóa skin đã lưu cho %s",
     "skinrestorer.command.skin.no_changes": "Không có thay đổi skin",
     "skinrestorer.command.skin.failed": "Thay đổi skin thất bại: %s",
     "skinrestorer.command.skin.ok": "Đã thay đổi skin",
