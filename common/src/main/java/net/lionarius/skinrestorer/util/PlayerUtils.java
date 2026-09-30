@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.biome.BiomeManager;
-
+import net.minecraft.network.chat.TextComponent;
 import java.util.*;
 
 public final class PlayerUtils {
@@ -24,7 +24,7 @@ public final class PlayerUtils {
     private PlayerUtils() {}
     
     public static Component createPlayerListComponent(Collection<ServerPlayer> players) {
-        var component = Component.empty();
+        var component = new TextComponent("");
         int index = 0;
         for (var player : players) {
             component.append(Objects.requireNonNull(player.getDisplayName()));
@@ -66,15 +66,14 @@ public final class PlayerUtils {
         if (!player.isDeadOrDying()) {
             player.connection.send(
                     new ClientboundRespawnPacket(
-                            player.getLevel().dimensionTypeId(),
+                            player.getLevel().dimensionTypeRegistration(),
                             player.getLevel().dimension(),
                             BiomeManager.obfuscateSeed(player.getLevel().getSeed()),
                             player.gameMode.getGameModeForPlayer(),
                             player.gameMode.getPreviousGameModeForPlayer(),
                             player.getLevel().isDebug(),
                             player.getLevel().isFlat(),
-                            true,
-                            player.getLastDeathLocation()
+                            true
                     )
             );
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
