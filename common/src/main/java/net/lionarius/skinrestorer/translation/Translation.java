@@ -7,7 +7,7 @@ import net.lionarius.skinrestorer.util.FileUtils;
 import net.lionarius.skinrestorer.util.JsonUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-
+import net.minecraft.network.chat.TranslatableComponent;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,11 +39,11 @@ public final class Translation {
     }
     
     public static MutableComponent translatableWithFallback(String key) {
-        return Component.translatable(Translation.get(key));
+        return new TranslatableComponent(Translation.get(key));
     }
     
     public static MutableComponent translatableWithFallback(String key, Object... args) {
-        return Component.translatable(Translation.get(key), args);
+        return new TranslatableComponent(Translation.get(key), args);
     }
     
     public static void reloadTranslations() {
