@@ -32,7 +32,9 @@ import static net.minecraft.commands.Commands.literal;
 public final class SkinCommand {
     
     private SkinCommand() {}
-    
+    private static ServerPlayer getPlayer(CommandSourceStack src) {
+    return src.getEntity() instanceof ServerPlayer player ? player : null;
+}
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         var base =
                 literal("skin")
@@ -64,7 +66,7 @@ public final class SkinCommand {
     private static int refreshSubcommand(
             CommandSourceStack src
     ) {
-        var player = src.getPlayer();
+        var player = getPlayer(src);
         if (player == null)
             return 0;
         
@@ -115,10 +117,10 @@ public final class SkinCommand {
     private static int resetSubcommand(
             CommandSourceStack src
     ) {
-        if (src.getPlayer() == null)
+        if (getPlayer(src) == null)
             return 0;
         
-        return resetSubcommand(src, Collections.singleton(src.getPlayer().getGameProfile()), false);
+        return resetSubcommand(src, Collections.singleton(getPlayer(src).getGameProfile()), false);
     }
     
     private static int setSubcommand(
@@ -160,10 +162,10 @@ public final class SkinCommand {
             CommandSourceStack src,
             SkinProviderContext context
     ) {
-        if (src.getPlayer() == null)
+        if (getPlayer(src) == null)
             return 0;
         
-        return setSubcommand(src, Collections.singleton(src.getPlayer().getGameProfile()), context, false);
+        return setSubcommand(src, Collections.singleton(getPlayer(src).getGameProfile()), context, false);
     }
     
     private static int configReloadSubcommand(CommandContext<CommandSourceStack> context) {
