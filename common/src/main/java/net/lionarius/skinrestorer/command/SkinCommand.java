@@ -22,6 +22,7 @@ import net.lionarius.skinrestorer.util.StringUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -79,12 +80,16 @@ public final class SkinCommand {
                 src, SkinRestorer.getConfig().command().targetsPermissionLevel());
     }
 
+    private static ServerPlayer getPlayer(CommandSourceStack src) {
+        return src.getEntity() instanceof ServerPlayer player ? player : null;
+    }
+
     private static boolean hasPermissionLevel(CommandSourceStack src, int level) {
         return src.hasPermission(level);
     }
 
     private static int refreshSubcommand(CommandSourceStack src) {
-        var player = src.getPlayer();
+        var player = getPlayer(src);
         if (player == null) return 0;
 
         var profile = player.getGameProfile();
@@ -130,7 +135,7 @@ public final class SkinCommand {
     }
 
     private static int resetSubcommand(CommandSourceStack src) {
-        var player = src.getPlayer();
+        var player = getPlayer(src);
         if (player == null) return 0;
 
         return resetSubcommand(src, Collections.singleton(SkinTarget.of(player)), false);
@@ -142,7 +147,7 @@ public final class SkinCommand {
             SkinProviderContext context,
             boolean save,
             boolean setByOperator) {
-        src.sendSystemMessage(Translation.translatableWithFallback(Translation.COMMAND_SKIN_LOADING_KEY));
+        src.sendSuccess(Translation.translatableWithFallback(Translation.COMMAND_SKIN_LOADING_KEY), false);
 
         SkinService.setSkinAsync(src.getServer(), targets, context, save).thenAccept(result -> {
             if (result.isError()) {
@@ -171,7 +176,7 @@ public final class SkinCommand {
     }
 
     private static int setSubcommand(CommandSourceStack src, SkinProviderContext context) {
-        var player = src.getPlayer();
+        var player = getPlayer(src);
         if (player == null) return 0;
 
         return setSubcommand(src, Collections.singleton(SkinTarget.of(player)), context, false);

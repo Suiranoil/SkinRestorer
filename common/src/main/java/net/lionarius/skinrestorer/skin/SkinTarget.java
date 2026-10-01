@@ -1,10 +1,11 @@
 package net.lionarius.skinrestorer.skin;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +31,7 @@ public record SkinTarget(@NotNull UUID id, @Nullable String name) {
         var player = server.getPlayerList().getPlayerByName(name);
         if (player != null) return SkinTarget.of(player);
 
-        return new SkinTarget(UUIDUtil.createOfflinePlayerUUID(name), name);
+        return new SkinTarget(Player.createPlayerUUID(name), name);
     }
 
     public Component displayName(MinecraftServer server) {
@@ -40,13 +41,13 @@ public record SkinTarget(@NotNull UUID id, @Nullable String name) {
             if (displayName != null) return displayName;
         }
 
-        if (this.name != null) return Component.literal(this.name);
+        if (this.name != null) return new TextComponent(this.name);
 
         // get(UUID) is a plain map read, unlike get(String) which falls through to the session service
         return server.getProfileCache()
                 .get(this.id)
-                .map(profile -> Component.literal(profile.getName()))
-                .orElseGet(() -> Component.literal(this.id.toString()));
+                .<Component>map(profile -> new TextComponent(profile.getName()))
+                .orElseGet(() -> new TextComponent(this.id.toString()));
     }
 
     @Override

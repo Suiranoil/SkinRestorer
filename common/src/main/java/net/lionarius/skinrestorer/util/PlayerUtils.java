@@ -10,6 +10,7 @@ import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
 import net.lionarius.skinrestorer.skin.SkinTarget;
 import net.lionarius.skinrestorer.skin.SkinVariant;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkMap;
@@ -26,7 +27,7 @@ public final class PlayerUtils {
     private PlayerUtils() {}
 
     public static Component createTargetListComponent(MinecraftServer server, Collection<SkinTarget> targets) {
-        var component = Component.empty();
+        var component = new TextComponent("");
         int index = 0;
         for (var target : targets) {
             component.append(target.displayName(server));
@@ -69,15 +70,14 @@ public final class PlayerUtils {
 
         if (!player.isDeadOrDying()) {
             player.connection.send(new ClientboundRespawnPacket(
-                    player.getLevel().dimensionTypeId(),
+                    player.getLevel().dimensionTypeRegistration(),
                     player.getLevel().dimension(),
                     BiomeManager.obfuscateSeed(player.getLevel().getSeed()),
                     player.gameMode.getGameModeForPlayer(),
                     player.gameMode.getPreviousGameModeForPlayer(),
                     player.getLevel().isDebug(),
                     player.getLevel().isFlat(),
-                    true,
-                    player.getLastDeathLocation()));
+                    true));
             player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
             var vehicle = player.getVehicle();

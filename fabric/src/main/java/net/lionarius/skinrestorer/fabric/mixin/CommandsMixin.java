@@ -2,7 +2,6 @@ package net.lionarius.skinrestorer.fabric.mixin;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.lionarius.skinrestorer.SkinRestorer;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import org.spongepowered.asm.mixin.Final;
@@ -25,8 +24,7 @@ public abstract class CommandsMixin {
                             value = "INVOKE",
                             target =
                                     "Lnet/minecraft/server/commands/AdvancementCommands;register(Lcom/mojang/brigadier/CommandDispatcher;)V"))
-    private void init(
-            Commands.CommandSelection environment, CommandBuildContext commandRegistryAccess, CallbackInfo ci) {
+    private void init(Commands.CommandSelection environment, CallbackInfo ci) {
         SkinRestorer.Events.onCommandRegister(dispatcher);
     }
 }
