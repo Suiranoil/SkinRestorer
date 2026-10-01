@@ -44,3 +44,20 @@ publishMods {
             optional(optional_dependencies.split(','))
     }
 }
+
+def verifyModJar = tasks.register('verifyModJar', net.lionarius.gradle.VerifyModJar) {
+    group = 'verification'
+    description = 'Checks that the jar picked for publishing is complete and correctly remapped.'
+
+    jarFile = publishMods.file
+    expectedFiles.from(sourceSets.main.output)
+    srgMappings = layout.buildDirectory.file('createMcpToSrg/output.tsrg')
+            .map { tasks.names.contains('reobfJar') ? it : null }
+
+    mustRunAfter(tasks.matching { it.name in ['assemble', 'jar', 'jarJar', 'remapJar', 'reobfJar', 'reobfJarJar'] })
+}
+
+tasks.configureEach { task ->
+    if (task.name == 'build' || task.name.startsWith('publish'))
+        task.dependsOn(verifyModJar)
+}
