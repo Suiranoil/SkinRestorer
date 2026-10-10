@@ -1,39 +1,28 @@
 name: build
 on:
-    push:
-        paths-ignore:
-            - '.github/**'
-            - '*.md'
-    pull_request:
-        paths-ignore:
-            - '.github/**'
-            - '*.md'
+  push:
+    branches: ['1.7.10-gtnh兼容']
+  pull_request:
+    branches: ['1.7.10-gtnh兼容']
+
+permissions:
+  contents: read
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        
-        steps:
-            -   uses: actions/checkout@v4
-
-            -   uses: actions/setup-java@v4
-                with:
-                    distribution: temurin
-                    java-version: 25
-
-            -   name: Setup Gradle
-                uses: gradle/actions/setup-gradle@v3
-                with:
-                    cache-read-only: false
-
-            -   name: Change wrapper permissions
-                run: chmod +x ./gradlew
-
-            -   name: Run build with Gradle Wrapper
-                run: ./gradlew build
-
-            -   name: Upload built JARs
-                uses: actions/upload-artifact@v4
-                with:
-                    name: skin-restorer-artifacts
-                    path: ./*/build/libs/*.jar
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skinrestorer-gtnh
+          path: build/libs/*.jar

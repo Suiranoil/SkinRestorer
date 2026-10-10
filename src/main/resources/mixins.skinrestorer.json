@@ -1,0 +1,19 @@
+{
+  "required": false,
+  "minVersion": "0.8.7",
+  "package": "net.lionarius.skinrestorer.mixin",
+  "refmap": "mixins.skinrestorer.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "EntityTrackerAccessor",
+    "EntityTrackerEntryAccessor",
+    "EntityPlayerMPAccessor"
+  ],
+  "client": [
+    "ClientPlayerMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

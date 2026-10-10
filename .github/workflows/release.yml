@@ -1,36 +1,84 @@
 name: release
+
 on:
-    workflow_dispatch:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and attach
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
-    release:
-        environment: release
-        runs-on: ubuntu-latest
-        
-        steps:
-            -   uses: actions/checkout@v4
+  build-and-attach:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.release.tag_name, 'gtnh') ||
+      contains(github.event.release.tag_name, '1.7.10')
+    name: Build and attach GTNH JAR
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
 
-            -   uses: actions/setup-java@v4
-                with:
-                    distribution: temurin
-                    java-version: 25
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+          fetch-depth: 0
 
-            -   name: Setup Gradle
-                uses: gradle/actions/setup-gradle@v3
-                with:
-                    cache-read-only: false
+      - name: Set up Java 8 toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: gradle
 
-            -   name: Change wrapper permissions
-                run: chmod +x ./gradlew
+      - name: Set up Java 17 toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-            -   name: Publish to CurseForge, Modrinth
-                run: ./gradlew build publishMods
-                env:
-                    CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-                    MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      - name: Set up Java 25 build JVM
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
 
-            -   name: Upload built JARs
-                uses: actions/upload-artifact@v4
-                with:
-                    name: skin-restorer-artifacts
-                    path: ./*/build/libs/*.jar
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build reobfuscated JAR
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon clean build
+
+      - name: Find and checksum release JAR
+        shell: bash
+        run: |
+          mapfile -t jars < <(find build/libs -maxdepth 1 -type f -name '*-gtnh.jar' ! -name '*-dev.jar' -print)
+          if [ "${#jars[@]}" -ne 1 ]; then
+            echo "Expected exactly one release JAR, found ${#jars[@]}"
+            printf '%s\n' "${jars[@]}"
+            exit 1
+          fi
+          jar="${jars[0]}"
+          checksum="${jar}.sha256"
+          sha256sum "$jar" > "$checksum"
+          echo "RELEASE_JAR=$jar" >> "$GITHUB_ENV"
+          echo "RELEASE_CHECKSUM=$checksum" >> "$GITHUB_ENV"
+          echo "Built $jar"
+          cat "$checksum"
+
+      - name: Attach JAR and checksum to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release upload "$RELEASE_TAG" "$RELEASE_JAR" "$RELEASE_CHECKSUM" --clobber --repo "$GITHUB_REPOSITORY"
