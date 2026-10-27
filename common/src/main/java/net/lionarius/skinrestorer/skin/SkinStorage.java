@@ -21,16 +21,16 @@ public class SkinStorage {
     }
 
     public SkinValue getSkin(UUID uuid, boolean cache) {
-        if (!skinMap.containsKey(uuid)) {
-            if (!skinIO.skinExists(uuid)) return SkinValue.EMPTY;
+        var cached = skinMap.get(uuid);
+        if (cached != null) return cached;
 
-            var skin = skinIO.loadSkin(uuid);
-            if (!cache) return skin;
+        if (!skinIO.skinExists(uuid)) return SkinValue.EMPTY;
 
-            skinMap.putIfAbsent(uuid, skin);
-        }
+        var skin = skinIO.loadSkin(uuid);
+        if (!cache) return skin;
 
-        return skinMap.get(uuid);
+        var existing = skinMap.putIfAbsent(uuid, skin);
+        return existing != null ? existing : skin;
     }
 
     public SkinValue getSkin(UUID uuid) {
