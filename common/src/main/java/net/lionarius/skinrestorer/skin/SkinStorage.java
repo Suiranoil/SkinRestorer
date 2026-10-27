@@ -22,6 +22,8 @@ public class SkinStorage {
 
     public SkinValue getSkin(UUID uuid, boolean cache) {
         if (!skinMap.containsKey(uuid)) {
+            if (!skinIO.skinExists(uuid)) return SkinValue.EMPTY;
+
             var skin = skinIO.loadSkin(uuid);
             if (!cache) return skin;
 
