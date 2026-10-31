@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,13 +25,21 @@ public class SkinStorage {
         var cached = skinMap.get(uuid);
         if (cached != null) return cached;
 
-        if (!skinIO.skinExists(uuid)) return SkinValue.EMPTY;
+        var loaded = skinIO.findSkin(uuid);
+        if (loaded.isEmpty()) return SkinValue.EMPTY;
 
-        var skin = skinIO.loadSkin(uuid);
+        var skin = loaded.get();
         if (!cache) return skin;
 
         var existing = skinMap.putIfAbsent(uuid, skin);
         return existing != null ? existing : skin;
+    }
+
+    public Optional<SkinValue> findSkin(UUID uuid) {
+        var cached = this.skinMap.get(uuid);
+        if (cached != null) return Optional.of(cached);
+
+        return this.skinIO.findSkin(uuid);
     }
 
     public SkinValue getSkin(UUID uuid) {
