@@ -3,6 +3,7 @@ package net.lionarius.skinrestorer.mixin;
 import com.mojang.authlib.GameProfile;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.skin.SkinValue;
+import net.lionarius.skinrestorer.skin.provider.SkinProvider;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderParameterType;
 import net.lionarius.skinrestorer.util.PlayerUtils;
@@ -58,10 +59,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                                         var currentSkin =
                                                 SkinRestorer.getSkinStorage().getSkin(profile.id());
 
-                                        if (!SkinRestorer.getConfig()
-                                                .join()
-                                                .skipRefreshProviders()
-                                                .contains(currentSkin.provider())) {
+                                        if (skinrestorer$shouldRefresh(currentSkin.provider())) {
                                             var context = currentSkin.toProviderContext();
                                             skinrestorer$fetchSkin(profile, context);
                                         }
@@ -131,6 +129,15 @@ public abstract class ServerLoginPacketListenerImplMixin {
             var storage = SkinRestorer.getSkinStorage();
             if (storage != null) storage.removeSkin(profile.id());
         });
+    }
+
+    @Unique
+    private static boolean skinrestorer$shouldRefresh(String providerName) {
+        if (SkinRestorer.getConfig().join().skipRefreshProviders().contains(providerName)) return false;
+
+        return SkinRestorer.getProvider(providerName)
+                .map(SkinProvider::isRefreshable)
+                .orElse(true);
     }
 
     @Unique
