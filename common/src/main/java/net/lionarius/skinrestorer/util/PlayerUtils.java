@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.authlib.services.response.MinecraftProfilePropertiesResponse;
+import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import it.unimi.dsi.fastutil.Pair;
 import net.lionarius.skinrestorer.mixin.ChunkMapAccessor;
 import net.lionarius.skinrestorer.skin.SkinTarget;

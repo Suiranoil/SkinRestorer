@@ -2,7 +2,7 @@ package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.services.response.MinecraftProfilePropertiesResponse;
+import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.skin.provider.base.UsernameSkinProvider;

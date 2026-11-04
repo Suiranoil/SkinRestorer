@@ -1,33 +1,43 @@
 package net.lionarius.skinrestorer.skin.provider.builtin;
 
 import com.mojang.authlib.*;
-import com.mojang.authlib.services.MinecraftServicesDiscoveryService;
-import com.mojang.authlib.services.response.NameAndId;
-import com.mojang.authlib.services.response.discovery.Service;
-import com.mojang.util.UndashedUuid;
+import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
+import com.mojang.authlib.yggdrasil.response.NameAndId;
 import net.lionarius.skinrestorer.SkinRestorer;
 import net.lionarius.skinrestorer.config.provider.CacheConfig;
 import net.lionarius.skinrestorer.exception.TransparentException;
 import net.lionarius.skinrestorer.skin.provider.SkinProviderContext;
 import net.lionarius.skinrestorer.skin.provider.base.YggdrasilSkinProvider;
-import net.lionarius.skinrestorer.util.WebUtils;
 import net.minecraft.server.players.CachedUserNameToIdResolver;
 
 import java.io.IOException;
-import java.net.Proxy;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.UUID;
 
 public final class MojangSkinProvider extends YggdrasilSkinProvider {
     public static final String PROVIDER_NAME = "mojang";
     public static final String PROFILE_CACHE_FILENAME = "mojang_profile_cache.json";
+    private static final Environment ENVIRONMENT;
+    private static final URI SERVICES_SERVER_URI;
+    private static final URI SESSION_SERVER_URI;
 
-    private final MinecraftServicesDiscoveryService discoveryService;
     private final CachedUserNameToIdResolver profileCache;
 
+    static {
+        try {
+            ENVIRONMENT =
+                    EnvironmentParser.getEnvironmentFromProperties().orElse(YggdrasilEnvironment.PROD.getEnvironment());
+
+            SERVICES_SERVER_URI = new URI(ENVIRONMENT.servicesHost());
+            SESSION_SERVER_URI = new URI(ENVIRONMENT.sessionHost());
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
     public MojangSkinProvider() {
-        this.discoveryService = MinecraftServicesDiscoveryService.create(Proxy.NO_PROXY);
         this.profileCache = new CachedUserNameToIdResolver(
                 new GameProfileRepository() {
                     @Override
@@ -83,16 +93,12 @@ public final class MojangSkinProvider extends YggdrasilSkinProvider {
     }
 
     @Override
-    protected URI profileByIdUri(UUID uuid) {
-        return URI.create(this.discoveryService
-                .getUrl(Service.SESSION, "getProfileById")
-                .replace("{profileId}", UndashedUuid.toString(uuid)));
+    protected URI baseSessionServerUrl() {
+        return MojangSkinProvider.SESSION_SERVER_URI;
     }
 
     @Override
-    protected URI profileByNameUri(String name) {
-        return URI.create(this.discoveryService
-                .getUrl(Service.PROFILES, "getByName")
-                .replace("{name}", WebUtils.urlEncode(name)));
+    protected URI baseServicesServerUrl() {
+        return MojangSkinProvider.SERVICES_SERVER_URI;
     }
 }
