@@ -8,6 +8,7 @@ import net.lionarius.skinrestorer.util.JsonUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.UUID;
 
 public class SkinIO {
@@ -26,24 +27,24 @@ public class SkinIO {
         return Files.exists(savePath.resolve(SkinIO.uuidToFilename(uuid)));
     }
 
-    public SkinValue loadSkin(UUID uuid) {
+    public Optional<SkinValue> findSkin(UUID uuid) {
         var file = this.savePath.resolve(SkinIO.uuidToFilename(uuid));
-        return SkinIO.loadSkin(file);
+        return SkinIO.findSkin(file);
     }
 
-    private static SkinValue loadSkin(Path file) {
+    private static Optional<SkinValue> findSkin(Path file) {
         var json = FileUtils.readFile(file);
-        if (json == null) return SkinValue.EMPTY;
+        if (json == null) return Optional.empty();
 
         try {
             var jsonObject = JsonUtils.parseJson(json);
             if (jsonObject == null) throw new JsonSyntaxException("skin data is not a JSON object");
 
             var migrated = MIGRATOR.migrateToLatest(jsonObject);
-            return JsonUtils.fromJson(migrated, SkinValue.class);
+            return Optional.of(JsonUtils.fromJson(migrated, SkinValue.class));
         } catch (Exception e) {
             SkinRestorer.LOGGER.error("Failed to parse or migrate skin data from {}", file, e);
-            return SkinValue.EMPTY;
+            return Optional.of(SkinValue.EMPTY);
         }
     }
 
