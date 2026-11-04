@@ -92,3 +92,8 @@ sourceSets.each {
 tasks.named('processResources') {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
+
+tasks.configureEach {
+    if (it.name.startsWith('configureReobfTaskFor'))
+        it.mustRunAfter(tasks.named('compileJava'))
+}
