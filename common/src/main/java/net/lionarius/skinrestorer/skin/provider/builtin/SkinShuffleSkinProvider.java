@@ -32,6 +32,11 @@ public final class SkinShuffleSkinProvider implements SkinProvider {
     }
 
     @Override
+    public boolean isRefreshable() {
+        return false;
+    }
+
+    @Override
     public Result<Optional<Property>, Exception> fetchSkin(String argument, SkinVariant variant) {
         return Result.error(new UnsupportedOperationException("SkinShuffle Provider does not support fetching skins"));
     }
