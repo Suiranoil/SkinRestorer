@@ -36,6 +36,10 @@ public interface SkinProvider {
 
     boolean hasVariantSupport();
 
+    default boolean isRefreshable() {
+        return true;
+    }
+
     // called on tab-complete, must be fast and non-blocking
     default Collection<String> getArgumentSuggestions() {
         return Collections.emptyList();
