@@ -98,6 +98,11 @@ public final class SkinCommand {
             }
         } else {
             context = SkinRestorer.getSkinStorage().getSkin(profile.id()).toProviderContext();
+
+            var refreshable = SkinRestorer.getProvider(context.name())
+                    .map(SkinProvider::isRefreshable)
+                    .orElse(true);
+            if (!refreshable) return 0;
         }
 
         if (context == null) return 0;
