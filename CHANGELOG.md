@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.1] - 2026-11-04
+### Fixed
+- Fixed skins applied with SkinShuffle being refreshed on join, which always failed and logged a warning
+- Fixed `/skin refresh` failing for skins applied with SkinShuffle
+- Fixed other mods looking up a player without a saved skin making that player count as having one (e.g. skipping the first join skin fetch)
+- Fixed a rare error when a player's skin was looked up while they were disconnecting
+- Fixed the broken Forge jars for 1.19.1–1.19.2 (crash on startup) and 1.19.3 (missing mod code)
+
 ## [2.11.0] - 2026-09-05
 ### Added
 - `/skin set`, `/skin clear` and `/skin reset` now accept offline players and UUIDs as targets; the skin is saved right away and applied on their next join
