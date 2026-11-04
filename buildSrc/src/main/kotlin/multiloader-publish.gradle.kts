@@ -53,3 +53,26 @@ publishMods {
         }
     }
 }
+
+val verifyModJar =
+    tasks.register<net.lionarius.gradle.VerifyModJar>("verifyModJar") {
+        group = "verification"
+        description = "Checks that the jar picked for publishing is complete and correctly remapped."
+
+        jarFile = publishMods.file
+        expectedFiles.from(project.the<SourceSetContainer>()["main"].output)
+        srgMappings =
+            layout.buildDirectory
+                .file("createMcpToSrg/output.tsrg")
+                .filter { tasks.names.contains("reobfJar") }
+
+        mustRunAfter(
+            tasks.matching { it.name in setOf("assemble", "jar", "jarJar", "remapJar", "reobfJar", "reobfJarJar") },
+        )
+    }
+
+tasks.configureEach {
+    if (name == "build" || name.startsWith("publish")) {
+        dependsOn(verifyModJar)
+    }
+}
